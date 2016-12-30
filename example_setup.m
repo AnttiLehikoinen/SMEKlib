@@ -111,7 +111,14 @@ nu_struct = initialize_reluctivityStruct_interp1(msh, true, [0 10;0 10/mu0]');
 nu_fun = @(B)( calculate_reluctivity(B, nu_struct) );
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% setting boundaries in the ugliest way possible
+% setting boundary conditions
+%
+% Redundant boundary variables (Dirichlet, periodic) are eliminated by
+% writing
+% a_ll = P*a_free
+% where a_free contains the free variables, and P is a Np x Nfree matrix.
+% Hence, the final problem to solve will be
+% P'*S*P*a_free = P'*f_free
 
 % finding Dirichlet boundary
 tol = 1e-4;

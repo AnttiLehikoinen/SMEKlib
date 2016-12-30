@@ -72,13 +72,21 @@ toc
 %plotting currents (and the currents from harmonic approximation
 figure(5); clf; hold on; box on;
 Iharm = bsxfun(@times, Xtot(indI), cos(w*tsamples)) + bsxfun(@times, Xtot(Nvars + indI), sin(w*tsamples));
-plot( 2*Xsamples(indI, 1:kt)' )
-plot( 2*Iharm', 'Linestyle', '--');
+h_td = plot( tsamples*1e3, 2*Xsamples(indI, :)' );
+h_h = plot( tsamples*1e3, 2*Iharm', 'Linestyle', '--');
+legend([h_td(1) h_h(1)], 'Time-stepping', 'Harmonic approximation');
+title('Phase currents')
+xlabel('Time (ms)');
+ylabel('Current (A)');
+
 
 %plotting line currents
 figure(6); clf; hold on; box on;
 Mline = [1 0 -1;-1 1 0;0 -1 1];
-plot( (Mline*Xsamples(indI, 1:kt))' )
+plot( tsamples*1e3, (Mline*Xsamples(indI, :))' )
+title('Line currents');
+xlabel('Time (ms)');
+ylabel('Current (A)');
 
 %ANOTHER AWESOME MIND-BOGGLING COLORDREAM
 figure(7); clf; box on;
@@ -88,3 +96,5 @@ drawFluxDensity(msh, Xsamples(indA, kt), wm*tsamples(kt), 'LineStyle', 'none');
 colormap('jet'); colorbar; caxis([0 2]);
 drawFluxLines(msh, Xsamples(indA, kt), 16, wm*tsamples(kt), 'k');
 axis(dims.D_so/2*[-1 1 0 1]); axis tight; daspect([1 1 1]); 
+
+title(['Flux lines and flux density (T) at t = ' num2str(1e3*tsamples(kt)) ' ms']);

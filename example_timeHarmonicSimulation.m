@@ -116,5 +116,6 @@ msh_trimesh(msh, Xtot(indA), []);
 figure(4); clf; box on;
 drawFluxDensity(msh, Xtot(indA), 'LineStyle', 'none'); colormap('jet'); colorbar; caxis([0 2]);
 drawFluxLines(msh, Xtot(indA), 16, 'k');
-axis(dims.D_so/2*[-1 1 0 1]); axis tight; daspect([1 1 1]); 
+axis(dims.D_so/2*[-1 1 0 1]); box on; axis tight; daspect([1 1 1]);
+title('Flux lines and flux density (T)');
 %set(gca,'xtick',[], 'ytick', []);

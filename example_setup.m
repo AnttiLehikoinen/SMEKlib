@@ -2,6 +2,9 @@
 % Initializes the pre-defined geometry, and runs both time-harmonic and
 % time-stepping simulations.
 %
+% Note that the machine has parallel paths outside the symmetry sector, so
+% the coefficient 2 appears a lot :)
+%
 % Copyright (c) 2016 Antti Lehikoinen / Aalto University
 
 addpath(genpath('SMEKlib'));

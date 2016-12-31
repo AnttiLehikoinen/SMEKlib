@@ -29,6 +29,9 @@ end
 %calculating flux density
 Babs = transpose(calculate_B(A, msh));
 
+%for backwards compatibility (up to Matlab 2014 and earlier at least)
+Babs = repmat(Babs', 3, 1);
+
 h = fill(X,Y, Babs, plotArgs{:});
 
 

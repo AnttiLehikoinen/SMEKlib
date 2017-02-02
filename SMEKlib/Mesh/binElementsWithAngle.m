@@ -31,7 +31,10 @@ elementAngles = atan2(Xe(2,:), Xe(1,:)); elementAngles( elementAngles<0 ) = elem
 
 elementRadii = sqrt( sum(Xe.^2, 1) );
 
-cl = knnsearch(angles', elementAngles')';
+%assigning each element to the closest bin as defined in angles
+%cl = knnsearch(angles', elementAngles')'; old implementation
+cl = internal_binner(angles, elementAngles);    
+
 binElements = cell(1, Nbins*Nlayers);
 for k_angle = 1:Nbins
     for k_layer = 1:Nlayers
@@ -51,6 +54,18 @@ for k_angle = 1:Nbins
         binElements{1, (k_angle-1)*Nlayers + k_layer} = toRow( ...
             elementList( (cl==k_angle) & (elementRadii>r_low) & (elementRadii<r_up) ) );
     end
+end
+
+end
+
+function cl = internal_binner(angles, elementAngles)
+
+cl = zeros( size(elementAngles) );
+
+for k = 1:numel(elementAngles)
+    ad = angleDifference(angles, elementAngles(k));
+    [~, I] = min(abs(ad));
+    cl(k) = I;
 end
 
 end

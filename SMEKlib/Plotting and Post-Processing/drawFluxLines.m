@@ -93,18 +93,20 @@ for kpot = 1:N
     end
 
     X = lineStruct.X(:, 1:lineStruct.Nval);
-    eqLines = lineReorderer(X, delta, numberOfLines);
-    linehandles{kpot} = cell(size(eqLines,1), 1); 
-    for kl = 1:size(eqLines,1)
-        linehandles{kpot}{kl} = plot( eqLines{kl}(1,:), eqLines{kl}(2,:), plotArgs{:});
-    end
     
-    linecoordinates{kpot} = eqLines;
-    %linehandles(kpot) = plot( X(1,:), X(2,:), style);
+    % "resolving" a compatibility issue with Octave
+    try
+        eqLines = lineReorderer(X, delta, numberOfLines);
+        
+        linehandles{kpot} = cell(size(eqLines,1), 1); 
+        for kl = 1:size(eqLines,1)
+            linehandles{kpot}{kl} = plot( eqLines{kl}(1,:), eqLines{kl}(2,:), plotArgs{:});
+        end
+        linecoordinates{kpot} = eqLines;
+    catch
+        plot([X(1, 1:2:lineStruct.Nval); X(1, 2:2:lineStruct.Nval)], [X(2, 1:2:lineStruct.Nval); X(2, 2:2:lineStruct.Nval)], plotArgs{:});
+    end
 end
-   
-%linecoordinates = 0;
-%linehandles = 0;
 
 end
 

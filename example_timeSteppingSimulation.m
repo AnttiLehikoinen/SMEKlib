@@ -55,6 +55,7 @@ for kt = 2:Nsamples
         
         resNorm = norm(res_tot) / norm(FL);
         disp([9 'Newton step ' num2str(kiter) ', relative residual ' num2str(resNorm) '.']);
+        %disp(['    Newton step ' num2str(kiter) ', relative residual ' num2str(resNorm) '.']); fflush(stdout); uncomment in Octave
         if resNorm < 1e-6
             break;
         end

@@ -27,8 +27,9 @@ end
 
 Jplot = transpose(J);
 
+colormap('jet');
 if numel(varargin) == 0
-   h = fill(X,Y, Jplot(msh.t(:,elements)), 'LineStyle', 'none'); 
+   h = fill(X,Y, Jplot(msh.t(:,elements)), 'LineStyle', 'none');
 else
     h = fill(X,Y, Jplot(msh.t(:,elements)), plotArgs{:});
 end

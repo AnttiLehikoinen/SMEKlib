@@ -1,6 +1,5 @@
 %a mini-minimal demo for the gwrap wrapper
 
-addpath('gwrap');
 gmsh_path = 'D:\Large Installations\Gmsh\'; %CHANGE THIS
 gwrap_init(gmsh_path);
 

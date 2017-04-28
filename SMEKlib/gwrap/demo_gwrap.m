@@ -13,4 +13,5 @@ figure(1); clf; hold on; box on;
 triplot(t(:,:)', p(1,:), p(2,:), 'c');
 triplot(t(:, t_inEntity==Name2id('Some_rectangle'))', p(1,:), p(2,:), 'b');
 triplot(t(:, t_inEntity==Name2id('Some_circle'))', p(1,:), p(2,:), 'r');
+legend('Other stuff', 'Some rectangle', 'Some circle');
 axis equal;

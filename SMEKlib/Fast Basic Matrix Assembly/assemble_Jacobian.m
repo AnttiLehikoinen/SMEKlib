@@ -15,7 +15,7 @@ function [J, varargout] = assemble_Jacobian(nu_fun, X, elements, msh)
 Nvars = size(X, 1);
 %Nvars = size(msh.p, 2);
 
-if nargout > 0
+if nargout > 1
     % also computing residual
     [E, I, J, E_res, I_res] = assemble_Jacobian_data(nu_fun, X, elements, msh, true);
     

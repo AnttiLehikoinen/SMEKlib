@@ -15,57 +15,78 @@ function [t, p, t_inEntity, Name2id] = gwrap_loadmesh(varargin)
 % 
 % (c) 2017 Antti Lehikoinen / Aalto University
 
-global gwrap_filename
+global gwrap_filename gwrap_PhysicalSurfaces
 if numel(varargin)
     filename = varargin{1};
 else
     filename = gwrap_filename;
 end
 
-%skip unnecessary stuff in the beginning
-global gwrap_PhysicalSurfaces
+%skip unnecessary stuff until the line '$PhysicalNames'
 fid = fopen(strrep(filename, '.geo', '.msh'));
-for k = 1:4
-    fgetl(fid);
+while true
+    dline = fgetl(fid);
+    if any(dline) && dline(2) == 'P'
+        break;
+    end
 end
 
 %scanning physical names
 N_physicalNames = fscanf(fid, '%d', [1 1]);
-if N_physicalNames ~= numel(gwrap_PhysicalSurfaces.keys)
-    warning('Unexpected number of physical surfaces.');
+
+%quality check if using Matlab-scripted geometry
+if ~numel(varargin)
+    if N_physicalNames ~= numel(gwrap_PhysicalSurfaces.keys)
+        warning('Unexpected number of physical surfaces.');
+    end
 end
 Name2id = containers.Map();
+fgetl(fid);
 for k = 1:N_physicalNames
-    temp = fscanf(fid, '%d %d %s', [1 3]);
+    %temp = fscanf(fid, '%d %d %s', [1 3])
+    dline = fgetl(fid);
+    temp = sscanf(dline, '%d %d %999999c');
     Name = char(temp(4:(end-1)));
     id = temp(2);
     Name2id(Name) = id;
 end
 
 %skipping lines again
-fgetl(fid);
-fgetl(fid);
-fgetl(fid);
-
-%scanning nodes
-Np = fscanf(fid, '%d', [1 1]);
+while true
+    dline = fgetl(fid);
+    if any(dline) && dline(1) ~= '$'
+        break;
+    end
+end
+Np = sscanf(dline, '%d');
 temp = fscanf(fid, '%d %f %f %f', [4 Np])';
 p = temp(:, 2:3)';
 
-%skipping lines
-fgetl(fid);
-fgetl(fid);
-fgetl(fid);
+%skipping lines again
+while true
+    dline = fgetl(fid);
+    if any(dline) && dline(1) ~= '$'
+        break;
+    end
+end
 
 %scanning elements
-Ne = fscanf(fid, '%d', [1 1]);  fgetl(fid);
+Ne = sscanf(dline, '%d');
 t = zeros(3, Ne);
 t_inEntity = zeros(1, Ne);
-for ke = 1:Ne
-    line = fgetl(fid);
-    temp = strsplit(line);
-    t_inEntity(ke) = str2double(temp{4});
-    t(:,ke) = [str2double(temp{end-2}); str2double(temp{end-1}); str2double(temp{end})];
+try
+    %assuming a fixed number (=2) of tags
+    temp = fscanf(fid, '%d %d %d %d %d %d %d %d', [8 Ne]);
+    t_inEntity = temp(4,:);
+    t = temp(6:8, :);
+catch
+    %something failed; looping over elements 1-by-1
+    for ke = 1:Ne
+        dline = fgetl(fid);
+        temp = strsplit(dline);
+        t_inEntity(ke) = str2double(temp{4});
+        t(:,ke) = [str2double(temp{end-2}); str2double(temp{end-1}); str2double(temp{end})];
+    end
 end
 fclose(fid);
 

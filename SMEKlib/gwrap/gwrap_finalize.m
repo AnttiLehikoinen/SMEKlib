@@ -27,7 +27,8 @@ fclose(gwrap_fid);
 
 %meshing with gmsh
 disp('Meshing with gmsh...');
-system(['"' gwrap_gmshpath '"' 'gmsh ' '"' gwrap_filename '"' ' -2']);
+gwrap_mesh();
+%system(['"' gwrap_gmshpath '"' 'gmsh ' '"' gwrap_filename '"' ' -2']);
 
 %loading mesh
 fprintf('Done. Loading mesh...');

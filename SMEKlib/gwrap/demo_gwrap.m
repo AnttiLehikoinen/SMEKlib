@@ -1,6 +1,6 @@
 %a mini-minimal demo for the gwrap wrapper
 
-gmsh_path = 'D:\Large Installations\Gmsh\'; %CHANGE THIS
+gmsh_path = 'C:\Antti\Software\gmsh'; %CHANGE THIS
 gwrap_init(gmsh_path);
 
 gwrap_addpolygon([0.25 0.45 0.45 0.25], [0.25 0.25 0.5 0.5], 'Some_rectangle');

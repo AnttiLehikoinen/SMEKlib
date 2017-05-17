@@ -2,7 +2,9 @@ function [t_ag, nodeShift, pnew] = updateRotorPosition(rotorAngle, msh)
 %updateRotorPosition updates the air-gap mesh
 % 
 % [t_ag, nodeShift, pnew] = updateRotorPosition(rotorAngle, msh)
-% NOTE: periodicity conditions not supported
+%
+% NOTE: if msh has a field symmetrySectors, pnew contains air-gap nodes
+% (real and virtual both) only, and t_ag is indexed to refer to them.
 %
 % Copyright (c) 2015-2016 Antti Lehikoinen / Aalto University
 
@@ -15,14 +17,17 @@ newPositions = mod(msh.bandData.originalPositions_rotor - 1 + nodeShift, msh.ban
 t_ag = msh.bandData.t_ag;
 t_ag(msh.bandData.inds_r) = msh.bandData.sortedNodes_rotor(newPositions);
 
-t_ag = reshape(msh.bandData.agNodes_global(t_ag(:)), 3, []);
-
-pnew = msh.p;
-inds_p_rotor = msh.bandData.agNodes_global( msh.bandData.sortedNodes_rotor );
-%inds_p_rotor = msh.bandData.sortedNodes_rotor;
-
-
-pnew(:, inds_p_rotor) = [cos(rotorAngle) -sin(rotorAngle);sin(rotorAngle) cos(rotorAngle)] * ...
-    pnew(:, inds_p_rotor);
+if ~isfield(msh, 'symmetrySectors')
+    t_ag = reshape(msh.bandData.agNodes_global(t_ag(:)), 3, []); %shifting to global indexing
+    
+    pnew = msh.p;
+    inds_p_rotor = msh.bandData.agNodes_global( msh.bandData.sortedNodes_rotor );
+    pnew(:, inds_p_rotor) = [cos(rotorAngle) -sin(rotorAngle);sin(rotorAngle) cos(rotorAngle)] * ...
+        pnew(:, inds_p_rotor);
+else
+    pnew = msh.bandData.p_ag_virt;
+    pnew(:, msh.bandData.sortedNodes_rotor) = [cos(rotorAngle) -sin(rotorAngle);sin(rotorAngle) cos(rotorAngle)] * ...
+        pnew(:, msh.bandData.sortedNodes_rotor);
+end    
 
 end

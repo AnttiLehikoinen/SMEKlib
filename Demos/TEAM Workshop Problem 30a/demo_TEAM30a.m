@@ -1,10 +1,8 @@
 %simulates the TEAM workshop problem 30a
 % 
-% (c) 2017 Antti Lehikoinen / Aalto University and Jonathan Velasco 
+% (c) 2017 Antti Lehikoinen / Aalto University
 
-gmsh_path = 'C:\Antti\Software\gmsh'; %CHANGE THIS
-
-addpath(genpath('..\..\SMEKlib')); %adding library to the search path
+gmsh_path = 'C:\Antti\Software\gmsh'; %CHANGE this
 
 %parameters
 mur_stator = 30; %relative permeability
@@ -21,7 +19,6 @@ wms = linspace(0, 1200, 49); %range of rotor speeds analysed
 
 %meshing and extracting geometry
 geo_path = 'Problem30a.geo';
-
 gwrap_mesh(gmsh_path, geo_path);
 [t, p, t_inEntity, Name2id] = gwrap_loadmesh(geo_path);
 disp(Name2id.keys)
@@ -70,6 +67,7 @@ msh_plot(msh, n_Dirichlet, 'ko');
 
 %plotting the 6th stator coil just because
 msh_fill(msh, statorConductors{6}, 'g');
+drawnow;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % assembling matrices
@@ -128,6 +126,15 @@ hE = plot(wms, abs(Es_coil), 'b');
 title('Induced voltages per turn and coil-side')
 ylabel('Voltage (V)')
 xlabel('Speed (rad/s)');
+drawnow;
+
+%torque
+T = compute_Torque_simple(As, msh, 3e-2, 3.2e-2, el_ag);
+figure(3); clf; hold on; box on;
+plot(wms, T, 'b');
+xlabel('Speed (rad/s)');
+ylabel('Torque (Nm)');
+drawnow;
 
 %computing current densities in rotor
 J_coat = zeros(Np, numel(wms)); J_iron = zeros(Np, numel(wms));
@@ -149,12 +156,13 @@ end
 %plotting current ant flux densities at a specified operating point
 kw = 9; %200 rad/s
 
-figure(3); clf; hold on; box on;
+figure(4); clf; hold on; box on;
 drawCurrentDensity(msh, real(J_coat(:,kw)), rotorCoat );
 drawCurrentDensity(msh, real(J_iron(:,kw)), rotorIron ); colorbar;
 title(['Rotor current density at ' num2str(wms(kw)) ' rad/s']);
+drawnow;
 
-figure(4); clf; hold on; box on;
+figure(5); clf; hold on; box on;
 subplot(2, 1, 1); hold on; box on;
 plot(wms, P_coat, 'b');
 title('Losses in aluminum coat (W)');
@@ -163,6 +171,7 @@ subplot(2, 1, 2); hold on; box on;
 plot(wms, P_iron, 'r');
 title('Losses in rotor iron (W)');
 xlabel('Speed (rad/s)');
+drawnow;
 
 %plot Comsol results if available
 try
@@ -171,23 +180,31 @@ try
     figure(2);
     hE_Comsol = plot(Data_Comsol(:,1), abs(Data_Comsol(:, 2:7)), 'rv');
     legend([hE(1) hE_Comsol(2)], 'Matlab', 'Comsol');
+    drawnow;
     
-    figure(4);
+    figure(3);
+    plot(Data_Comsol(:,1), Data_Comsol(:, 10), 'bv');
+    legend('Matlab', 'Comsol');
+    drawnow;
+    
+    figure(5);
     subplot(2,1,1);
     plot(Data_Comsol(:,1), Data_Comsol(:,8), 'bv');
     legend('Matlab', 'Comsol', 'Location', 'Best');
     subplot(2,1,2);
     plot(Data_Comsol(:,1), Data_Comsol(:,9), 'rv');
     legend('Matlab', 'Comsol', 'Location', 'Best');
+    drawnow;
 catch
     print('No Comsol simulation results found!');
 end
 
-figure(5); clf; hold on; box on;
+figure(6); clf; hold on; box on;
 drawFluxDensity(msh, real(As(:,kw)), 'LineStyle', 'none'); colormap('jet'); 
 colorbar; caxis([0 0.22]);
 drawFluxLines(msh, real(As(:,kw)), 20, 'k');
 title(['Flux density and flux lines at ' num2str(wms(kw)) ' rad/s']);
+drawnow;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % performing time-stepping analysis because WE CAN
@@ -222,8 +239,12 @@ for ksample = 2:Nsamples
 end
 disp([num2str(Nsamples) ' time-steps simulated in ' num2str(toc) ' seconds.']);
 
-figure(6); clf;
-plot(tsamples, Esamples');
+figure(7); clf;
+Tsamples = compute_Torque_simple(Asamples, msh, 3e-2, 3.2e-2, [], wms(kw)*tsamples);
+plot(tsamples, Tsamples);
+title('Torque computed from time-stepping analysis');
+xlabel('Time (s)');
+ylabel('Torque (Nm)');
 
 %plotting current density in the rotor
 kt = 800; %time-step to plot at
@@ -235,6 +256,6 @@ J_coat_ts( msh.t(:,unique(rotorCoat)) ) = -sigma_aluminum*...
 J_iron_ts( msh.t(:,unique(rotorIron)) ) = sigma_rotorSteel*...
     (Asamples(msh.t(:,unique(rotorIron)),kt) - Asamples(msh.t(:,unique(rotorIron)),kt-1))/dt;
 
-figure(7); clf; hold on; box on;
+figure(8); clf; hold on; box on;
 drawCurrentDensity(msh, J_coat_ts, rotorCoat );
 drawCurrentDensity(msh, J_iron_ts, rotorIron ); colorbar;axis equal tight;

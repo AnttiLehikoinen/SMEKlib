@@ -197,7 +197,7 @@ try
     legend('Matlab', 'Comsol', 'Location', 'Best');
     drawnow;
 catch
-    print('No Comsol simulation results found!');
+    disp('No Comsol simulation results found!');
 end
 
 figure(6); clf; hold on; box on;

@@ -1,6 +1,7 @@
 %simulates the TEAM workshop problem 30a
 % 
-% (c) 2017 Antti Lehikoinen / Aalto University
+% (c) 2017 Antti Lehikoinen / Aalto University and
+% Jonathan Velasco / University of Liege
 
 gmsh_path = 'C:\Antti\Software\gmsh'; %CHANGE this
 

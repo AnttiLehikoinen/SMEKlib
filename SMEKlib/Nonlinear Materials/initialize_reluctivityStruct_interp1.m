@@ -17,8 +17,8 @@ mats = unique(msh.matel);
 Nmats = numel(mats);
 
 if useDefaultMaterials
-    N_defaultMats = get_defaultMaterials(0); %number of default materials available
-    N_defMatsUsed = numel(intersect(mats, 1:N_defaultMats)); %number of default materials used
+    N_defaultMats = fcsmek_defaultMaterials(-1); %number of default materials available
+    N_defMatsUsed = numel(intersect(mats, 0:N_defaultMats)); %number of default materials used
 else
     N_defMatsUsed = 0;
 end
@@ -29,7 +29,7 @@ mats_cell = cell(Nmats, 1);
 for kmat = 1:Nmats
     matIndex = mats(kmat);
     if kmat <= N_defMatsUsed
-        BH = get_defaultMaterials(matIndex);
+        BH = fcsmek_defaultMaterials(matIndex);
     else 
         BH = varargin{kmat - N_defMatsUsed};
     end

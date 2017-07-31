@@ -31,8 +31,8 @@ mats = unique(msh.matel);
 Nmats = numel(mats);
 
 if useDefaultMaterials
-    N_defaultMats = get_defaultMaterials(0); %number of default materials available
-    N_defMatsUsed = numel(intersect(mats, 1:N_defaultMats)); %number of default materials used
+    N_defaultMats = fcsmek_defaultMaterials(-1); %number of default materials available
+    N_defMatsUsed = numel(intersect(mats, 0:N_defaultMats)); %number of default materials used
 else
     N_defMatsUsed = 0;
 end
@@ -41,7 +41,7 @@ nu_cell = cell(Nmats, 3);
 for kmat = 1:Nmats
     matIndex = mats(kmat);
     if kmat <= N_defMatsUsed
-        BH = get_defaultMaterials(matIndex);
+        BH = fcsmek_defaultMaterials(matIndex);
     else 
         BH = varargin{kmat - N_defMatsUsed};
     end
@@ -52,7 +52,7 @@ for kmat = 1:Nmats
     %initializing interpolation splines
     pp = spline(BH(:,1).^2, nu); %spline for nu(B^2)
     ppder = derivate_pp(pp); %spline for d/dB^2 nu(B^2)
-    matInElements = find( msh.matel == matIndex ); %which elements have which material
+    matInElements = find( msh.matel == matIndex );
 
     nu_cell{kmat, 1} = pp; nu_cell{kmat, 2} = ppder; nu_cell{kmat, 3} = matInElements;
 end

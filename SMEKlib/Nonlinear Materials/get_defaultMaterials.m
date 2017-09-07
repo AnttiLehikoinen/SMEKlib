@@ -17,8 +17,10 @@ function BH = get_defaultMaterials(matNumber)
 % Feel free to add your own :)
 
 
-if matNumber < 1
+if matNumber < 0
     BH = 2; return;
+elseif matNumber == 0
+    BH = [0 1; 0 1/(pi*4e-7)]'; return
 elseif matNumber <= 2
     HBdata = [           48          0.1           19          0.1
            97          0.2           39          0.2

@@ -1,0 +1,50 @@
+pars = pars_ref;
+sim = sim_ref;
+
+
+f = pars.f;
+U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
+%U = 400/sqrt(3)/2 *sqrt(2) ; %taking the second-turn side outside symmetry sector into account
+w = 2*pi*f;
+
+if ~isempty(pars.slip)
+    slips = pars.slip;
+else
+    slips = sim.dims.slip;
+end
+
+Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), true);
+
+Ntot = size(sim.results.Xh, 1) / 2;
+Np = sim.Np;
+Nui = Ntot - size(sim.matrices.P,1);
+PT = sim.matrices.P;
+
+kslip = 1;
+
+slip = slips(kslip);
+[Stot, Mtot] = get_circuitMatrices(sim, slip);
+Stot = Stot + sim.msh.get_AGmatrix(0, size(Stot,1));
+
+Finit = -( Stot*sim.results.Xh(1:Ntot, kslip) + w*Mtot*sim.results.Xh(Ntot + (1:Ntot), kslip) );
+Finit = Finit(1:Np,:
+
+X = sim.results.Xh(1:Np, kslip);
+Sag = sim.msh.get_AGmatrix(0);
+for kiter = 1:50
+    [J, res] = Jc.eval(X, sim.nu_fun);
+    
+    Jtot = PT'*( J + Sag )*PT;
+    res_tot = PT'*(Sag*X - Finit + res );
+    
+    %checking convergence
+    disp( norm(res_tot) / norm(Finit) )
+    if (norm(res_tot) / norm(Finit)) < 1e-6
+        break;
+    end
+    
+    %Newton step
+    dX = - Jtot \ res_tot;
+    
+    X = X + PT*dX;
+end

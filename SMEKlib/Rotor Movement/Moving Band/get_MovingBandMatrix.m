@@ -42,12 +42,15 @@ if (numel(varargin) == 1) || ( (numel(varargin)==2) && isa(varargin{2}, 'double'
         %shifting indices in the sorted list
         newPositions = mod(msh.bandData.originalPositions_rotor - 1 + nodeShift, msh.bandData.N_ag_r ) + 1;
 
-        t_ag = msh.bandData.t_ag;        
+        t_ag = msh.bandData.t_ag;
         t_ag(msh.bandData.inds_r) = msh.bandData.sortedNodes_rotor(newPositions);
         
         p = msh.bandData.p_ag_virt;
         p(:, msh.bandData.sortedNodes_rotor) = [cos(rotorAngle) -sin(rotorAngle);sin(rotorAngle) cos(rotorAngle)] * ...
             p(:, msh.bandData.sortedNodes_rotor);
+        
+        %figure(3); clf;
+        %triplot(t_ag', p(1,:), p(2,:));
         
         S_ag_struct = assemble_matrix('grad', 'nodal', 'grad', 'nodal', 1/mu0, [], struct('t', t_ag, 'p', p), []);
         

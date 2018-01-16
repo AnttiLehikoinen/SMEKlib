@@ -1,4 +1,4 @@
-function S_ag = get_MovingBandMatrix_2(rotorAngle, varargin)
+function [S_ag, t_ag, p_ag]  = get_MovingBandMatrix_2(rotorAngle, varargin)
 %get_MovingBandMatrix_2 moving band matrix with remeshing.
 % 
 % Like get_MovingBandMatrix, but now the air-gap is explicitly re-meshed.

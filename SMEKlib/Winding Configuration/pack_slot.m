@@ -12,6 +12,8 @@ function [Xc, reff] = pack_slot(slotPoints, Ns, rs)
 % boundary segments at once. For slot shapes containing narrow crevices:
 % the best of luck.
 %
+% NOTE: having slotPoints(:,1) = slotPoints(:,end) results in an error.
+%
 % Copyright (c) 2016 Antti Lehikoinen / Aalto University
 
 Xc = [];

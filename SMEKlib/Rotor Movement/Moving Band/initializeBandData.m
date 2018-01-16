@@ -84,15 +84,17 @@ if isfield(msh, 'symmetrySectors')
     end
     
     %getting rid of redundant dublicate rotor nodes
-    Ntemp = size(p_ag_virt, 2);
-    p_ag_virt = p_ag_virt(:, ...
-        setdiff(1:Ntemp, [((N_ag_s+N_ag_r+1):N_ag_r:Ntemp) Ntemp]));
-    virt_sectors = virt_sectors(...
-        setdiff(1:Ntemp, [((N_ag_s+N_ag_r+1):N_ag_r:Ntemp) Ntemp]));
-    virt_identities = virt_identities(...
-        setdiff(1:Ntemp, [((N_ag_s+N_ag_r+1):N_ag_r:Ntemp) Ntemp]));
-    
-    N_ag_r = size(p_ag_virt, 2) - N_ag_s;
+    if msh.symmetrySectors > 1
+        Ntemp = size(p_ag_virt, 2);
+        p_ag_virt = p_ag_virt(:, ...
+            setdiff(1:Ntemp, [((N_ag_s+N_ag_r+1):N_ag_r:Ntemp) Ntemp]));
+        virt_sectors = virt_sectors(...
+            setdiff(1:Ntemp, [((N_ag_s+N_ag_r+1):N_ag_r:Ntemp) Ntemp]));
+        virt_identities = virt_identities(...
+            setdiff(1:Ntemp, [((N_ag_s+N_ag_r+1):N_ag_r:Ntemp) Ntemp]));
+
+        N_ag_r = size(p_ag_virt, 2) - N_ag_s;
+    end
    
     
     %sorting rotor and stator nodes
@@ -104,9 +106,9 @@ if isfield(msh, 'symmetrySectors')
     sectorAngle = 2*pi;
 else
     %sorting rotor and stator nodes
-    %agAngles_rotor = atan2( msh.p(2, agNodes_rotor), msh.p(1, agNodes_rotor) );
-    %agAngles_rotor( agAngles_rotor<0 ) = agAngles_rotor(agAngles_rotor<0) + 2*pi;
-    %[~, agOrder_rotor] = sort( agAngles_rotor );
+    agAngles_rotor = atan2( msh.p(2, agNodes_rotor), msh.p(1, agNodes_rotor) );
+    agAngles_rotor( agAngles_rotor<0 ) = agAngles_rotor(agAngles_rotor<0) + 2*pi;
+    [~, agOrder_rotor] = sort( agAngles_rotor );
 
     %sectorAngle = max(agAngles_rotor) - min(agAngles_rotor)
     sectorAngle = 2*pi;

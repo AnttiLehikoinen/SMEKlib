@@ -1,0 +1,7 @@
+function [x_quad, w_quad, Nrows, Ncols, Nf1, Nf2] = ...
+                get_AssemblyParameters(op1, fun1, op2, fun2, msh)
+            
+[
+
+
+end

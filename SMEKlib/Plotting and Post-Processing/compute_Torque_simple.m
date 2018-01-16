@@ -11,7 +11,7 @@ function T = compute_Torque_simple(A, msh, ri, ro, arg1, varargin)
 % Eccentricity is not supported for now.
 % In harmonic problems, rms-scaling of A is assumed, i.e. the
 % time-dependent vector potential is assumed to be
-% At(t) = sqrt(2)*real(A)*cos(2*pi*f*t) - sqrt(2)*imag(A)*sin(2*pi*f*t)
+% At(t) = real(A)*cos(2*pi*f*t) - imag(A)*sin(2*pi*f*t)
 % 
 % (c) 2017 Antti Lehikoinen / Aalto University
 
@@ -24,7 +24,6 @@ if numel(varargin)
 end
 
 %stationary problem (or time-harmonic)
-
 if min(size(arg1)) == 1
     el_ag = arg1;
     msh_comp = msh;
@@ -59,7 +58,7 @@ for kcol = 1:size(A,2)
     end
 end
 
-T = T / (mu0*(ro-ri));
+T = T / (mu0*(ro-ri)) /2;
 
 end
 
@@ -78,7 +77,14 @@ T = zeros(1, Nsamples);
 N_quad = numel(W_quad);
 
 for ksample = 1:Nsamples
-    [t_ag, ~, pnew] = updateRotorPosition(rotorAngles(ksample), msh);
+    if isobject(msh.bandData)
+        [t,pnew, t_ag] = msh.bandData.t_ag(rotorAngles(ksample));
+        t_ag = msh.bandData.t_const;
+        pnew = msh.bandData.p_virt;
+        %msh_comp.t_global = t;
+    else
+        [t_ag, ~, pnew] = updateRotorPosition(rotorAngles(ksample), msh);
+    end
     msh_comp.t = t_ag;
     msh_comp.p = pnew;
     
@@ -86,15 +92,15 @@ for ksample = 1:Nsamples
     detF = mappingDeterminant(F);
     
     for k_quad = 1:N_quad
-        B = zeros(2, Ne);
+        B = zeros(2, size(msh_comp.t,2));
         x_global = mappingTimesVector(X_quad(:,k_quad), false, false, F) + F0;
         
         
         %computing flux density
         for kn = 1:3
             if isfield(msh, 'symmetrySectors')
-                A_true = transpose(A( msh.bandData.el_table(2, msh_comp.t_ag(kn, :)), ksample)) ...
-                    .* msh.bandData.el_table(3, :);
+                A_true = transpose(A( msh.bandData.el_table(2, msh_comp.t(kn, :)), ksample)) ...
+                    .* msh.bandData.el_table(3, msh_comp.t(kn, :));
             else
                 A_true = transpose( A(msh_comp.t(kn, :), ksample ) );
             end
@@ -105,34 +111,12 @@ for ksample = 1:Nsamples
         Br_r = dotProduct(B, x_global); %Br * |r|
         Bphi_r = dotProduct(B, [0 -1;1 0]*x_global); %Bphi * |r|
 
-        T(ksample) = T(ksample) + W_quad(k_quad) * sum( real(conj(Br_r) .* Bphi_r) ...
+        T(ksample) = T(ksample) + W_quad(k_quad) * sum(( Br_r .* Bphi_r ) ...
             ./ sum(x_global.^2,1).^0.5 .*abs(detF));    
         
     end
 end
 
 T = T / (mu0*(ro-ri));
-
-end
-
-function V = evaluate_ShapeFunction(op, fun, k, varargin)
-
-if strcmp(fun, 'nodal')
-   phi_ref = {  [-1 -1 1]; [1 0 0]; [0 1 0] };
-   if strcmp(op, '')
-        V = phi_ref{k}*X;
-    elseif strcmp(op, 'grad')
-        F = varargin{1}; detF = varargin{2};
-        V = mappingTimesVector(phi_ref{k}(1,1:2)', true, true, F, [], detF);
-    elseif strcmp(op, 'curl')
-        F = varargin{1}; detF = varargin{2};
-        V = [0 1;-1 0] * mappingTimesVector(phi_ref{k}(1,1:2)', true, true, F, [], detF);
-    else
-        error('Invalid operator.');
-    end
-else
-    error('Shape function not implemented.');
-end
-
 
 end

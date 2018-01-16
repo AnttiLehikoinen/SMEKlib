@@ -18,6 +18,7 @@ function [pnew, tnew, varargout] = repmesh(p, t, Pfun, varargin)
 % t2, 'p', p1, 'p', p2) to get the indices of some elements t1,t2 and nodes
 % p1,p2 in the new triangulation. In this case, the output is
 % [pnew, tnew, t1_new, t2_new, p1_new, p2_new]
+% Indices must be row vectors
 %
 % Call syntax 2:
 % repmesh(p, t, N_sectors) to replicate a sector mesh for the entire
@@ -50,12 +51,20 @@ else
     inds_p_slave = setdiff(inds_p_slave, ind_p_center); %possible center node does not change
     
     inds_p_master = find( abs(p_angles - angle_sector) < tol );
+    
+    if N_rep == 1
+        % 180-degree symmetry sector --> angling gets fucked up it seems
+        inds_p_slave = find( (p(2,:)<tol) & (p(1,:)<0) );
+        inds_p_slave = setdiff(inds_p_slave, ind_p_center); %possible center node does not change
+        inds_p_master = find( (p(2,:)<tol) & (p(1,:)>0) );
+    end
 end
 
 
 %figure(1); clf; hold on;
 %plot(p(1, inds_p_slave), p(2,inds_p_slave), 'ko');
 %plot(p(1, inds_p_master), p(2,inds_p_master), 'rx');
+%axis equal;
 
 %repeats mesh
 Np_old = size(p, 2);
@@ -115,6 +124,7 @@ for kout = 1:numel(inds_list)
     else
        varargout{ri} = kron(0:N_rep, Np_old*ones(1, numel(inds_list{kout}))) + ...
             repmat(inds_list{kout}, 1, N_rep+1);
+       varargout{ri} = IC( varargout{ri} );
         ri = ri + 1;
     end
 end

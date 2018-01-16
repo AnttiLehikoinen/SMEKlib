@@ -6,8 +6,6 @@ function S = sparseAdd2(varargin)
 % sparseAdd2(I, J, E, S)
 % 
 % sparseAdd2(S_to_add, S_existing)
-%
-% Copyright (c) 2016 Antti Lehikoinen / Aalto University
 
 if (numel(varargin) == 4) && ~isa(varargin{1}, 'struct')
     % call syntax: sparseAdd(I, J, E, S)

@@ -9,7 +9,7 @@ function h = get_periodicityFactor(N_sec, p)
 
 h = exp(1i * p * 2*pi/N_sec);
 
-if imag(h) < 1e-4
+if abs(imag(h)) < 1e-4
     h = real(h);
 end
 

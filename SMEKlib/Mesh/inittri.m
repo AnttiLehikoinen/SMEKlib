@@ -12,6 +12,10 @@ function msh = inittri(p, t)
 % Copyright (c) 2016 Antti Lehikoinen / Aalto University,
 %   based on the work of Antti Hannukainen and Mika Juntunen, 3.11.2005
 
+if size(t,1)~=3
+    t = t';
+end
+
 t = sort(t, 1);
 
 %defining edges an' pals

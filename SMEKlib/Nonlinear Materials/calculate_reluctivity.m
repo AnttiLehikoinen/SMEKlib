@@ -11,8 +11,6 @@ function [nu, varargout] = calculate_reluctivity(varargin)
 % dnu/dB^2 in the similar fashion.
 % 
 % Call with calculate_reluctivity(nu_struct) to assume 0 flux.
-%
-% Copyright (c) 2016 Antti Lehikoinen / Aalto University
 
 if nargin == 1
     nu_struct = varargin{1};

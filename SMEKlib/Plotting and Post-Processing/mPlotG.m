@@ -9,7 +9,7 @@ function [] = mPlotG( G , varargin)
 for k = 1:size(G,2)
     if (G(1,k)==2) || (G(1,k)==3)
         np = G(2,k);
-        plot( G([3:(3+np-1) 3], k), G([(3+np):end 3+np], k), varargin{:});
+        plot( G([3:(3+np-1) 3], k), G([(3+np):(3+2*np-1) 3+np], k), varargin{:});
     elseif G(1,k)==1
         r = G(4,k);
         rectangle('Position', [G(2,k)-r G(3,k)-r 2*r*[1 1]], 'Curvature', [1 1], ...

@@ -1,11 +1,11 @@
 function [linehandles, linecoordinates] = drawFluxLines(msh, A, numberOfLines, varargin)
-%drawFluxlines Draws flux lines.
+%drawFluxLines Draws flux lines.
 %
-% drawFluxlines(msh, A, Nl, args) draws a total of Nl flux lines with the
+% drawFluxLines(msh, A, Nl, args) draws a total of Nl flux lines with the
 % "plot" function and input arguments args
 %
 % If the mesh struct msh has a field "rotel", the call syntax can be
-% drawFluxlines(msh, A, Nl, rotorAngle, args)
+% drawFluxLines(msh, A, Nl, rotorAngle, args)
 % 
 % Copyright (c) 2016 Antti Lehikoinen / Aalto University
 

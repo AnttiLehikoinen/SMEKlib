@@ -10,7 +10,9 @@ function [x, w] = get_2DtriangleIntegrationPoints(p)
 
 % removing some redundancy
 n = p;
-if (p == 11)
+if p == 0
+    n = 1;
+elseif (p == 11)
     n = 12;
 elseif (p == 15) || (p == 16)
     n = 17;

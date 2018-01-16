@@ -33,6 +33,8 @@ for kp = 1:N_Ps
         [I, J, E] = find(P{1, kp});
     elseif size(P{1,kp},1) == 3
         [I, J, E] = deal( P{1, kp}(1,:)', P{1, kp}(2,:)', transpose(P{1, kp}(3,:)) );
+    elseif isempty(P{1,kp})
+        continue;
     else
         error('Incorrect input in P.');
     end
@@ -57,6 +59,7 @@ slaveNodes = unique( horzcat( Pinds{1,:} ) );
 [freeNodes, IA] = setdiff(1:Ntot, slaveNodes);
 
 Np_free = numel(freeNodes);
+indsOfFree = zeros(1, Ntot);
 indsOfFree(IA) = 1:Np_free;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

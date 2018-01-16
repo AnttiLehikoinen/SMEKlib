@@ -5,7 +5,7 @@ function h = drawFluxDensity(msh, A, varargin)
 % arguments args
 %
 % If the mesh msh has a field "rotel" listing the rotor elements, the call 
-% syntax can be drawFluxDensity(msh, A, , rotorAngle, args)
+% syntax can be drawFluxDensity(msh, A, rotorAngle, args)
 % 
 % Copyright (c) 2016 Antti Lehikoinen / Aalto University
 
@@ -28,9 +28,6 @@ end
 
 %calculating flux density
 Babs = transpose(calculate_B(A, msh));
-
-%for backwards compatibility (up to Matlab 2014 and earlier at least)
-Babs = repmat(Babs', 3, 1);
 
 h = fill(X,Y, Babs, plotArgs{:});
 

@@ -1,5 +1,5 @@
 # SMEKlib
-Matlab 2D-FEM library for electrical machines
+2D-FEA Library for Electrical Machines in Matlab
 
 Several simulation examples can be found under Examples.
 

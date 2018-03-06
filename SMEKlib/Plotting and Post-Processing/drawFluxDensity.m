@@ -13,9 +13,10 @@ function h = drawFluxDensity(msh, A, varargin)
 
 if size(msh.t, 1) > 3
     % higher-order mesh
-    t = aux_mesh(msh);
+    [t, I] = aux_mesh(msh);
 else
     t = msh.t;
+    I = 1;
 end
 
 X = zeros(3, size(t,2));
@@ -27,7 +28,13 @@ for kn = 1:3
 end
 
 %calculating flux density
-Babs = transpose(calculate_B(A, msh));
+Babs_t = calculate_B(A, msh);
+
+Ne = size(msh.t,2);
+Babs = zeros(size(I,1), Ne*size(I,2));
+for kc = 1:size(I,2)
+    Babs(:, (1:Ne) + (kc-1)*Ne) = Babs_t(I(:,kc), :);
+end
 
 h = fill(X,Y, Babs, plotArgs{:});
 

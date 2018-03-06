@@ -7,4 +7,4 @@ For additional information, please refer to "A. Lehikoinen, T. Davidsson, A. Ark
 
 A citation won't be minded, either :)
 
-All copyright Antti Lehikoinen / Aalto University 2013-1018 unless otherwise stated.
+All copyright Antti Lehikoinen / Aalto University 2013-2018 unless otherwise stated.

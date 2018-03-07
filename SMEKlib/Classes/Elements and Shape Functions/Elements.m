@@ -1,12 +1,22 @@
 classdef Elements < handle
+	%{
     enumeration
         %element types
         triangle, prism, composite,
         triangle2 %non-curved second-order
         triangle2I %isoparametric second-order
     end
+	%}
+	
     
     methods (Static)
+		
+		%ugly non-enumeration-workaround for enumerations
+		function e = triangle(); e = 11; end;
+		function e = triangle2(); e = 12; end;
+		function e = triangle2I(); e = 13; end;		
+		function e = prism(); e = 14; end;
+		function e = composite(); e = 15; end;
         
         function bl = isIsoparametric(type)
             if type == Elements.triangle2I

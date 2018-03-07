@@ -83,7 +83,7 @@ for kt = 2:Nsamples
         res_tot = PT'*(res + Qconst*Xsamples(:,kt) - FL - (alpha1/alpha2)*res_prev);
         
         resNorm = norm(res_tot) / norm(FL);
-        disp([9 'Newton step ' num2str(kiter) ', relative residual ' num2str(resNorm) '.']);
+        disp(['    Newton step ' num2str(kiter) ', relative residual ' num2str(resNorm) '.']);
         %disp(['    Newton step ' num2str(kiter) ', relative residual ' num2str(resNorm) '.']); fflush(stdout); uncomment in Octave
         if resNorm < 1e-6
             break;

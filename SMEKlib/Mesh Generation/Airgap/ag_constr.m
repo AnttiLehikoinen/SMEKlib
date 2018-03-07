@@ -1,6 +1,7 @@
 function this = ag_constr(this, msh, varargin)
 
 % generating air-gap triangulation; for two layers by default
+this.misc = struct();
 
 n_ag_s = msh.namedNodes.get('n_ag_s');
 n_ag_r = msh.namedNodes.get('n_ag_r');

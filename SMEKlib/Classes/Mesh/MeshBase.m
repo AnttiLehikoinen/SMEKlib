@@ -90,6 +90,7 @@ classdef MeshBase < handle
         end
         
         function [F, F0] = getMappingMatrix(this, varargin)
+            %FIXME make this into an independent function instead
             if this.elementType == Elements.triangle || this.elementType == Elements.triangle2
                 %getMappingMatrix A mesh-specific mapping matrix.            
                 [F, F0] = mappingTerms(this, varargin{:});

@@ -4,13 +4,27 @@ function sim = sim_runTimeSteppingSimulation_CN(sim, pars)
 % (c) 2017 Antti Lehikoinen / Aalto University
 
 f = pars.f;
-U = abs(pars.U) / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
 w = 2*pi*f;
 
 if ~isempty(pars.slip)
     slip = pars.slip;
 else
     slip = sim.dims.slip;
+end
+
+%voltage-function
+if isa(pars.U, 'function_handle')
+    Ufun = pars.U;
+else
+    U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %voltage function
+    phi0 = 0;
+    if sim.dims.connection_stator == defs.delta
+        Ufun = @(t)(  U*[cos(w*t-phi0); cos(w*t - 2*pi/3-phi0); cos(w*t - 4*pi/3-phi0)] );
+    else
+        Ufun = @(t)(  U*[cos(w*t-phi0); cos(w*t - pi/3-phi0)] );
+    end
 end
 
 dt = 1/f / pars.N_stepsPerPeriod; %time-step length
@@ -26,14 +40,6 @@ Mtot = Mtot/dt;
 Ntot = size(Mtot, 1);
 Nui = Ntot - size(sim.matrices.P,1);
 PT = blkdiag(sim.matrices.P, speye(Nui));
-
-%voltage function
-phi0 = 0;
-if sim.dims.connection_stator == defs.delta
-    Ufun = @(t)(  U*[cos(w*t-phi0); cos(w*t - 2*pi/3-phi0); cos(w*t - 4*pi/3-phi0)] );
-else
-    Ufun = @(t)(  U*[cos(w*t-phi0); cos(w*t - pi/3-phi0)] );
-end
 
 %Jacobian constructor object
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);

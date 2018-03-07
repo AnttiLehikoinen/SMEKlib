@@ -149,7 +149,7 @@ toc
 
 figure(12); clf; hold on;
 plot(pars.ts, 2*sim.Is');
-plot(pars.ts, 2*Xsamples(indI, :)', 'b--');
+%plot(pars.ts, 2*Xsamples(indI, :)', 'b--');
 
 figure(13); clf;
 sim.fluxplot(25, pars);

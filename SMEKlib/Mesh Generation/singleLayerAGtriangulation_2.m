@@ -27,14 +27,14 @@ rprev = 1; N_ag_s = numel(n_ag_s);
 sprev = 1; N_ag_r = numel(n_ag_r);
 while true
     %triangulation for the next 4 air-gap nodes (2 candidate triangles)
-    TR = triangulation([1 2 3; 1 3 4], [msh.p(:, n_ag_s(sprev:(sprev+1))) msh.p(:,n_ag_r(rprev:(rprev+1)))]');
+    %TR = triangulation([1 2 3; 1 3 4], [msh.p(:, n_ag_s(sprev:(sprev+1))) msh.p(:,n_ag_r(rprev:(rprev+1)))]');
     
     %computing the radii of in- (rin) and circumcircles (rout)
-    [~,rin1] = incenter(TR, 1); [~,rout1] = circumcenter(TR, 1);
-    [~,rin2] = incenter(TR, 2); [~,rout2] = circumcenter(TR, 2);
+    %[~,rin1] = incenter(TR, 1); [~,rout1] = circumcenter(TR, 1);
+    %[~,rin2] = incenter(TR, 2); [~,rout2] = circumcenter(TR, 2);
     
-    %pt = [msh.p(:, n_ag_s(sprev:(sprev+1))) msh.p(:,n_ag_r(rprev:(rprev+1)))];
-    %[rout1, rout2] = circumcircles(pt);
+    pt = [msh.p(:, n_ag_s(sprev:(sprev+1))) msh.p(:,n_ag_r(rprev:(rprev+1)))];
+    [rout1, rout2, rin1, rin2] = circumcircles(pt);
     
     %choosing the triangle with the better condition indicator (rout/rin)
     if rout1/rin1 < rout2/rin2
@@ -67,7 +67,7 @@ tag = tag(:,1:ne);
 
 end
 
-function [rout1, rout2] = circumcircles(pt)
+function [rout1, rout2, rin1, rin2] = circumcircles(pt)
 a = norm(pt(:,2) - pt(:,1)); 
 b = norm(pt(:,3)-pt(:,2)); 
 c = norm(pt(:,1)-pt(:,3));
@@ -78,5 +78,9 @@ A1 = abs(det([pt(:,2)-pt(:,1) pt(:,3)-pt(:,1)]));
 A2 = abs(det([pt(:,3)-pt(:,1) pt(:,4)-pt(:,1)]));
 rout1 = a*b*c/(2*A1);
 rout2 = a2*b2*c/(2*A2);
+
+s1 = (a+b+c)/2; s2 = (a2+b2+c)/2;
+rin1 = A1/s1; rin2 = A2/s2;
+
 end
 

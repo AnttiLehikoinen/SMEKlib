@@ -15,6 +15,13 @@ function [p, t, n_master_final, n_ag, n_dir] = ...
 % 
 % (c) 2017 Antti Lehikoinen / Aalto University
 
+%disp('ayaaa')
+if N == 0
+    mirror = true;
+    N = 2;
+else
+    mirror = false;
+end
 
 %initializing nodes
 Np_el = size(p_sec, 2); %number of nodes in the elementary mesh
@@ -24,9 +31,14 @@ p = [p_sec zeros(2, (N-1)*Np_rep)];
 
 %center node given?
 n_center = intersect(n_slave, n_master);
-
 if isempty(n_center)
     n_center = 0;
+end
+
+%special case: mirroring
+if mirror
+    n_master_orig = n_master;
+    n_master = n_slave;
 end
 
 %initializing elements
@@ -36,7 +48,7 @@ t = [t_sec zeros(3, (N-1)*Ne_el)];
 %determining a replicable segment mesh
 t_sec_rep = t_sec;
 [inds_t_slave, locb] = ismember(t_sec, n_slave); %linear indices of n_slave within t_sec
-inds_t_slave = find(inds_t_slave);
+inds_t_slave = find(inds_t_slave)';
 locb = locb(locb>0); %removing zero entries
 
 ind_t_center = find( t_sec == n_center ); %linear index of center node, if any
@@ -50,6 +62,9 @@ t_sec_rep = reshape( pinds_new(t_sec_rep(:)), size(t_sec,1), []);
 for k = 2:N
    ra = (k-1)*theta; %rotation angle
    rM = [cos(ra) -sin(ra); sin(ra) cos(ra)]; %rotation matrix
+   if mirror
+       rM = rM*diag([1 -1])*rM';
+   end
    
    %replicating nodes
    p(:, (1:Np_rep) + Np_el + (k-2)*Np_rep) = rM*p_sec(:, n_rep);
@@ -64,6 +79,18 @@ for k = 2:N
    end
    t_segment(ind_t_center) = n_center;
    t(:, (1:Ne_el) + (k-1)*Ne_el) = t_segment;
+end
+
+if mirror
+    n_master = pinds_new(n_master_orig) + Np_el;
+    n_master_final = n_master + 0*Np_el;
+    
+    n_ag_rep = pinds_new( n_ag(1:(end-1)) ) + Np_el;
+    n_ag = [n_ag fliplr(n_ag_rep)];
+    
+    n_dir_rep = pinds_new( n_dir(1:(end-1)) ) + Np_el;
+    n_dir = [n_dir fliplr(n_dir_rep)];
+    return;      
 end
 
 %updating nodal indices

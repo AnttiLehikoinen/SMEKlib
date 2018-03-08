@@ -50,11 +50,6 @@ classdef gwrap < handle
             this = gw_addpcw(this, varargin{:});
         end
         
-        
-        function this = addpcw(this, varargin)
-            this = gw_addpcw(this, varargin{:});
-        end
-        
         function this = removeDuplicates(this, varargin)
             this = gw_removeDuplicates(this, varargin{:});
         end

@@ -1,5 +1,5 @@
 function [p, t, n_master_final, n_ag, n_dir] = ...
-    replicate_sector(p_sec, t_sec, N, theta, n_slave, n_master, n_ag, n_dir)
+    replicate_sector_fixed(p_sec, t_sec, N, theta, n_slave, n_master, n_ag, n_dir)
 %replicate_sector replicates an elementary mesh sector.
 %
 % Call syntax

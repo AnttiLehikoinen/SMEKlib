@@ -78,8 +78,8 @@ N_quad = numel(W_quad);
 
 for ksample = 1:Nsamples
     if isobject(msh.bandData)
-        [t_local, pnew, t_global] = msh.bandData.t_ag(rotorAngles(ksample));
-        t_ag = msh.bandData.t_const;
+        %[t_local, pnew, t_global] = msh.bandData.t_ag(rotorAngles(ksample));
+        t_ag = msh.bandData.t_const; %computing torque from the constant part of ag mesh only
         pnew = msh.bandData.p_virt;
         %msh_comp.t_global = t;
     else

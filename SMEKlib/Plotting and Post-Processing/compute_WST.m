@@ -1,7 +1,11 @@
 function [Force, Torque] = compute_WST(A, msh, arg1, varargin)
 %compute_WST computes torque and force with Weighted Stress Tensor
 % 
-% Arguments as in compute_Torque_simple
+% Call syntax:
+% [Force, Torque] = compute_WST(A, msh, arg1, varargin)
+% where 
+%   arg1 = list of elements to compute the forces from OR
+%   arg1 = a triangulation for the force computation
 % 
 % For article reference, see:
 % "The eggshell method for the computation of electromagnetic forces on 
@@ -27,8 +31,7 @@ else
     msh_comp = struct('t', arg1, 'p', msh.p);
     el_ag = 1:size(arg1, 2);
 end
-Ne = numel(el_ag);
-Np = size(msh.p, 2);
+
 
 %get boundary (and free=middle) nodes of the air-gap triangulation
 [~, nb_stator, n_free] = get_boundaryNodes(msh, msh_comp, el_ag);

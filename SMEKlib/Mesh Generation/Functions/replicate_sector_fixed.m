@@ -1,5 +1,5 @@
-function [p, t, n_master_final, n_ag, n_dir] = ...
-    replicate_sector_fixed(p_sec, t_sec, N, theta, n_slave, n_master, n_ag, n_dir)
+function [p, t, n_master_final, n_ag, n_dir, varargout] = ...
+    replicate_sector_fixed(p_sec, t_sec, N, theta, n_slave, n_master, n_ag, n_dir, varargin)
 %replicate_sector replicates an elementary mesh sector.
 %
 % Call syntax
@@ -81,6 +81,9 @@ for k = 2:N
    t(:, (1:Ne_el) + (k-1)*Ne_el) = t_segment;
 end
 
+%variable-length output?
+nout = max(nargout,1) - 5;
+
 if mirror
     n_master = pinds_new(n_master_orig) + Np_el;
     n_master_final = n_master + 0*Np_el;
@@ -90,16 +93,40 @@ if mirror
     
     n_dir_rep = pinds_new( n_dir(1:(end-1)) ) + Np_el;
     n_dir = [n_dir fliplr(n_dir_rep)];
+    
+    varargout = cell(1, nout);
+    for kout = 1:nout
+        n_other = varargin{(kout-1)*2 + 1};
+        flip = varargin{(kout-1)*2 + 2};
+        n_rep = pinds_new( setdiff(n_other, n_slave, 'stable') ) + Np_el;
+        if flip
+            n_other_rep = [n_other fliplr(n_rep)];
+        else
+            n_other_rep = [n_other n_rep];
+        end
+        varargout{kout} = n_other_rep;
+    end
     return;      
 end
 
 %updating nodal indices
-n_master_final = n_master + Np_el + (N-2)*Np_rep;
+%n_master_final = n_master + Np_el + (N-2)*Np_rep;
+n_master_final = pinds_new( n_master ) + Np_el + (N-2)*Np_rep;
 
 n_ag_rep = pinds_new( n_ag(2:end) ) + Np_el;
 n_ag = [n_ag repmat(n_ag_rep, 1, N-1)+kron(0:(N-2), Np_rep*ones(1,numel(n_ag_rep)))];
 
 n_dir_rep = pinds_new( n_dir(2:end) ) + Np_el;
 n_dir = [n_dir repmat(n_dir_rep, 1, N-1)+kron(0:(N-2), Np_rep*ones(1,numel(n_dir_rep)))];
-    
+
+%FIXME TODO: nargout
+varargout = cell(1, nout);
+for kout = 1:nout
+    n_other = varargin{kout};
+    %flip = varargin{(kout-1)*2 + 2};
+    n_rep = pinds_new( setdiff(n_other, n_slave, 'stable') ) + Np_el;
+    n_other_rep = [n_other repmat(n_rep, 1, N-1)+kron(0:(N-2), Np_rep*ones(1,numel(n_rep)))];
+    varargout{kout} = n_other_rep;
+end
+
 end

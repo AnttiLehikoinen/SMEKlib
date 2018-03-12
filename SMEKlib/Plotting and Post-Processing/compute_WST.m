@@ -37,6 +37,9 @@ end
 [~, nb_stator, n_free] = get_boundaryNodes(msh, msh_comp, el_ag);
 
 %determining weighting function
+Np = size(msh_comp.p, 2);
+Ne = size(msh_comp.t, 2);
+
 g = zeros(Np, 1);
 g(nb_stator) = 1;
 if any(n_free)

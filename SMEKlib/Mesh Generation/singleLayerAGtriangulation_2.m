@@ -11,12 +11,13 @@ function tag = singleLayerAGtriangulation_2(msh, n_ag_s, n_ag_r)
 %[~,I] = sort( atan2(msh.p(2,n_ag_s), msh.p(1,n_ag_s)) ); n_ag_s = n_ag_s(I);
 %[~,I] = sort( atan2(msh.p(2,n_ag_r), msh.p(1,n_ag_r)) ); n_ag_r = n_ag_r(I);
 
+
 tag = zeros(3, 1000); ne = 0;
 function addt(t)
     % nested function for incrementing the array
     if (ne+size(t,2)) > size(tag,2)
         nadd = min(2*size(tag,2), size(t,2));
-        tag = [tag zeros(2,nadd)];
+        tag = [tag zeros(3,nadd)];
     end
     tag(:,(ne+1):(ne+size(t,2))) = t;
     ne = ne + size(t,2);

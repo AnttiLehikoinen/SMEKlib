@@ -34,6 +34,18 @@ if sim.dims.connection_stator == defs.star
    M_II_s = Cstar'*M_II_s*Cstar;
    Ni_s = 2;
 end
+
+if isfield(sim.dims, 'supply_type') && sim.dims.supply_type == defs.current_supply
+    S_AI_s = sparse(Np, 0);
+    S_AU_s = sparse(Np, 0);
+    S_UI_s = [];
+    M_IA_s = sparse(0, Np);
+    S_IU_s = [];
+    S_II_s = [];
+    M_II_s = [];
+    Ni_s = 0; Nu_s = 0;
+end
+    
    
 sim.results.Ni_s = Ni_s; sim.results.Nu_s = Nu_s;
 

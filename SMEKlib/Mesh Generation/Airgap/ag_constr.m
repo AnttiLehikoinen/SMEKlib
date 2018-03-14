@@ -1,4 +1,7 @@
 function this = ag_constr(this, msh, varargin)
+%
+
+%FIXME: add number of midnodes thingy
 
 % generating air-gap triangulation; for two layers by default
 this.misc = struct();
@@ -9,8 +12,8 @@ N_ag_s = numel(n_ag_s);
 N_ag_r = numel(n_ag_r);
 
 %sorting
-[~,I] = sort( atan2(msh.p(2,n_ag_s), msh.p(1,n_ag_s)) ); n_ag_s = n_ag_s(I);
-[~,I] = sort( atan2(msh.p(2,n_ag_r), msh.p(1,n_ag_r)) ); n_ag_r = n_ag_r(I);
+%[~,I] = sort( atan2(msh.p(2,n_ag_s), msh.p(1,n_ag_s)) ); n_ag_s = n_ag_s(I);
+%[~,I] = sort( atan2(msh.p(2,n_ag_r), msh.p(1,n_ag_r)) ); n_ag_r = n_ag_r(I);
 
 n_mid = msh.namedNodes.get('n_mid');
 mid_given = false;
@@ -24,9 +27,13 @@ else
     %no middle layer nodes given --> generating middle layer
     N_mid = ceil( 0.5*(N_ag_s + N_ag_r) ) - 1;
     %N_mid = ceil(0.5*N_ag_s) - 1;
-    N_mid = 2*(N_ag_s-1) + 1;
+    %N_mid = 2*(N_ag_s-1) + 1;
 
-    angles = linspace(0, 2*pi/msh.symmetrySectors, N_mid);
+    %angles = linspace(0, 2*pi/msh.symmetrySectors, N_mid);
+    angle_start = (atan2(msh.p(2,n_ag_s(1)), msh.p(1,n_ag_s(1))) + ...
+        atan2(msh.p(2,n_ag_r(1)), msh.p(1,n_ag_r(1))))/2;
+    angles = linspace(0, 2*pi/msh.symmetrySectors, N_mid) + angle_start;
+    
     rin = mean( sum(msh.p(:,n_ag_r).^2,1).^0.5 );
     rout = mean( sum(msh.p(:,n_ag_s).^2,1).^0.5 );
 
@@ -44,11 +51,14 @@ t_in = singleLayerAGtriangulation_2(msh, n_mid, n_ag_r);
 t_out = singleLayerAGtriangulation_2(msh, n_ag_s, n_mid);
 
 %{
-figure(12); clf; hold on;
+figure(12); clf; hold on; axis equal;
 p = msh.p;
-plot(p(1, n_mid), p(2,n_mid), 'ro-');
+%plot(p(1, n_mid), p(2,n_mid), 'ro-');
+plot(p(1, n_ag_s(1)), p(2, n_ag_s(1)), 'ro');
+plot(p(1, n_ag_r(1)), p(2, n_ag_r(1)), 'ro');
+
 triplot(t_in(:,1:10)', p(1,:), p(2,:), 'r');
-t_in(:,1:10)
+%t_in(:,1:10)
 triplot(t_out', p(1,:), p(2,:), 'b');
 %}
 
@@ -80,11 +90,13 @@ for k_sector = 1:(symm-1)
 end
 
 %getting rid of redundant dublicate virtual nodes
-Ntemp = size(p_ag_virt, 2);
-inds2keep = setdiff(1:Ntemp, [((N_ag_s+N_ag_r + N_mid +1):N_mid:Ntemp) Ntemp]);
-p_ag_virt = p_ag_virt(:, inds2keep);
-virt_sectors = virt_sectors(inds2keep);
-virt_identities = virt_identities(inds2keep);
+if symm > 1
+    Ntemp = size(p_ag_virt, 2);
+    inds2keep = setdiff(1:Ntemp, [((N_ag_s+N_ag_r + N_mid +1):N_mid:Ntemp) Ntemp]);
+    p_ag_virt = p_ag_virt(:, inds2keep);
+    virt_sectors = virt_sectors(inds2keep);
+    virt_identities = virt_identities(inds2keep);
+end
 
 % indices of moving interface node within the moving-band triangulation
 inds_r = find( ismember(agNodes_global(t_out(:)), n_mid ) );
@@ -120,12 +132,13 @@ if ~mid_given
     msh.namedNodes.add('Periodic_master', n_mid(1));
     msh.namedNodes.add('Periodic_slave', n_mid(end));
 end
-        
+
 %generating constant-part of ag matrix
 Np = size(msh.p,2);
 this.msh_ag.t = this.t_const;
 Sag_c = ...
     MatrixConstructor(Nodal2D(Operators.grad), Nodal2D(Operators.grad), 1/(pi*4e-7), [], this.msh_ag);
+
 %moving to global indexing and taking care of symmetry sectors
 inds = 1:Sag_c.Nvals;
 Sag_c.E(inds) = Sag_c.E(inds) .* this.el_table(3, Sag_c.I(inds));

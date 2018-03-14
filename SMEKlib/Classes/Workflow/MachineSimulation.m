@@ -66,9 +66,21 @@ classdef MachineSimulation < handle
             %this = sim_runTimeSteppingSimulation(this, varargin{:});
             this = sim_runTimeSteppingSimulation_CN(this, varargin{:});
         end
+        function this = run_static(this, varargin)
+            this = sim_runStaticSimulation(this, varargin{:});
+        end
         
         function [] = fluxplot(this, step, pars)
-            A = this.results.Xt(1:this.Np, step);
+            
+            if step == -1
+                A = this.results.Xh(1:this.Np);
+                step = 1;
+            elseif isempty(step)
+                A = this.results.Xs(1:this.Np);
+                step = 1;
+            else
+                A = this.results.Xt(1:this.Np, step);
+            end
             if any(pars.slip)
                 slip = pars.slip;
             else

@@ -46,7 +46,7 @@ if ~isempty( solids )
     end
 end
 
-sim.matrices.Mr = Mc.finalize();
+sim.matrices.Mr = Mc.finalize(sim.Np, sim.Np);
 
 %setting loop matrices
 if sim.dims.type_rotorWinding == defs.cage

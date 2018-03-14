@@ -1,12 +1,12 @@
 function BH = get_defaultMaterials(matNumber)
 %get_defaultMaterials returns the BH curve for some materials
-% 
+%
 % BH = get_defaultMaterials(matNumber)
 % returns the BH curve of the FCSMEK default material matnumber, in the
 % format BH = [B H];
 %
 % supplying a matNumber < 0 returns the number of available materials
-% 
+%
 % Copyright (c) 2016 Antti Lehikoinen / Aalto University
 
 %NOTE: due to possible confidentiality issues, only three materials are
@@ -14,11 +14,13 @@ function BH = get_defaultMaterials(matNumber)
 % 0 = air
 % 1 = construction steel (Ovako 520 L)
 % 2 = Electrical steel sheet – Bochum STABOLEC 260-50 A
+% 3 = slot wedge material
+% 4 = M27 steel
 %
 % Feel free to add your own :)
 
 if matNumber < 0
-    BH = 3; return;
+    BH = 4; return;
 elseif matNumber == 0
     BH = [0 1; 0 1/(pi*4e-7)]'; return
 elseif matNumber <= 3
@@ -63,7 +65,102 @@ elseif matNumber <= 3
         10373          1.8         9268          1.8
         15274          1.9        16215          1.9
         23176            2        26966            2];
-    %}
+        %}
+elseif matNumber == 4
+    B = [0.050000
+        0.100000
+        0.150000
+        0.200000
+        0.250000
+        0.300000
+        0.350000
+        0.400000
+        0.450000
+        0.500000
+        0.550000
+        0.600000
+        0.650000
+        0.700000
+        0.750000
+        0.800000
+        0.850000
+        0.900000
+        0.950000
+        1.000000
+        1.050000
+        1.100000
+        1.150000
+        1.200000
+        1.250000
+        1.300000
+        1.350000
+        1.400000
+        1.450000
+        1.500000
+        1.550000
+        1.600000
+        1.650000
+        1.700000
+        1.750000
+        1.800000
+        1.850000
+        1.900000
+        1.950000
+        2.000000
+        2.050000
+        2.100000
+        2.150000
+        2.200000
+        2.250000
+        2.300000];
+    H = [17.059828
+        25.634971
+        31.338354
+        35.778997
+        39.602124
+        43.123143
+        46.520439
+        49.908177
+        53.368284
+        56.966318
+        60.760271
+        64.806105
+        69.161803
+        73.890922
+        79.066315
+        84.774676
+        91.122722
+        98.246299
+        106.324591
+        115.603417
+        126.435124
+        139.349759
+        155.187082
+        175.350538
+        202.312017
+        240.640455
+        299.118027
+        394.993386
+        561.726177
+        859.328763
+        1375.466888
+        2191.246914
+        3328.145908
+        4760.506172
+        6535.339449
+        8788.970657
+        11670.804347
+        15385.186211
+        20246.553031
+        26995.131141
+        38724.496369
+        64917.284463
+        101489.309338
+        137202.828961
+        176835.706764
+        216374.283609];
+    BH = [B H];
+    return;
 else
     error('Material not available');
 end

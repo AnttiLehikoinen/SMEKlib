@@ -3,15 +3,26 @@ function [p, t, n_master_final, n_ag, n_dir, varargout] = ...
 %replicate_sector replicates an elementary mesh sector.
 %
 % Call syntax
-% [p, t] = replicate_sector(p_sec, t_sec, N, theta, n_slave, n_master)
+% [p, t, n_ccl_new, n_ag, n_dir, other_nodes] = ...
+%    replicate_sector_fixed(p_sec, t_sec, N, theta, n_cl, n_ccl, n_ag, n_dir, other_nodes)
 % where
 % p_sec and t_sec specify the elementary sector mesh, that is then replicated N
 % times with theta radians rotation each. The nodes on the slave
 % (clockwise) and master (counter-clockwise) boundaries of the elementary
-% mesh are listed in n_slave and n_master.
+% mesh are listed in n_cl and n_ccl.
+% Furthermore, n_ag and n_dir contain nodes on the Dirichlet and airgap
+% boundaries. Finally, additional node lists can be given in other_nodes.
+%
+% The output includes the nodes and elements of the replicated mesh, as
+% well as the lists of nodes in the new geometry.
 %
 % NOTE: If the segment contains an origin (0,0) node, it has to be listed
 % in both n_slave and n_master;
+% 
+% NOTE: Giving N=0 performs a mirroring operation along the theta-axis.
+% In that case, other_nodes is given as value-pair arguments. The first
+% argument (boolean) specifies whether the list of nodes (second argument)
+% should be mirrored (to e.g. maintain circumferential orientation) or not. 
 % 
 % (c) 2017 Antti Lehikoinen / Aalto University
 

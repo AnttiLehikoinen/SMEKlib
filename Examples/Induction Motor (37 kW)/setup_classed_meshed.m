@@ -90,8 +90,7 @@ mshc.namedNodes.add('n_ag_r', data.n_ag_r');
 mshc.generateMovingBand();
 
 %plotting air-gap triangulation
-[~, p_ag_virt, tag] = mshc.bandData.t_ag(0);
-triplot(tag', p_ag_virt(1,:), p_ag_virt(2,:), 'r');
+[tag, p_ag_virt, ~] = mshc.bandData.t_ag(0);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % plotting boundary conditions

@@ -6,60 +6,68 @@ function this = ag_constr(this, msh, varargin)
 % generating air-gap triangulation; for two layers by default
 this.misc = struct();
 
-n_ag_s = msh.namedNodes.get('n_ag_s');
-n_ag_r = msh.namedNodes.get('n_ag_r');
-N_ag_s = numel(n_ag_s);
-N_ag_r = numel(n_ag_r);
-
-%sorting
-%[~,I] = sort( atan2(msh.p(2,n_ag_s), msh.p(1,n_ag_s)) ); n_ag_s = n_ag_s(I);
-%[~,I] = sort( atan2(msh.p(2,n_ag_r), msh.p(1,n_ag_r)) ); n_ag_r = n_ag_r(I);
-
-n_mid = msh.namedNodes.get('n_mid');
-mid_given = false;
-if any(n_mid)
+if isa(varargin{1}, 'double') && size(varargin{1}, 1) > 1
+    % triangulation given as input
+    [n_ag_s, n_ag_r, N_ag_s, N_ag_r, n_mid, t_in, t_out] = givenTriangulation(msh, varargin{1});
     N_mid = numel(n_mid);
-    [~,I] = sort( atan2(msh.p(2,n_mid), msh.p(1,n_mid)) ); n_mid = n_mid(I);
-    
-    p_mid = msh.p(n_mid);
     mid_given = true;
 else
-    %no middle layer nodes given --> generating middle layer
-    N_mid = ceil( 0.5*(N_ag_s + N_ag_r) ) - 1;
-    %N_mid = ceil(0.5*N_ag_s) - 1;
-    %N_mid = 2*(N_ag_s-1) + 1;
+    %generating triangulatio
+    n_ag_s = msh.namedNodes.get('n_ag_s');
+    n_ag_r = msh.namedNodes.get('n_ag_r');
+    N_ag_s = numel(n_ag_s);
+    N_ag_r = numel(n_ag_r);
 
-    %angles = linspace(0, 2*pi/msh.symmetrySectors, N_mid);
-    angle_start = (atan2(msh.p(2,n_ag_s(1)), msh.p(1,n_ag_s(1))) + ...
-        atan2(msh.p(2,n_ag_r(1)), msh.p(1,n_ag_r(1))))/2;
-    angles = linspace(0, 2*pi/msh.symmetrySectors, N_mid) + angle_start;
-    
-    rin = mean( sum(msh.p(:,n_ag_r).^2,1).^0.5 );
-    rout = mean( sum(msh.p(:,n_ag_s).^2,1).^0.5 );
+    %sorting
+    %[~,I] = sort( atan2(msh.p(2,n_ag_s), msh.p(1,n_ag_s)) ); n_ag_s = n_ag_s(I);
+    %[~,I] = sort( atan2(msh.p(2,n_ag_r), msh.p(1,n_ag_r)) ); n_ag_r = n_ag_r(I);
 
-    p_mid = (rin+rout)/2*[cos(angles); sin(angles)];
-    n_mid = size(msh.p, 2) + (1:N_mid);
+    n_mid = msh.namedNodes.get('n_mid');
+    mid_given = false;
+    if any(n_mid)
+        N_mid = numel(n_mid);
+        [~,I] = sort( atan2(msh.p(2,n_mid), msh.p(1,n_mid)) ); n_mid = n_mid(I);
 
-    %adding mid-nodes to the mesh
-    msh.p = [msh.p p_mid];
+        p_mid = msh.p(n_mid);
+        mid_given = true;
+    else
+        %no middle layer nodes given --> generating middle layer
+        N_mid = ceil( 0.5*(N_ag_s + N_ag_r) ) - 1;
+        %N_mid = ceil(0.5*N_ag_s) - 1;
+        %N_mid = 2*(N_ag_s-1) + 1;
+
+        %angles = linspace(0, 2*pi/msh.symmetrySectors, N_mid);
+        angle_start = (atan2(msh.p(2,n_ag_s(1)), msh.p(1,n_ag_s(1))) + ...
+            atan2(msh.p(2,n_ag_r(1)), msh.p(1,n_ag_r(1))))/2;
+        angles = linspace(0, 2*pi/msh.symmetrySectors, N_mid) + angle_start;
+
+        rin = mean( sum(msh.p(:,n_ag_r).^2,1).^0.5 );
+        rout = mean( sum(msh.p(:,n_ag_s).^2,1).^0.5 );
+
+        p_mid = (rin+rout)/2*[cos(angles); sin(angles)];
+        n_mid = size(msh.p, 2) + (1:N_mid);
+
+        %adding mid-nodes to the mesh
+        msh.p = [msh.p p_mid];
+    end
+
+    %layer-triangulations
+    t_in = singleLayerAGtriangulation_2(msh, n_mid, n_ag_r);
+    t_out = singleLayerAGtriangulation_2(msh, n_ag_s, n_mid);
 end
 
 agNodes_global = [n_ag_s n_ag_r n_mid];
 
-%layer-triangulations
-t_in = singleLayerAGtriangulation_2(msh, n_mid, n_ag_r);
-t_out = singleLayerAGtriangulation_2(msh, n_ag_s, n_mid);
-
-%{
+%%{
 figure(12); clf; hold on; axis equal;
 p = msh.p;
-%plot(p(1, n_mid), p(2,n_mid), 'ro-');
-plot(p(1, n_ag_s(1)), p(2, n_ag_s(1)), 'ro');
-plot(p(1, n_ag_r(1)), p(2, n_ag_r(1)), 'ro');
-
-triplot(t_in(:,1:10)', p(1,:), p(2,:), 'r');
+triplot(t_in(:,:)', p(1,:), p(2,:), 'r');
 %t_in(:,1:10)
 triplot(t_out', p(1,:), p(2,:), 'b');
+
+plot(p(1, n_mid), p(2,n_mid), 'ro-');
+plot(p(1, n_ag_s), p(2, n_ag_s), 'bo-');
+plot(p(1, n_ag_r), p(2, n_ag_r), 'go-');
 %}
 
 %switching from global to local indexing
@@ -150,4 +158,43 @@ this.S_const = Sag_c.finalize(Np,Np);
 this.msh_ag.t = this.t_moving;
 
 end
+
+
+
+function [n_ag_s, n_ag_r, N_ag_s, N_ag_r, n_mid, t_in, t_out] = givenTriangulation(msh, tag)
+
+rotel = msh.rotel;
+statel = setdiff(1:size(msh.t,2), rotel);
+
+n_ag_s = toRow(unique(intersect( msh.t(:,statel), tag)));
+n_ag_r = toRow(unique(intersect( msh.t(:,rotel), tag)));
+n_mid = toRow(setdiff(tag, [n_ag_s n_ag_r]));
+
+%sorting
+n_ag_s = nsort(msh, n_ag_s);
+n_ag_r = nsort(msh, n_ag_r);
+n_mid = nsort(msh, n_mid);
+
+msh.namedNodes.add('n_ag_s', n_ag_s);
+msh.namedNodes.add('n_ag_r', n_ag_r);
+msh.namedNodes.add('n_mid', n_mid);
+
+N_ag_s = numel(n_ag_s);
+N_ag_r = numel(n_ag_r);
+
+inds_out = find( sum( ismember(tag, n_ag_s), 1) );
+t_out = tag(:,inds_out);
+t_in = tag(:, setdiff(1:size(tag,2), inds_out));
+
+end
+
+function n = nsort(msh, n)
+
+atemp = atan2(msh.p(2,n), msh.p(1,n)); atemp( atemp<0 ) = atemp(atemp<0) + 2*pi;
+[~, I] =sort(atemp);
+n = n(I);
+
+end
+
+
 

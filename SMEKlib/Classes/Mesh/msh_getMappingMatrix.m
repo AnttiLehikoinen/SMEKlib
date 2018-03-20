@@ -1,4 +1,17 @@
-function [F, F0] = getMappingMatrix(this, varargin)
+function [F, F0] = msh_getMappingMatrix(this, varargin)
+%msh_getMappingMatrix mapping matrix from reference to global element.
+%
+% Call syntax
+% [F, F0] = msh_getMappingMatrix(msh, elements) for an affine mapping
+%   x_global = F:x_local + F0
+%
+% OR
+%
+% [dF/dx_local, F] = msh_getMappingMatrix(msh, elements, x_local) for
+%   isoparametric mappings:
+%   x_global = F
+%
+% (c) 2018 Antti Lehikoinen / Aalto University
 
 %FIXME make this into an independent function instead
 if this.elementType == Elements.triangle || this.elementType == Elements.triangle2

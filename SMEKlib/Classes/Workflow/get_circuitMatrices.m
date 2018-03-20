@@ -4,7 +4,7 @@ function [Sc, Mc] = get_circuitMatrices(sim, varargin)
 % (c) 2017 Antti Lehikoinen / Aalto University
 
 Np = sim.Np;
-if sim.dims.type_statorWinding == defs.stranded
+if sim.dims.type_statorWinding == defs.stranded || sim.dims.type_statorWinding == defs.decomposed
     Ni_s = size(sim.matrices.Ls, 2); Nu_s = 0;
     S_AU_s = sparse(Np, 0);
     S_AI_s = -sim.matrices.Cs*sim.matrices.Ls;
@@ -21,6 +21,10 @@ if sim.dims.type_statorWinding == defs.stranded
     
     S_II_s = real(sim.matrices.Zew_s);
     M_II_s = imag(sim.matrices.Zew_s);
+end
+if sim.dims.type_statorWinding == defs.decomposed
+   S_AI_s = S_AI_s*0;
+   M_IA_s = M_IA_s*0;
 end
 
 %checking if star connection

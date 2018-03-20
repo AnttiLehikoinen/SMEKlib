@@ -4,7 +4,7 @@ classdef MachineSimulation < handle
     % (c) 2017 Antti Lehikoinen / Aalto University
     
     properties
-        msh, dims, results, Ne, Np, matrices, nu_fun, nu_struct
+        msh, dims, results, Ne, Np, matrices, nu_fun, nu_struct, misc
     end
     
     methods
@@ -14,6 +14,7 @@ classdef MachineSimulation < handle
             this.Np = size(msh.p, 2);
             this.Ne = size(msh.t, 2);
             this.dims = dims;
+            this.misc = struct();
             
             this.matrices = struct('P', [], 'W', [], 'Ls', [], 'Lr', [], ...
                 'Ms', [], 'Mr', [], ...

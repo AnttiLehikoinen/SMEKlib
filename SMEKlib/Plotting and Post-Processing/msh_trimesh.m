@@ -21,11 +21,11 @@ else
 end
     
     
-
+Np = size(msh.p,2);
 if any(elements)
-    h = trimesh( t(:,elements)', p_plot(1,:), p_plot(2,:), A, plotArgs{:} );
+    h = trimesh( t(:,elements)', p_plot(1,:), p_plot(2,:), A(1:Np), plotArgs{:} );
 else
-    h = trimesh( t', p_plot(1,:), p_plot(2,:), A, plotArgs{:} );
+    h = trimesh( t', p_plot(1,:), p_plot(2,:), A(1:Np), plotArgs{:} );
 end
 
 end

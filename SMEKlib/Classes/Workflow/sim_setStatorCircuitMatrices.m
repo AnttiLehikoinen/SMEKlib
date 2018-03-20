@@ -41,8 +41,16 @@ if sim.dims.type_statorWinding == defs.stranded
     Ls = Ls(1:(size(Ls,1)/sim.msh.symmetrySectors),:); 
     sim.matrices.Ls = Ls(:, sum(abs(Ls),1)>0) * sim.dims.N_series;
     sim.matrices.Zew_s = sparse(sim.matrices.Ls'*DRs*sim.matrices.Ls);
+elseif sim.dims.type_statorWinding == defs.decomposed
+    % decomposed winding: A-parts handled elsewhere
+     %loop matrix
+    Ls = statorConnectionMatrix(sim.matrices.W, sim.dims.Nc_slot, sim.dims.N_series, 3);
+    Ls = Ls(1:(size(Ls,1)/sim.msh.symmetrySectors),:); 
+    sim.matrices.Ls = sparse(Ls(:, sum(abs(Ls),1)>0));
+    sim.matrices.Ms = sparse(sim.Np,sim.Np);
+    sim.matrices.Cs = sparse(sim.Np, size(Ls,1));
 else
-    error('Non-stranded stator windings not yet implemented.');
+    warning('Non-stranded stator windings not yet implemented.');
 end
 
 end

@@ -69,7 +69,7 @@ classdef MachineMesh < MeshBase
         end
         
         function msh = generateMovingBand(msh, varargin)
-            msh.bandData = AGtriangulation(msh);
+            msh.bandData = AGtriangulation(msh, varargin{:});
         end
         
         function bl = isfield(msh, arg)

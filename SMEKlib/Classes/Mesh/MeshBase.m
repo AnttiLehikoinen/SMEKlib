@@ -23,6 +23,7 @@ classdef MeshBase < handle
         matel
         
         namedNodes, namedElements, namedEdges, info
+        misc
     end
     
     methods
@@ -31,6 +32,7 @@ classdef MeshBase < handle
             msh.namedElements = SLContainer();
             msh.namedEdges = SLContainer();
             msh.info = SLContainer();
+            msh.misc = struct();
             if nargin == 0
                 %no arguments given; pass
             elseif nargin >= 2

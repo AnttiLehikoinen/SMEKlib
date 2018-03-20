@@ -1,4 +1,13 @@
 function [interpolants, Pclosest] = generateInterpolants( PM, PS, bnd_edges_master, slavePoints, PsFun, varargin )
+%generateInterpolants generates interpolation matrix between master and
+%slave meshes.
+% 
+% Call syntax
+% [interpolants, Pclosest] = generateInterpolants( PM, PS, bnd_edges_master, slavePoints, PsFun, varargin )
+%
+%
+% (c) 2016-2018 Antti Lehikoinen / Aalto University
+
 Pclosest = PS(:, slavePoints);
 if isa(bnd_edges_master, 'cell')
     %[interpolants, Pclosest] = internal_varyingOrderInt( PM, PS, bnd_edges_master, slavePoints, PsFun );

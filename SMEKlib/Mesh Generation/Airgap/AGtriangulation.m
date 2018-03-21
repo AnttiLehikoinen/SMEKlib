@@ -48,7 +48,6 @@ classdef AGtriangulation < handle
                 rotorAngle = 0;
             end
             [t_mov, p] = this.update(rotorAngle);            
-            size(t_mov)
             tag_local = [this.t_const t_mov];
             if nargout == 3
                 tag_global = reshape(this.agNodes_global(tag_local(:)), size(tag_local,1), []);

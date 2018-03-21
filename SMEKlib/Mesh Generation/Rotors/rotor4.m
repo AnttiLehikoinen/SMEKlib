@@ -1,7 +1,7 @@
-function msh = rotor5(msh,dim)
+function msh = rotor4(msh,dim)
 
 %Init the first sector
-[p,t,m,FL,LL,ag] = calculate_rotor5(dim);
+[p,t,m,FL,LL,ag] = calculate_rotor4(dim);
 Nsec = dim.Qr/dim.num;
 [p, t, LLnew, agnew, ~] = replicate_sector_fixed(p', t', Nsec, dim.angleR(1), FL, LL, ag, []);
 msh.matel = repmat(m, Nsec, 1);
@@ -15,7 +15,8 @@ msh.n_ag_r = agnew';
 msh.FL = FL(2:end);
 msh.index_p = size(msh.p,1);
 msh.LL = LLnew(2:end)-1;
-msh.RC = reshape(find(msh.matel == 9999), [], Nsec);
-msh.matel(msh.matel == 9999) = dim.RSM;
+msh.RC = reshape(find(msh.matel == 999), [], Nsec);
+msh.matel(msh.matel == 999) = dim.RSM;
+msh.matel(msh.matel == 9999) = dim.RO;
 
 end

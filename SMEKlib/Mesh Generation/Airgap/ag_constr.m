@@ -6,7 +6,7 @@ function this = ag_constr(this, msh, varargin)
 % generating air-gap triangulation; for two layers by default
 this.misc = struct();
 
-if isa(varargin{1}, 'double') && size(varargin{1}, 1) > 1
+if numel(varargin) && isa(varargin{1}, 'double') && size(varargin{1}, 1) > 1
     % triangulation given as input
     [n_ag_s, n_ag_r, N_ag_s, N_ag_r, n_mid, t_in, t_out] = givenTriangulation(msh, varargin{1});
     N_mid = numel(n_mid);
@@ -58,7 +58,7 @@ end
 
 agNodes_global = [n_ag_s n_ag_r n_mid];
 
-%%{
+%{
 figure(12); clf; hold on; axis equal;
 p = msh.p;
 triplot(t_in(:,:)', p(1,:), p(2,:), 'r');

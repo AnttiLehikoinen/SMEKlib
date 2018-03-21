@@ -1,4 +1,4 @@
-function [p,t,m] = calculate_stator4_2(dim,msh)
+function [p,t,m,FL,LL,cir,ag] = calculate_stator4(dim)
     
 
 %preallocate memory
@@ -7,10 +7,10 @@ t = zeros(44,3);
 m = zeros(44,1);
 
 %help variables
-line = [dim.Sin dim.Sin+dim.htt_s dim.Sin+dim.hs_s-dim.wc2_s/2-dim.hc_s ...
-        dim.Sin+dim.hs_s-dim.wc2_s/2 dim.Sin+dim.hs_s (dim.Sin+dim.hs_s+dim.Sout)/2 dim.Sout];
-c = sqrt(line(4)^2+(dim.wc2_s/2)^2-2*(dim.wc2_s/2)*line(4)*cosd(135));
-alfa = asin((dim.wc2_s/2*sind(135))/c);
+line = [dim.Sin dim.Sin+dim.S_height1 dim.Sin+dim.S_height-dim.S_width3/2-dim.S_height3 ...
+        dim.Sin+dim.S_height-dim.S_width3/2 dim.Sin+dim.S_height (dim.Sin+dim.S_height+dim.Sout)/2 dim.Sout];
+c = sqrt(line(4)^2+(dim.S_width3/2)^2-2*(dim.S_width3/2)*line(4)*cosd(135));
+alfa = asin((dim.S_width3/2*sind(135))/c);
 
 %Init the first sector
 
@@ -18,17 +18,17 @@ alfa = asin((dim.wc2_s/2*sind(135))/c);
 p(1,1) = line(1)*cos(dim.angleS(1)/2);
 p(1,2) = line(1)*sin(dim.angleS(1)/2);
 
-p(2,1) = line(1)*cos(dim.angleS(1)/2-asin(dim.wso_s/2/line(1)));
-p(2,2) = line(1)*sin(dim.angleS(1)/2-asin(dim.wso_s/2/line(1)));
+p(2,1) = line(1)*cos(dim.angleS(1)/2-asin(dim.S_width1/2/line(1)));
+p(2,2) = line(1)*sin(dim.angleS(1)/2-asin(dim.S_width1/2/line(1)));
 
-p(3,1) = line(2)*cos(dim.angleS(1)/2-asin(dim.wso_s/2/line(2)));
-p(3,2) = line(2)*sin(dim.angleS(1)/2-asin(dim.wso_s/2/line(2)));
+p(3,1) = line(2)*cos(dim.angleS(1)/2-asin(dim.S_width1/2/line(2)));
+p(3,2) = line(2)*sin(dim.angleS(1)/2-asin(dim.S_width1/2/line(2)));
 
-p(4,1) = line(3)*cos(dim.angleS(1)/2-atan((dim.wc1_c/2)/line(3)));
-p(4,2) = line(3)*sin(dim.angleS(1)/2-atan((dim.wc1_c/2)/line(3)));
+p(4,1) = line(3)*cos(dim.angleS(1)/2-atan((dim.S_width2/2)/line(3)));
+p(4,2) = line(3)*sin(dim.angleS(1)/2-atan((dim.S_width2/2)/line(3)));
 
-p(5,1) = line(4)*cos(dim.angleS(1)/2-atan(dim.wc2_s/2/line(4)));
-p(5,2) = line(4)*sin(dim.angleS(1)/2-atan(dim.wc2_s/2/line(4)));
+p(5,1) = line(4)*cos(dim.angleS(1)/2-atan(dim.S_width3/2/line(4)));
+p(5,2) = line(4)*sin(dim.angleS(1)/2-atan(dim.S_width3/2/line(4)));
 
 p(6,1) = c*cos(dim.angleS(1)/2-alfa);
 p(6,2) = c*sin(dim.angleS(1)/2-alfa);
@@ -39,17 +39,17 @@ p(7,2) = line(5)*sin(dim.angleS(1)/2);
 p(8,1) = c*cos(dim.angleS(1)/2+alfa);
 p(8,2) = c*sin(dim.angleS(1)/2+alfa);
 
-p(9,1) = line(4)*cos(dim.angleS(1)/2+atan(dim.wc2_s/2/line(4)));
-p(9,2) = line(4)*sin(dim.angleS(1)/2+atan(dim.wc2_s/2/line(4)));
+p(9,1) = line(4)*cos(dim.angleS(1)/2+atan(dim.S_width3/2/line(4)));
+p(9,2) = line(4)*sin(dim.angleS(1)/2+atan(dim.S_width3/2/line(4)));
 
-p(10,1) = line(3)*cos(dim.angleS(1)/2+atan((dim.wc1_c/2)/line(3)));
-p(10,2) = line(3)*sin(dim.angleS(1)/2+atan((dim.wc1_c/2)/line(3)));
+p(10,1) = line(3)*cos(dim.angleS(1)/2+atan((dim.S_width2/2)/line(3)));
+p(10,2) = line(3)*sin(dim.angleS(1)/2+atan((dim.S_width2/2)/line(3)));
 
-p(11,1) = line(2)*cos(dim.angleS(1)/2+asin(dim.wso_s/2/line(2)));
-p(11,2) = line(2)*sin(dim.angleS(1)/2+asin(dim.wso_s/2/line(2)));
+p(11,1) = line(2)*cos(dim.angleS(1)/2+asin(dim.S_width1/2/line(2)));
+p(11,2) = line(2)*sin(dim.angleS(1)/2+asin(dim.S_width1/2/line(2)));
 
-p(12,1) = line(1)*cos(dim.angleS(1)/2+asin(dim.wso_s/2/line(1)));
-p(12,2) = line(1)*sin(dim.angleS(1)/2+asin(dim.wso_s/2/line(1)));
+p(12,1) = line(1)*cos(dim.angleS(1)/2+asin(dim.S_width1/2/line(1)));
+p(12,2) = line(1)*sin(dim.angleS(1)/2+asin(dim.S_width1/2/line(1)));
 
 p(13,1) = line(2)*cos(dim.angleS(1)/2);
 p(13,2) = line(2)*sin(dim.angleS(1)/2);
@@ -57,23 +57,23 @@ p(13,2) = line(2)*sin(dim.angleS(1)/2);
 p(14,1) = line(4)*cos(dim.angleS(1)/2);
 p(14,2) = line(4)*sin(dim.angleS(1)/2);
 
-p(15,1) = ((dim.Sin+dim.hs_s)*0.75+0.25*dim.Sout)*cos(dim.angleS(1)/2+dim.angleS(1)/4);
-p(15,2) = ((dim.Sin+dim.hs_s)*0.75+0.25*dim.Sout)*sin(dim.angleS(1)/2+dim.angleS(1)/4);
+p(15,1) = ((dim.Sin+dim.S_height)*0.75+0.25*dim.Sout)*cos(dim.angleS(1)/2+dim.angleS(1)/4);
+p(15,2) = ((dim.Sin+dim.S_height)*0.75+0.25*dim.Sout)*sin(dim.angleS(1)/2+dim.angleS(1)/4);
 
-p(16,1) = ((dim.Sin+dim.hs_s)*0.75+0.25*dim.Sout)*cos(dim.angleS(1)/2);
-p(16,2) = ((dim.Sin+dim.hs_s)*0.75+0.25*dim.Sout)*sin(dim.angleS(1)/2);
+p(16,1) = ((dim.Sin+dim.S_height)*0.75+0.25*dim.Sout)*cos(dim.angleS(1)/2);
+p(16,2) = ((dim.Sin+dim.S_height)*0.75+0.25*dim.Sout)*sin(dim.angleS(1)/2);
 
-p(17,1) = ((dim.Sin+dim.hs_s)*0.75+0.25*dim.Sout)*cos(dim.angleS(1)/2-dim.angleS(1)/4);
-p(17,2) = ((dim.Sin+dim.hs_s)*0.75+0.25*dim.Sout)*sin(dim.angleS(1)/2-dim.angleS(1)/4);
+p(17,1) = ((dim.Sin+dim.S_height)*0.75+0.25*dim.Sout)*cos(dim.angleS(1)/2-dim.angleS(1)/4);
+p(17,2) = ((dim.Sin+dim.S_height)*0.75+0.25*dim.Sout)*sin(dim.angleS(1)/2-dim.angleS(1)/4);
 
 p(18,1) = line(1)*cos(dim.angleS(1)/6);
 p(18,2) = line(1)*sin(dim.angleS(1)/6);
 
-p(19,1) = line(1)*cos(dim.angleS(1)/2-atan(dim.wc1_c/2/line(1)));
-p(19,2) = line(1)*sin(dim.angleS(1)/2-atan(dim.wc1_c/2/line(1)));
+p(19,1) = line(1)*cos(dim.angleS(1)/2-atan(dim.S_width2/2/line(1)));
+p(19,2) = line(1)*sin(dim.angleS(1)/2-atan(dim.S_width2/2/line(1)));
 
-p(20,1) = line(1)*cos(dim.angleS(1)/2+(dim.wc1_c/2/line(1)));
-p(20,2) = line(1)*sin(dim.angleS(1)/2+atan(dim.wc1_c/2/line(1)));
+p(20,1) = line(1)*cos(dim.angleS(1)/2+(dim.S_width2/2/line(1)));
+p(20,2) = line(1)*sin(dim.angleS(1)/2+atan(dim.S_width2/2/line(1)));
 
 p(21,1) = line(1)*cos(5*dim.angleS(1)/6);
 p(21,2) = line(1)*sin(5*dim.angleS(1)/6);
@@ -87,8 +87,8 @@ p(23,2) = line(3)*sin(dim.angleS(1));
 p(24,1) = line(4)*cos(dim.angleS(1));
 p(24,2) = line(4)*sin(dim.angleS(1));
 
-p(25,1) = ((dim.Sin+dim.hs_s)*0.75+0.25*dim.Sout)*cos(dim.angleS(1));
-p(25,2) = ((dim.Sin+dim.hs_s)*0.75+0.25*dim.Sout)*sin(dim.angleS(1));
+p(25,1) = ((dim.Sin+dim.S_height)*0.75+0.25*dim.Sout)*cos(dim.angleS(1));
+p(25,2) = ((dim.Sin+dim.S_height)*0.75+0.25*dim.Sout)*sin(dim.angleS(1));
 
 p(26,1) = line(7)*cos(dim.angleS(1));
 p(26,2) = line(7)*sin(dim.angleS(1));
@@ -98,7 +98,7 @@ p(27,2) = line(7)*sin(dim.angleS(1)/2);
 
 p(28,1) = line(7);
 
-p(29,1) = ((dim.Sin+dim.hs_s)*0.75+0.25*dim.Sout);
+p(29,1) = ((dim.Sin+dim.S_height)*0.75+0.25*dim.Sout);
 
 p(30,1) = line(4);
 
@@ -242,5 +242,10 @@ m(43) = dim.SSM1;
 t(44,:) = [8 9 14];
 m(44) = dim.SSM1;
   
+
+FL = [32 31 30 29 28];
+LL = [22 23 24 25 26];
+cir = [28 27 26];
+ag = [32 18 19 2 1 12 20 21 22];
 end
     

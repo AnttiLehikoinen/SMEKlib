@@ -58,14 +58,14 @@ air = find( mshc.matel == 3 );
 msh_fill(mshc, air, 'r', 'EdgeColor', 'w');
 
 %assigning conductors
-rotorConductors = cell(1, size(data.RC, 2));
+rotorConductors = cell(1, size(data.RC, 1));
 for k = 1:numel(rotorConductors)
-    rotorConductors{k} = data.RC(:, k)';
+    rotorConductors{k} = data.RC(k, :);
 end
 mshc.namedElements.add('rotorConductors', rotorConductors);
-statorConductors = cell(1, size(data.SC, 2));
+statorConductors = cell(1, size(data.SC, 1));
 for k = 1:numel(statorConductors)
-    statorConductors{k} = data.SC(:, k)';
+    statorConductors{k} = data.SC(k, :);
 end
 mshc.namedElements.add('statorConductors', statorConductors);
 
@@ -90,7 +90,7 @@ mshc.namedNodes.add('n_ag_r', data.n_ag_r');
 mshc.generateMovingBand();
 
 %plotting air-gap triangulation
-[tag, p_ag_virt, ~] = mshc.bandData.t_ag(0);
+%[tag, p_ag_virt, ~] = mshc.bandData.t_ag(0);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % plotting boundary conditions

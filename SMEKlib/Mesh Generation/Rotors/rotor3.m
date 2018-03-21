@@ -1,7 +1,7 @@
-function msh = rotor5(msh,dim)
+function msh = rotor3(msh,dim)
 
 %Init the first sector
-[p,t,m,FL,LL,ag] = calculate_rotor5(dim);
+[p,t,m,FL,LL,ag] = calculate_rotor3(dim);
 Nsec = dim.Qr/dim.num;
 [p, t, LLnew, agnew, ~] = replicate_sector_fixed(p', t', Nsec, dim.angleR(1), FL, LL, ag, []);
 msh.matel = repmat(m, Nsec, 1);

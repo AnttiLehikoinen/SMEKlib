@@ -28,8 +28,11 @@ plot( Xslot(1,[1:end 1]), Xslot(2,[1:end 1]), 'b-'); axis equal;
 %final adjustment
 Xc(1,:) = Xc(1,:) - 0.0e-3;
 
+%msh.misc.Xc = Xc;
+%msh.misc.Xslot = Xslot;
+
 %taking the inter-layer insulation into account in a reaaaally ugly way
-Xc(1, (dims.Nc_slot/2 + 1):end) = Xc(1, (dims.Nc_slot/2 + 1):end) - 1e-3;
+%Xc(1, (dims.Nc_slot/2 + 1):end) = Xc(1, (dims.Nc_slot/2 + 1):end) - 1e-3;
 drawConductors(reff, Xc, 'EdgeColor', 'r'); axis equal;
 
 % generating mesh for slot

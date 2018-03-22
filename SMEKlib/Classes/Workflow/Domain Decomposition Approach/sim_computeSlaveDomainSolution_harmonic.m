@@ -7,7 +7,7 @@ function sim = sim_computeSlaveDomainSolution_harmonic(sim, pars)
 msh = sim.msh.misc.msh_slave;
 nd = sim.msh.misc.nd_slave;
 conductors = sim.msh.misc.conductors_slave;
-Nu = numel(conductors);
+Nu = numel(conductors)
 Qs_sector = sim.dims.Qs / sim.msh.symmetrySectors;
 
 Np = size(msh.p,2);
@@ -18,13 +18,14 @@ M = MatrixConstructor(Nodal2D(Operators.I), Nodal2D(Operators.I), sim.dims.sigma
 
 Cc = MatrixConstructor();
 for kc = 1:Nu
-    Cc.assemble_vector(Nodal2D(Operators.I), kc, 1, conductors{kc}, msh);
+    Cc.assemble_vector(Nodal2D(Operators.I), kc, sim.dims.sigma_stator, conductors{kc}, msh);
 end
 C = Cc.finalize(Np, Nu);
 
 %conductor areas
 cA_slave = sum(C*speye(Nu, Nu), 1);
 DR = sparsediag( sim.dims.leff ./ cA_slave );
+
 DR_ew = kron(speye(Qs_sector, Qs_sector),...
     sparsediag( (sim.dims.l_halfCoil - sim.dims.leff) ./ cA_slave ));
 sim.matrices.Zew_s = sim.matrices.Ls'*DR_ew*sim.matrices.Ls;

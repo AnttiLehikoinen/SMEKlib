@@ -4,7 +4,7 @@ function sim = sim_runtimeHarmonicSimulation_DDM(sim, pars)
 % (c) 2018 Antti Lehikoinen / Aalto University
 
 f = pars.f;
-U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
+U = 400/2;
 %U = 400/sqrt(3)/2 *sqrt(2) ; %taking the second-turn side outside symmetry sector into account
 w = 2*pi*f;
 
@@ -20,10 +20,15 @@ slip = slips(1);
 nu_struct = initialize_reluctivityStruct_interp1(sim.msh, true);
 nu_fun = @(B)( calculate_reluctivity(B, nu_struct) );
 
+%Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 
 %(rotor) circuit matrices
 [Stot, Mtot] = get_circuitMatrices(sim, slip);
+
+%figure(10); clf; hold on;
+%spy(Mtot, 'r')
+%spy(Stot, 'b')
 
 %coupling blocks
 Qs_sector = sim.dims.Qs / sim.msh.symmetrySectors;
@@ -38,7 +43,6 @@ Q_DI = P_m2D'*blkdiag(tempcell_DI{:})*L_s; clear tempcell_DI;
 Q_ID = L_s'*blkdiag(tempcell_ID{:})*P_m2D; clear tempcell_ID;
 Q_II = L_s'*blkdiag(tempcell_II{:})*L_s; clear tempcell_II;
 
-figure(10); clf; spy(Q_DD);
 
 Nu = sim.results.Nu_r;
 Ni_r = sim.results.Ni_r;
@@ -59,6 +63,8 @@ Nui = size(Stot,1) - size(sim.matrices.P,1);
 PTT = blkdiag(sim.matrices.P, speye(Nui, Nui), ...
     sim.matrices.P, speye(Nui, Nui));
 
+sim.misc.Q = Q;
+
 %assembling load vector
 Ftemp = [zeros(sim.Np + sim.results.Nu_r+sim.results.Nu_s,1); UH];
 Ftot = [real(Ftemp); -imag(Ftemp)];
@@ -69,18 +75,23 @@ for kiter = 1:15
     %[J11, J12, J21, J22, res11, res22] = assemble_ComplexJacobian(sim.nu_fun, Xtot(:,kslip), [], sim.msh);
     [J11, J12, J21, J22, res11, res22] = Jc.eval_complex(Xtot, nu_fun);
     
+    sim.misc.res11 = res11;
+    sim.misc.res22 = res22;
+    sim.misc.J11 = J11;
+    
     %finalizing
     Jtot = PTT'*( [J11 J12; J21 J22] + Q )*PTT;
     res_tot = PTT'*( Q*Xtot - Ftot + [res11;res22] );
     
     %checking convergence
     disp( norm(res_tot) / norm(Ftot) )
-    if (norm(res_tot) / norm(Ftot)) < 1e-6
+    if (norm(res_tot) / norm(Ftot)) < 1e-9
         break;
     end
     
     dX = - Jtot \ res_tot;
     Xtot = Xtot + PTT*dX;
 end
+sim.results.Xh = Xtot;
 
 end

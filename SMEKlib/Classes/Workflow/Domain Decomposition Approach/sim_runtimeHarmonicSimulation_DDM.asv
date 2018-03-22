@@ -21,7 +21,6 @@ nu_struct = initialize_reluctivityStruct_interp1(sim.msh, true);
 nu_fun = @(B)( calculate_reluctivity(B, nu_struct) );
 
 %Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
-Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 
 %(rotor) circuit matrices
 [Stot, Mtot] = get_circuitMatrices(sim, slip);
@@ -70,14 +69,10 @@ Ftemp = [zeros(sim.Np + sim.results.Nu_r+sim.results.Nu_s,1); UH];
 Ftot = [real(Ftemp); -imag(Ftemp)];
 
 Xtot = zeros(size(Q,1), 1);
-for kiter = 1:15
+for kiter = 1:1%15
     % assembling Jacobian and residual blocks
     %[J11, J12, J21, J22, res11, res22] = assemble_ComplexJacobian(sim.nu_fun, Xtot(:,kslip), [], sim.msh);
     [J11, J12, J21, J22, res11, res22] = Jc.eval_complex(Xtot, nu_fun);
-    
-    sim.misc.res11 = res11;
-    sim.misc.res22 = res22;
-    sim.misc.J11 = J11;
     
     %finalizing
     Jtot = PTT'*( [J11 J12; J21 J22] + Q )*PTT;

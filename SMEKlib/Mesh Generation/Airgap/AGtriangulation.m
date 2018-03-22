@@ -24,6 +24,10 @@ classdef AGtriangulation < handle
             Sag = ag_getAGmatrix(this, rotorAngle, varargin{:});
         end
         
+        function this = setConstantAGmatrix(this, Np)
+            this = ag_setConstantMatrix(this, Np);
+        end
+        
         %CAUTION: changed output argument types
         %{
         function [tag, p, tag_local] = t_ag(this, varargin)
@@ -48,7 +52,6 @@ classdef AGtriangulation < handle
                 rotorAngle = 0;
             end
             [t_mov, p] = this.update(rotorAngle);            
-            size(t_mov)
             tag_local = [this.t_const t_mov];
             if nargout == 3
                 tag_global = reshape(this.agNodes_global(tag_local(:)), size(tag_local,1), []);

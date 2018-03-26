@@ -42,8 +42,11 @@ for k = 1:numel(keys)
     key = keys{k};
     msh.namedNodes.set(key, n_inds_new( msh.namedNodes.get(key) ) );
 end
+
+%updating airgap triangulation
 msh.bandData.agNodes_global = n_inds_new( msh.bandData.agNodes_global );
 msh.bandData.el_table(2,:) = n_inds_new( msh.bandData.el_table(2,:) );
+msh.bandData.setConstantAGmatrix(Np_master);
 %edges: TODO
 
 end

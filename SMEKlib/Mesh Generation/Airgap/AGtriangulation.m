@@ -24,6 +24,10 @@ classdef AGtriangulation < handle
             Sag = ag_getAGmatrix(this, rotorAngle, varargin{:});
         end
         
+        function this = setConstantAGmatrix(this, Np)
+            this = ag_setConstantMatrix(this, Np);
+        end
+        
         %CAUTION: changed output argument types
         %{
         function [tag, p, tag_local] = t_ag(this, varargin)

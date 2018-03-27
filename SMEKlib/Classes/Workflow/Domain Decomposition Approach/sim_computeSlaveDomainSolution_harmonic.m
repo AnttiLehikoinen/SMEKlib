@@ -7,7 +7,7 @@ function sim = sim_computeSlaveDomainSolution_harmonic(sim, pars)
 msh = sim.msh.misc.msh_slave;
 nd = sim.msh.misc.nd_slave;
 conductors = sim.msh.misc.conductors_slave;
-Nu = numel(conductors)
+Nu = numel(conductors);
 Qs_sector = sim.dims.Qs / sim.msh.symmetrySectors;
 
 Np = size(msh.p,2);
@@ -29,6 +29,12 @@ DR = sparsediag( sim.dims.leff ./ cA_slave );
 DR_ew = kron(speye(Qs_sector, Qs_sector),...
     sparsediag( (sim.dims.l_halfCoil - sim.dims.leff) ./ cA_slave ));
 sim.matrices.Zew_s = sim.matrices.Ls'*DR_ew*sim.matrices.Ls;
+
+%saving slave domain matrices
+sim.matrices.S_slave = S;
+sim.matrices.M_slave = M;
+sim.matrices.C_slave = C;
+sim.matrices.DR_slave = DR;
 
 P_D2s = sim.msh.misc.P_D2s;
 

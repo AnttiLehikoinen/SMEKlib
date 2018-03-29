@@ -86,9 +86,9 @@ mu0 = pi*4e-7;
 
 BH2 = internal_extendBH(BH);
 
-nu_init = BH(:,2) ./ BH(:,1); 
+nu_init = BH(:,2) ./ BH(:,1);
 
-if 1/(mu0*nu_init(1)) > 1e4
+if isnan(nu_init(1))
     nu_init(1) = nu_init(2);
 end
 

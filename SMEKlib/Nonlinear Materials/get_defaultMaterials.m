@@ -16,11 +16,13 @@ function BH = get_defaultMaterials(matNumber)
 % 2 = Electrical steel sheet – Bochum STABOLEC 260-50 A
 % 3 = slot wedge material
 % 4 = M27 steel
+% 5 = linear iron (mu_r = 1000)
 %
 % Feel free to add your own :)
 
 if matNumber < 0
-    BH = 4; return;
+    % number of default materials asked
+    BH = 5; return;
 elseif matNumber == 0
     BH = [0 1; 0 1/(pi*4e-7)]'; return
 elseif matNumber <= 3
@@ -161,6 +163,11 @@ elseif matNumber == 4
         216374.283609];
     BH = [B H];
     return;
+elseif matNumber == 5
+    B = linspace(0, 2, 2)';
+    H = B / (1000*pi*4e-7);
+    BH = [B H];
+    return
 else
     error('Material not available');
 end

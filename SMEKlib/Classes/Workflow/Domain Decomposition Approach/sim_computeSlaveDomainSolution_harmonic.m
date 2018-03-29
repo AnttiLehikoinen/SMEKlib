@@ -7,7 +7,7 @@ function sim = sim_computeSlaveDomainSolution_harmonic(sim, pars)
 msh = sim.msh.misc.msh_slave;
 nd = sim.msh.misc.nd_slave;
 conductors = sim.msh.misc.conductors_slave;
-Nu = numel(conductors)
+Nu = numel(conductors);
 Qs_sector = sim.dims.Qs / sim.msh.symmetrySectors;
 
 Np = size(msh.p,2);

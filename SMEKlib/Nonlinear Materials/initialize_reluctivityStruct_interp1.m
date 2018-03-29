@@ -47,12 +47,15 @@ for kmat = 1:Nmats
     ppder = derivate_pp(pp); %spline for d/dB^2 nu(B^2)
     
     %interpolation points (T^2)
-    B2samples = [linspace(0, Bmax.^2, N_INTERPOLATIONPOINTS_1)  internal_linspace(Bmax^2, 10, ceil(N_INTERPOLATIONPOINTS_2)/2)...
+    %B2samples = [linspace(0, Bmax.^2, N_INTERPOLATIONPOINTS_1)  internal_linspace(Bmax^2, 10, ceil(N_INTERPOLATIONPOINTS_2)/2)...
+    %    aux_intlogspace(10, B2_MAX, ceil(N_INTERPOLATIONPOINTS_2)/2)];
+    B2samples = [linspace(0, Bmax, N_INTERPOLATIONPOINTS_1).^2  internal_linspace(Bmax^2, 10, ceil(N_INTERPOLATIONPOINTS_2)/2)...
         aux_intlogspace(10, B2_MAX, ceil(N_INTERPOLATIONPOINTS_2)/2)];
     
     %interpolated values for nu and dnu/dB^2
     Bnu{kmat} = [B2samples;  ppval(pp, B2samples)]';
-    Bdnu{kmat} = [B2samples;  max(ppval(ppder, B2samples), 0)]';
+    %Bdnu{kmat} = [B2samples;  max(ppval(ppder, B2samples), 0)]'; %not allowing negative derivatives
+    Bdnu{kmat} = [B2samples;  ppval(ppder, B2samples)]';
     
     mats_cell{kmat} = find( msh.matel == matIndex );
 end
@@ -83,7 +86,11 @@ mu0 = pi*4e-7;
 
 BH2 = internal_extendBH(BH);
 
-nu_init = BH(:,2) ./ BH(:,1); nu_init(1) = nu_init(2);
+nu_init = BH(:,2) ./ BH(:,1); 
+
+if 1/(mu0*nu_init(1)) > 1e4
+    nu_init(1) = nu_init(2);
+end
 
 nu = min(interp1(BH(:,1), nu_init, BH2(:,1), 'linear', 'extrap'), 1/mu0);
 

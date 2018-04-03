@@ -27,11 +27,16 @@ else
     end
 end
 
+%{
 dt = 1/f / pars.N_stepsPerPeriod; %time-step length
-wm = w/sim.dims.p * (1-slip);
-
 Nsamples = ceil( (pars.N_periods/f) / dt );
 tsamples = (0:(Nsamples-1))*dt;
+%}
+
+wm = w/sim.dims.p * (1-slip);
+tsamples = pars.ts;
+Nsamples = numel(tsamples);
+dt = tsamples(2) - tsamples(1);
 
 
 [Sc, Mtot] = get_circuitMatrices(sim);

@@ -1,5 +1,6 @@
-function sim = sim_computeSlaveDomainSolution_timestepping(sim,pars)
-%sim_computeSlaveDomainSolution_timestepping
+function sim = sim_computeSlaveDomainSolution_timestepping(sim, pars)
+%sim_computeSlaveDomainSolution_timestepping Compute impulse-response
+%solution for the slave domain.
 %
 % (c) 2018 Antti Lehikoinen / Aalto University
 

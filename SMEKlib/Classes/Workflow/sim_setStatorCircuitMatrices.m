@@ -50,7 +50,17 @@ elseif sim.dims.type_statorWinding == defs.decomposed
     sim.matrices.Ms = sparse(sim.Np,sim.Np);
     sim.matrices.Cs = sparse(sim.Np, size(Ls,1));
 else
-    warning('Non-stranded stator windings not yet implemented.');
+    warning('Stator winding type not yet implemented.');
+end
+
+%end-winding inductance given?
+if isfield(sim.dims, 'Lew')
+    Lew = sim.dims.Lew;
+    if numel(Lew) == 1
+        sim.matrices.Zew_s = sim.matrices.Zew_s + 1i*Lew*eye(size(sim.matrices.Zew_s,1));
+    else
+        sim.matrices.Zew_s = sim.matrices.Zew_s + 1i*Lew;
+    end
 end
 
 end

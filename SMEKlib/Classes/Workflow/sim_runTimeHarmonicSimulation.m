@@ -1,4 +1,4 @@
-function sim = sim_runTimeHarmonicSimulation(sim, pars)
+function sim = sim_runTimeHarmonicSimulation(sim, pars, varargin)
 %run_timeHarmonicSimulation
 %
 % (c) 2017 Antti Lehikoinen / Aalto University
@@ -16,9 +16,14 @@ else
 end
 
 %setting harmonic reluctivity function
-nu_struct = initialize_harmonicReluctivityStruct_interp1(sim.msh, true);
-%nu_struct = initialize_reluctivityStruct_interp1(sim.msh, true);
-nu_fun = @(B)( calculate_reluctivity(B, nu_struct) );
+if ~numel(varargin)
+    nu_struct = initialize_harmonicReluctivityStruct_interp1(sim.msh, true);
+    %nu_struct = initialize_reluctivityStruct_interp1(sim.msh, true);
+    nu_fun = @(B)( calculate_reluctivity(B, nu_struct) );
+else
+    nu_fun = varargin{1};
+end
+
 
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 for kslip = 1:numel(slips)

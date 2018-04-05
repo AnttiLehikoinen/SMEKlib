@@ -1,4 +1,4 @@
-function sim = sim_initialConditions_CN(sim, pars)
+function sim = sim_initialConditions_CN(sim, pars, varargin)
 %sim_initialConditions_CN initial conditions for time-stepping.
 %
 % (c) 2017 Antti Lehikoinen / Aalto University
@@ -55,13 +55,21 @@ end
 Finit = Finit + [zeros(Ntot-sim.results.Ni_s, 1); Ufun(0)];
 %}
 
+%setting reluctivity function
+if ~numel(varargin)
+    nu_fun = sim.nu_fun;
+else
+    nu_fun = varargin{1};
+end
+
+
 %effect of derivatives
 Finit = -(  w*Mtot*sim.results.Xh(Ntot + (1:Ntot), kslip) );
 
 X0 = sim.results.Xh(1:Ntot, kslip);
 Sag = sim.msh.get_AGmatrix(0, Ntot);
 for kiter = 1:15
-    [J, res] = Jc.eval(X0, sim.nu_fun);
+    [J, res] = Jc.eval(X0, nu_fun);
     
     Jtot = PT'*( J + Sag + Stot )*PT;
     res_tot = PT'*( (Sag+Stot)*X0 - Finit + res );

@@ -1,11 +1,11 @@
-function sim = sim_runtimeHarmonicSimulation_DDM(sim, pars)
+function sim = sim_runtimeHarmonicSimulation_DDM(sim, pars, varargin)
 %sim_runtimeHarmonicSimulation_DDM domain-reduced time-harmonic simulation.
 %
 % (c) 2018 Antti Lehikoinen / Aalto University
 
 f = pars.f;
-U = 400/2;
-%U = 400/sqrt(3)/2 *sqrt(2) ; %taking the second-turn side outside symmetry sector into account
+%U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
+U = 400/2
 w = 2*pi*f;
 
 if ~isempty(pars.slip)
@@ -16,21 +16,20 @@ end
 slip = slips(1);
 
 %setting harmonic reluctivity function
-%nu_struct = initialize_harmonicReluctivityStruct_interp1(sim.msh, true);
-nu_struct = initialize_reluctivityStruct_interp1(sim.msh, true);
-nu_fun = @(B)( calculate_reluctivity(B, nu_struct) );
+if ~numel(varargin)
+    %nu_struct = initialize_harmonicReluctivityStruct_interp1(sim.msh, true);
+    nu_struct = initialize_reluctivityStruct_interp1(sim.msh, true);
+    nu_fun = @(B)( calculate_reluctivity(B, nu_struct) );
+else
+    nu_fun = varargin{1};
+end
 
-%Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 
 %(rotor) circuit matrices
 [Stot, Mtot] = get_circuitMatrices(sim, slip);
 
-%figure(10); clf; hold on;
-%spy(Mtot, 'r')
-%spy(Stot, 'b')
-
-%coupling blocks
+%reduced-basis coupling blocks
 Qs_sector = sim.dims.Qs / sim.msh.symmetrySectors;
 P_m2D = sim.msh.misc.P_m2D;
 L_s = sim.matrices.Ls;
@@ -43,7 +42,7 @@ Q_DI = P_m2D'*blkdiag(tempcell_DI{:})*L_s; clear tempcell_DI;
 Q_ID = L_s'*blkdiag(tempcell_ID{:})*P_m2D; clear tempcell_ID;
 Q_II = L_s'*blkdiag(tempcell_II{:})*L_s; clear tempcell_II;
 
-
+%numbers of variables
 Nu = sim.results.Nu_r;
 Ni_r = sim.results.Ni_r;
 Ni_s = sim.results.Ni_s;

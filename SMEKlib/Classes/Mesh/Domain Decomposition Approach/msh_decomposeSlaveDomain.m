@@ -59,7 +59,7 @@ slot_sf = 'b';
 geometryFromEdges(slot_model, slot_dl);
 
 %meshing
-Hmax = -1;
+Hmax = rc/2;
 if Hmax > 0
     generateMesh(slot_model, 'GeometricOrder', 'linear', 'Hmax', Hmax);
 else

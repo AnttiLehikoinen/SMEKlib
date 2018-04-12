@@ -4,7 +4,7 @@ function sim = sim_runtimeSteppingSimulation_DDM(sim, pars, varargin)
 % (c) 2018 Antti Lehikoinen / Aalto University
 
 %TODO
-% [ ] CN initial conditions
+% [x] CN initial conditions
 % [ ] remove quick fixes from e.g. voltage
 % [ ] remove unnecessary data from impulse response computation
 % [ ] switch to harmonic reluctivity? (maybe not required yet
@@ -24,8 +24,8 @@ L_s = sim.matrices.Ls;
 if isa(pars.U, 'function_handle')
     Ufun = pars.U;
 else
-    %U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
-    U = 400/2;
+    U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
+    %U = 400/2;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %voltage function
     phi0 = 0;
@@ -90,17 +90,18 @@ Xsamples = zeros(Ntot, Nsamples);
 %setting initial condition
 if isfield(sim.results, 'X0') && ~isempty( sim.results.X0 )
     Xsamples(:, 1) = sim.results.X0;
+    %Xsamples(:, 1) = sim.results.Xh(1:Ntot);
 else
     Xsamples(:, 1) = sim.results.Xh(1:Ntot);
-    %error('Initial conditions not computed.')
+    error('Initial conditions not computed.')
 end
 
 % adjusted CN for stability
-alpha2 = 2; %weight for implicit (k+1) step; 1 for CN, 2 for BE
+alpha2 = 1.1; %weight for implicit (k+1) step; 1 for CN, 2 for BE
 alpha1 = 2 - alpha2;
 
 %initializing previous residual term
-res_prev = zeros(size(Sc, 1), 1);
+res_prev = sim.results.res_prev;
 
 for kt = 2:100%Nsamples
     disp(['Time step ' num2str(kt) '...']);
@@ -131,7 +132,7 @@ for kt = 2:100%Nsamples
     for kiter = 1:50
         [J, res] = Jc.eval(Xsamples(:,kt), sim.nu_fun); 
         
-        res_tot = PT'*(res + Qconst*Xsamples(:,kt) - FL - 0*(alpha1/alpha2)*res_prev);
+        res_tot = PT'*(res + Qconst*Xsamples(:,kt) - FL - (alpha1/alpha2)*res_prev);
         
         %sim.misc.J = J;
         %sim.misc.res = res;
@@ -150,12 +151,12 @@ for kt = 2:100%Nsamples
     
     %updating prev-residual term
     res_prev = -res - (S_ag + Sc)*Xsamples(:,kt) + ...
-        [zeros(Ntot-sim.results.Ni_s, 1); Ustep(1:sim.results.Ni_s)];
+        [zeros(Ntot-sim.results.Ni_s, 1); Ustep(1:sim.results.Ni_s)] + FD;
     
     %plotting currents
-    %Is = Xsamples(indI(1:3), 1:kt);
-    %figure(11); clf;
-    %plot( Is'); drawnow;
+    Is = Xsamples(indI(1:3), 1:kt);
+    figure(11); clf;
+    plot( Is'); drawnow;
 end
 
 sim.results.Xt = Xsamples;

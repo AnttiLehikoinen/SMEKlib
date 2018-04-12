@@ -4,8 +4,8 @@ function sim = sim_runtimeHarmonicSimulation_DDM(sim, pars, varargin)
 % (c) 2018 Antti Lehikoinen / Aalto University
 
 f = pars.f;
-%U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
-U = 400/2
+U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
+%U = 400/2
 w = 2*pi*f;
 
 if ~isempty(pars.slip)

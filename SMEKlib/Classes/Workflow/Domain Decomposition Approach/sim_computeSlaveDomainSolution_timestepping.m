@@ -234,5 +234,9 @@ end
 sim.misc.h_decay = h_decay(:, 1:kt);
 sim.misc.h_decay2 = h_decay2(:, 1:kt);
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% initial conditions computation for CN-stepping
+
 
 end

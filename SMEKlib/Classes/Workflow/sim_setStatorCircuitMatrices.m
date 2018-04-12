@@ -3,7 +3,10 @@ function sim = sim_setStatorCircuitMatrices(sim)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % stator winding matrices
 
-if isfield(sim.dims, 'N_layers')
+if isfield(sim.dims, 'W')
+    %winding configuration matrix given
+    sim.matrices.W = sim.dims.W;
+elseif isfield(sim.dims, 'N_layers')
     W = windingConfiguration_1(sim.dims.q, sim.dims.p, sim.dims.a, sim.dims.c);
     temp = unique( abs(W(:, 1:(sim.dims.Qs/sim.msh.symmetrySectors))) );
     if mod(numel(temp), sim.dims.a)

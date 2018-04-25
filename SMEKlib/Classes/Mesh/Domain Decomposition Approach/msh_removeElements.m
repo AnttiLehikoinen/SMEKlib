@@ -46,7 +46,14 @@ end
 %updating airgap triangulation
 msh.bandData.agNodes_global = n_inds_new( msh.bandData.agNodes_global );
 msh.bandData.el_table(2,:) = n_inds_new( msh.bandData.el_table(2,:) );
-msh.bandData.setConstantAGmatrix(Np_master);
+
+try
+    %necessary for the AirgapTriangulation class
+    msh.bandData.setConstantAGmatrix(Np_master);
+catch
+    %does not work for the struct-based bandData approach.
+end
+    
 %edges: TODO
 
 end

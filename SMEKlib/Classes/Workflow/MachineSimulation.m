@@ -28,6 +28,7 @@ classdef MachineSimulation < handle
             this.setBoundaryMatrix();
             this.setStatorCircuitMatrices();
             this.setRotorCircuitMatrices();
+            this.setLoadVector();
         end
         
         function this = setBoundaryMatrix(this, varargin)
@@ -43,10 +44,18 @@ classdef MachineSimulation < handle
             end
         end
         
-        function this = setCircuitMatrices(this)
-            this.setStatorCircuitMatrices();
-            this.setRotorCircuitMatrices;
-            %this.setSolidConductors; %TODO
+        function this = setLoadVector(this)
+            %setting PM sources, if any
+            PMs = this.msh.namedElements.get('PMs');
+            if isempty(PMs)
+                this.matrices.F = sparse(this.Np, 1);
+                return
+            end
+            Fc = MatrixConstructor();
+            for k = 1:size(PMs,2)
+                Fc.assemble_vector(Nodal2D(Operators.curl), 1, PMs{1,k}, PMs{2,k}, this.msh);
+            end
+            this.matrices.F = Fc.finalize(this.Np, 1);
         end
         
         function this = setStatorCircuitMatrices(this)

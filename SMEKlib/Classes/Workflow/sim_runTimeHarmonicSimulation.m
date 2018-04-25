@@ -24,7 +24,6 @@ else
     nu_fun = varargin{1};
 end
 
-
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 for kslip = 1:numel(slips)
     slip = slips(kslip);
@@ -40,6 +39,7 @@ for kslip = 1:numel(slips)
     %size(Stot)
 
     Nui = size(Stot,1) - size(sim.matrices.P,1);
+    Nu = sim.results.Nu_r+sim.results.Nu_s;
     PTT = blkdiag(sim.matrices.P, speye(Nui, Nui), ...
         sim.matrices.P, speye(Nui, Nui));
 
@@ -53,7 +53,7 @@ for kslip = 1:numel(slips)
     end
 
     %assembling load vector
-    Ftemp = [zeros(sim.Np + sim.results.Nu_r+sim.results.Nu_s,1); FI(1:sim.results.Ni_s)];
+    Ftemp = [sim.matrices.F; zeros(Nu,1); FI(1:sim.results.Ni_s)];
     Ftot = [real(Ftemp); -imag(Ftemp)];
 
     if kslip == 1

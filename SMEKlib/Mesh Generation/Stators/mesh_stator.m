@@ -33,7 +33,8 @@ else
 end
 
 %Finalize
-msh.cir = [1 Np_old+cirnew];
+%msh.cir = [1 Np_old+cirnew];
+msh.cir = [msh.cir Np_old+cirnew];
 msh.p = [msh.p;p'];
 msh.t = [msh.t; Np_old + t'];
 msh.n_ag_s = Np_old + agnew';
@@ -43,4 +44,8 @@ msh.LL = [msh.LL'; LLnew'];
 SC = sort(SC);
 msh.SC = reshape(SC, [], Nsec);
 msh.matel(msh.matel == 9999) = dim.SWM;
+
+msh.FL = setdiff(msh.FL, msh.cir);
+msh.LL = setdiff(msh.LL, msh.cir);
+
 end

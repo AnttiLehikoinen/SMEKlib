@@ -1,4 +1,4 @@
-function n = sortSegmentEdges(p, e)
+function n = sortRadialEdges(p, e)
 %sortSegmentEdges sorts nodes of circumferentially.
 %
 %
@@ -6,7 +6,7 @@ function n = sortSegmentEdges(p, e)
 
 n = toRow(unique(e));
 
-[~,I] = sort( atan2(p(2,n), p(1,n)) );
+[~,I] = sort( sum(p(:,n).^2,1) );
 n = n(I);
 
 end

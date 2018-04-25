@@ -22,6 +22,12 @@ if Elements.isTriangle( msh.elementType )
     order_curvature = curvatureOrder( msh.elementType );    
     [x_quad, w_quad] = get_2DtriangleIntegrationPoints(order_test + order_shape + order_nonlin + order_curvature);
     %[x_quad, w_quad] = get_2DtriangleIntegrationPoints(3);
+elseif Elements.isTet( msh.elementType )
+    order_curvature = 0;
+    %[x_quad, w_quad] = get_3DtetIntegrationPoints(order_test + order_shape + order_nonlin + order_curvature);
+    %[x_quad, w_quad] = get_3DtetIntegrationPoints(2);
+    [x_quad, w_quad] = gaussint_tet(order_test + order_shape + order_nonlin + order_curvature);
+    w_quad = transpose(w_quad);
 else
     error('Not yet implemented');
 end

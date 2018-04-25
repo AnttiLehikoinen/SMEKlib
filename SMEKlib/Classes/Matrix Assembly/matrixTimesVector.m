@@ -46,9 +46,9 @@ elseif size(M,1) == 9
     if inverse
         %pain cometh here
         % referenced from https://en.wikipedia.org/wiki/Invertible_matrix
-        row1 = crossProduct( M(inds(:,2),:), M(inds(:,3)) );
-        row2 = crossProduct( M(inds(:,3),:), M(inds(:,1)) );
-        row3 = crossProduct( M(inds(:,1),:), M(inds(:,2)) );
+        row1 = crossProduct( M(inds(:,2),:), M(inds(:,3), :) );
+        row2 = crossProduct( M(inds(:,3),:), M(inds(:,1), :) );
+        row3 = crossProduct( M(inds(:,1),:), M(inds(:,2), :) );
         if ~numel(varargin) || ~any(varargin{1})
             detF = matrixDeterminant(M);
         else
@@ -63,7 +63,8 @@ elseif size(M,1) == 9
                 sum(row2.*v,1);
                 sum(row3.*v,1)];
         end
-        b = bsxfun(@rdivide, b, detF);    
+        b = bsxfun(@times, b, 1./detF);
+        %b = bsxfun(@rdivide, b, detF);    
     else
         b = bsxfun(@times, M(inds(:,1),:), v(1,:)) + ...
             bsxfun(@times, M(inds(:,2),:), v(2,:)) + ...

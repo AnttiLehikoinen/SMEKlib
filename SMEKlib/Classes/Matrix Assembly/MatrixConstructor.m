@@ -67,7 +67,7 @@ classdef MatrixConstructor < MatrixConstructorBase
             Fvals_test = cell(N_quad, N_test);
             for k_quad = 1:N_quad
                 for k_test = 1:N_test
-                    Fvals_test{k_quad, k_test} = fun_test.eval(k_test, x_quad(:,k_quad), msh, Ffun(k_quad), detFun(k_quad));
+                    Fvals_test{k_quad, k_test} = fun_test.eval(k_test, x_quad(:,k_quad), msh, Ffun(k_quad), detFun(k_quad), elements);
                 end
             end
             if symmetric
@@ -77,7 +77,7 @@ classdef MatrixConstructor < MatrixConstructorBase
                 for k_quad = 1:N_quad
                     for k_shape = 1:N_shape
                         Fvals_shape{k_quad,k_shape} = ...
-                            fun_shape.eval(k_shape, x_quad(:,k_quad), msh, Ffun(k_quad), detFun(k_quad));
+                            fun_shape.eval(k_shape, x_quad(:,k_quad), msh, Ffun(k_quad), detFun(k_quad), elements);
                     end
                 end
             end

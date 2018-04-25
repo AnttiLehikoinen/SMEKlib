@@ -46,15 +46,19 @@ for kslip = 1:numel(slips)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %voltage vector
     t0 = 0;
-    if sim.dims.connection_stator == defs.delta
+    if numel(pars.U) > 1
+        FI = pars.U;
+    elseif sim.dims.connection_stator == defs.delta
         FI = U.*[exp(1i*w*t0); exp(1i*w*t0-1i*2*pi/3); exp(1i*w*t0-1i*4*pi/3)];
     else
         FI = U.* [exp(1i*w*t0); exp(1i*w*t0-1i*pi/3)];
     end
 
     %assembling load vector
-    Ftemp = [sim.matrices.F; zeros(Nu,1); FI(1:sim.results.Ni_s)];
-    Ftot = [real(Ftemp); -imag(Ftemp)];
+    %Ftemp = [sim.matrices.F; zeros(Nu,1); FI(1:sim.results.Ni_s)];
+    %Ftot = [real(Ftemp); -imag(Ftemp)];
+    Ftot = [sim.matrices.F; zeros(Nu,1); real(FI(1:sim.results.Ni_s));
+        -0*sim.matrices.F; zeros(Nu,1); -imag(FI(1:sim.results.Ni_s))];
 
     if kslip == 1
         Xtot = zeros(size(Q,1), numel(slips));

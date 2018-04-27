@@ -66,7 +66,7 @@ for kt = 2:Nsamples
     Qconst = S_ag + Sc + Mtot;
     
     Ustep = Ufun(tsamples(kt));
-    FL = Mtot*Xsamples(:,kt-1) + [zeros(Ntot-sim.results.Ni_s, 1); Ustep(1:sim.results.Ni_s)];
+    FL = Mtot*Xsamples(:,kt-1) + [sim.matrices.F; zeros(Nu, 1); Ustep(1:sim.results.Ni_s)];
     
     Xsamples(:,kt) = Xsamples(:,kt-1); %initial condition for NR
     for kiter = 1:50

@@ -32,7 +32,7 @@ for kslip = 1:numel(slips)
     
     if isfield(pars.misc, 'isDC') && pars.misc.isDC
         Sag_r = sim.msh.get_AGmatrix(0, size(Stot,1));
-        Sag_i = sim.msh.get_AGmatrix(-0.5*pi/sim.dims.p, size(Stot,1));
+        Sag_i = sim.msh.get_AGmatrix(+0.5*pi/sim.dims.p, size(Stot,1));
         Q = [Stot+Sag_r w*Mtot;
             -w*Mtot Stot+Sag_i];
     else

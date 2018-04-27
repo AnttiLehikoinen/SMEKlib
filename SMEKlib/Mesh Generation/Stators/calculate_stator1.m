@@ -278,6 +278,6 @@ line = [dim.Sin dim.Sin+dim.S_height1 dim.Sin+dim.S_height-dim.S_height3 ...
     FL = [37 36 35 34 33 32];
     LL = [25 26 27 28 29 30];
     cir = [32 31 30];
-    ag = [37 21 22 2 1 12 28 24 25];
+    ag = [37 21 22 2 1 12 23 25];
     
 end

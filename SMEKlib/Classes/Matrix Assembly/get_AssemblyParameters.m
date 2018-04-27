@@ -24,10 +24,14 @@ if Elements.isTriangle( msh.elementType )
     %[x_quad, w_quad] = get_2DtriangleIntegrationPoints(3);
 elseif Elements.isTet( msh.elementType )
     order_curvature = 0;
+<<<<<<< HEAD
     %[x_quad, w_quad] = get_3DtetIntegrationPoints(order_test + order_shape + order_nonlin + order_curvature);
     %[x_quad, w_quad] = get_3DtetIntegrationPoints(2);
     [x_quad, w_quad] = gaussint_tet(order_test + order_shape + order_nonlin + order_curvature);
     w_quad = transpose(w_quad);
+=======
+    [x_quad, w_quad] = get_3DtetIntegrationPoints(order_test + order_shape + order_nonlin + order_curvature);
+>>>>>>> 294d9bc0f5bf79d636e2bbc42d46df79edab9e99
 else
     error('Not yet implemented');
 end

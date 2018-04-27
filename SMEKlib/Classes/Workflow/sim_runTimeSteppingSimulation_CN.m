@@ -44,6 +44,7 @@ Mtot = Mtot/dt;
 
 Ntot = size(Mtot, 1);
 Nui = Ntot - size(sim.matrices.P,1);
+Nu = sim.results.Nu_s + sim.results.Nu_r;
 PT = blkdiag(sim.matrices.P, speye(Nui));
 
 %Jacobian constructor object
@@ -61,7 +62,8 @@ else
 end
 
 % adjusted CN for stability
-alpha2 = 1.1; %weight for implicit (k+1) step; 1 for CN, 2 for BE
+%alpha2 = 1.1; %weight for implicit (k+1) step; 1 for CN, 2 for BE
+alpha2 = 2;
 alpha1 = 2 - alpha2;
 
 
@@ -78,7 +80,7 @@ for kt = 2:Nsamples
     Qconst = S_ag + Sc + (2/alpha2)*Mtot;
     
     Ustep = Ufun(tsamples(kt));
-    FL = (2/alpha2)*Mtot*Xsamples(:,kt-1) + [zeros(Ntot-sim.results.Ni_s, 1); Ustep(1:sim.results.Ni_s)];
+    FL = (2/alpha2)*Mtot*Xsamples(:,kt-1) + [sim.matrices.F; zeros(Nu, 1); Ustep(1:sim.results.Ni_s)];
     
     Xsamples(:,kt) = Xsamples(:,kt-1); %initial condition for NR
     for kiter = 1:50
@@ -101,7 +103,7 @@ for kt = 2:Nsamples
     
     %updating prev-residual term
     res_prev = -res - (S_ag + Sc)*Xsamples(:,kt) + ...
-        [zeros(Ntot-sim.results.Ni_s, 1); Ustep(1:sim.results.Ni_s)];
+        [sim.matrices.F; zeros(Nu, 1); Ustep(1:sim.results.Ni_s)];
 end
 
 sim.results.Xt = Xsamples;

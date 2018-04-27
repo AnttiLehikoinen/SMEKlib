@@ -28,6 +28,7 @@ classdef MachineSimulation < handle
             this.setBoundaryMatrix();
             this.setStatorCircuitMatrices();
             this.setRotorCircuitMatrices();
+            this.setLoadVector();
         end
         
         function this = setBoundaryMatrix(this, varargin)
@@ -43,10 +44,18 @@ classdef MachineSimulation < handle
             end
         end
         
-        function this = setCircuitMatrices(this)
-            this.setStatorCircuitMatrices();
-            this.setRotorCircuitMatrices;
-            %this.setSolidConductors; %TODO
+        function this = setLoadVector(this)
+            %setting PM sources, if any
+            PMs = this.msh.namedElements.get('PMs');
+            if isempty(PMs)
+                this.matrices.F = sparse(this.Np, 1);
+                return
+            end
+            Fc = MatrixConstructor();
+            for k = 1:size(PMs,2)
+                Fc.assemble_vector(Nodal2D(Operators.curl), 1, PMs{1,k}, PMs{2,k}, this.msh);
+            end
+            this.matrices.F = Fc.finalize(this.Np, 1);
         end
         
         function this = setStatorCircuitMatrices(this)
@@ -58,6 +67,20 @@ classdef MachineSimulation < handle
         end
         
         function this = run_harmonic(this, varargin)
+            %Time-harmonic analysis.
+            %
+            % Call syntax:
+            %   this.run_harmonic(pars)
+            %   this.run_harmonic(pars, nu_fun)
+            %   this.run_harmonic(pars, BH_fun)
+            %
+            % Method runs nonlinear "time-harmonic analysis", i.e. solves
+            % for the sine and cosine terms of the fundamental-only Fourier
+            % series. Thus, the cosine term corresponds to the real part of
+            % the corresponding phasor, while the sine is the NEGATIVE
+            % imaginary part. For this reason, complex voltages in pars.U
+            % must be conjugated to obtain correct results.
+            
             this = sim_runTimeHarmonicSimulation(this, varargin{:});
         end               
         function this = init(this, varargin)
@@ -72,6 +95,15 @@ classdef MachineSimulation < handle
         end
         
         function [] = fluxplot(this, step, pars)
+            %Flux density plot.
+            % 
+            % Call syntax:
+            %   [] = this.fluxplot(step, pars)
+            %       for time-step 'step'.
+            %
+            %   [] = this.fluxplot(-1, pars)
+            %       for harmonic analysis results.
+            
             
             if step == -1
                 A = this.results.Xh(1:this.Np);

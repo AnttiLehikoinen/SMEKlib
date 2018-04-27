@@ -24,37 +24,48 @@ else
     nu_fun = varargin{1};
 end
 
-
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 for kslip = 1:numel(slips)
     slip = slips(kslip);
     
     [Stot, Mtot] = get_circuitMatrices(sim, slip);
-    Stot = Stot + sim.msh.get_AGmatrix(0, size(Stot,1));
-
-    Q = [Stot w*Mtot;
-        -w*Mtot Stot];
+    
+    if isfield(pars.misc, 'isDC') && pars.misc.isDC
+        Sag_r = sim.msh.get_AGmatrix(0, size(Stot,1));
+        Sag_i = sim.msh.get_AGmatrix(+0.5*pi/sim.dims.p, size(Stot,1));
+        Q = [Stot+Sag_r w*Mtot;
+            -w*Mtot Stot+Sag_i];
+    else
+        Stot = Stot + sim.msh.get_AGmatrix(0, size(Stot,1));
+        Q = [Stot w*Mtot;
+            -w*Mtot Stot];
+    end
 
     %sim.matrices.Stot = Stot;
     %sim.matrices.Mtot = Mtot;
     %size(Stot)
 
     Nui = size(Stot,1) - size(sim.matrices.P,1);
+    Nu = sim.results.Nu_r+sim.results.Nu_s;
     PTT = blkdiag(sim.matrices.P, speye(Nui, Nui), ...
         sim.matrices.P, speye(Nui, Nui));
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %voltage vector
     t0 = 0;
-    if sim.dims.connection_stator == defs.delta
+    if numel(pars.U) > 1
+        FI = pars.U;
+    elseif sim.dims.connection_stator == defs.delta
         FI = U.*[exp(1i*w*t0); exp(1i*w*t0-1i*2*pi/3); exp(1i*w*t0-1i*4*pi/3)];
     else
         FI = U.* [exp(1i*w*t0); exp(1i*w*t0-1i*pi/3)];
     end
 
     %assembling load vector
-    Ftemp = [zeros(sim.Np + sim.results.Nu_r+sim.results.Nu_s,1); FI(1:sim.results.Ni_s)];
-    Ftot = [real(Ftemp); -imag(Ftemp)];
+    %Ftemp = [sim.matrices.F; zeros(Nu,1); FI(1:sim.results.Ni_s)];
+    %Ftot = [real(Ftemp); -imag(Ftemp)];
+    Ftot = [sim.matrices.F; zeros(Nu,1); real(FI(1:sim.results.Ni_s));
+        -sim.matrices.F; zeros(Nu,1); -imag(FI(1:sim.results.Ni_s))];
 
     if kslip == 1
         Xtot = zeros(size(Q,1), numel(slips));

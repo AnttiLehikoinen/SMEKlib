@@ -2,7 +2,8 @@
 % 
 % (c) 2018 Antti Lehikoinen / Aalto University
 
-%generating edges
+%generating edges (should be moved into its own function, and called from
+%(tetra)mesh objects
 edgeDefs = [1 2; 1 3; 1 4; 2 3; 3 4; 4 2]; %numbering of edges in reference element
 
 edges = [t(edgeDefs(1,:),:) t(edgeDefs(2,:),:) t(edgeDefs(3,:),:) t(edgeDefs(4,:),:) t(edgeDefs(5,:),:) t(edgeDefs(6,:),:)];
@@ -53,7 +54,7 @@ figure(2); clf;
 spy(S)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Direct solution, will overfill RAM on larger problems.
+% Direct solution, will run out of RAM on larger problems.
 A = zeros(size(msh.e,2), 1);
 
 tic
@@ -96,8 +97,8 @@ tic;
 toc
 
 %solving
-%x = bicgstabl(S(e_free,e_free), F(e_free), 1e-6, 100, L, U, []);
-x = gmres(S(e_free,e_free), F(e_free) , 20, 1e-6, 10, L, U);
+x = bicgstabl(S(e_free,e_free), F(e_free), 1e-6, 100, L, U, []);
+%x = gmres(S(e_free,e_free), F(e_free) , 20, 1e-6, 10, L, U);
 toc
 A2 = zeros(size(A));
 A2(e_free) = real(x);
@@ -106,7 +107,6 @@ A2(e_free) = real(x);
 Avec2 = zeros(size(Avec));
 for k = 1:6
     Avec2 = Avec2 + bsxfun(@times, Wcurl.eval(k, xref, msh, []), A2(abs(msh.t2e(k,:)))' );
-    %Avec = Avec + Wcurl.eval(k, xref, msh, []);
 end
 
 figure(4); clf; hold on;

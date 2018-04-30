@@ -27,6 +27,7 @@ plot( Xslot(1,[1:end 1]), Xslot(2,[1:end 1]), 'b-'); axis equal;
 
 %final adjustment
 Xc(1,:) = Xc(1,:) - 0.0e-3;
+msh.misc.Xc = Xc;
 
 %msh.misc.Xc = Xc;
 %msh.misc.Xslot = Xslot;

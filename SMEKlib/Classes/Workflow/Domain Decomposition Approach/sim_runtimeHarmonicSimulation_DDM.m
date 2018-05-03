@@ -17,8 +17,8 @@ slip = slips(1);
 
 %setting harmonic reluctivity function
 if ~numel(varargin)
-    %nu_struct = initialize_harmonicReluctivityStruct_interp1(sim.msh, true);
-    nu_struct = initialize_reluctivityStruct_interp1(sim.msh, true);
+    nu_struct = initialize_harmonicReluctivityStruct_interp1(sim.msh, true);
+    %nu_struct = initialize_reluctivityStruct_interp1(sim.msh, true);
     nu_fun = @(B)( calculate_reluctivity(B, nu_struct) );
 else
     nu_fun = varargin{1};

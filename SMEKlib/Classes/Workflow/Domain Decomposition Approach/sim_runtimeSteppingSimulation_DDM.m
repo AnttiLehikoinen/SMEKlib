@@ -22,7 +22,9 @@ end
 %voltage-function
 L_s = sim.matrices.Ls;
 if isa(pars.U, 'function_handle')
-    Ufun = pars.U;
+    N_phases = numel(pars.U(0));
+    N_inParallel = size(L_s,2) / N_phases;
+    Ufun = @(t)( kron(eye(N_phases), ones(N_inParallel,1))*pars.U(t) );
 else
     U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
     %U = 400/2;
@@ -103,7 +105,7 @@ alpha1 = 2 - alpha2;
 %initializing previous residual term
 res_prev = sim.results.res_prev;
 
-for kt = 2:100%Nsamples
+for kt = 2:Nsamples
     disp(['Time step ' num2str(kt) '...']);
     
     S_ag = sim.msh.get_AGmatrix(wm*tsamples(kt), Ntot);
@@ -114,7 +116,7 @@ for kt = 2:100%Nsamples
     
     %load function
     Ustep = Ufun(tsamples(kt));
-    FL = (2/alpha2)*Mtot*Xsamples(:,kt-1) + [zeros(Ntot-sim.results.Ni_s, 1); Ustep(1:sim.results.Ni_s)];
+    FL = (2/alpha2)*Mtot*Xsamples(:,kt-1) + [sim.matrices.F; zeros(Nu,1); Ustep(1:sim.results.Ni_s)];
     
     % updating the decomposed-domain contribution to F
     FD = zeros(Ntot, 1);
@@ -150,13 +152,17 @@ for kt = 2:100%Nsamples
     end
     
     %updating prev-residual term
-    res_prev = -res - (S_ag + Sc)*Xsamples(:,kt) + ...
-        [zeros(Ntot-sim.results.Ni_s, 1); Ustep(1:sim.results.Ni_s)] + FD;
+    res_prev = -res - (S_ag + Sc)*Xsamples(:,kt) + [sim.matrices.F; zeros(Nu,1); Ustep(1:sim.results.Ni_s)] ...
+        + FD;
     
     %plotting currents
-    Is = Xsamples(indI(1:3), 1:kt);
-    figure(11); clf;
-    plot( Is'); drawnow;
+    Mphase = kron(eye(N_phases), ones(N_inParallel,1))';
+    Is = Xsamples(indI(:), 1:kt);
+    Iphase = Mphase*Is;
+    figure(11); clf; hold on;
+    plot( Iphase(1:3,:)' ); 
+    plot( Is(1:N_inParallel,:)', 'b--');
+    drawnow;
 end
 
 sim.results.Xt = Xsamples;

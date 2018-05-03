@@ -47,17 +47,37 @@ Nu = sim.results.Nu_r;
 Ni_r = sim.results.Ni_r;
 Ni_s = sim.results.Ni_s;
 
-Stot = Stot + sim.msh.get_AGmatrix(0, size(Stot,1));
 Qred = [Q_DD sparse(sim.Np, Nu) Q_DI sparse(sim.Np, Ni_r);
     sparse(Nu, sim.Np + Nu + Ni_r + Ni_s);
     Q_ID sparse(Ni_s,Nu) Q_II];
 
 %temp solution
-phi0 = 0;
-UH = kron(eye(3), ones(size(L_s,2)/3,1)) * U*[exp(1i*phi0); exp(1i*phi0 - 1i*2*pi/3); exp(1i*phi0 - 1i*4*pi/3)];
+if numel(pars.U) > 1
+    N_phases = numel(pars.U);
+    N_inParallel = size(L_s,2) / N_phases;
+    UH = kron(eye(N_phases), ones(N_inParallel,1))*pars.U;
+else
+    t0 = 0;
+    if sim.dims.connection_stator == defs.delta
+        FI = U.*[exp(1i*w*t0); exp(1i*w*t0-1i*2*pi/3); exp(1i*w*t0-1i*4*pi/3)];
+    else
+        FI = U.* [exp(1i*w*t0); exp(1i*w*t0-1i*pi/3)];
+    end            
+    UH = kron(eye(3), ones(size(L_s,2)/3,1)) * FI;
+end
 
-Q = [Stot+real(Qred) w*Mtot+imag(Qred);
-    -w*Mtot-imag(Qred) Stot+real(Qred)];
+%final assembly
+if isfield(pars.misc, 'isDC') && pars.misc.isDC
+    Stot_r = Stot + sim.msh.get_AGmatrix(0, size(Stot,1));
+    Stot_i = Stot + sim.msh.get_AGmatrix(+0.5*pi/sim.dims.p, size(Stot,1));
+else
+    Stot_r = Stot + sim.msh.get_AGmatrix(0, size(Stot,1));
+    Stot_i = Stot_r;
+end
+
+
+Q = [Stot_r+real(Qred) w*Mtot+imag(Qred);
+    -w*Mtot-imag(Qred) Stot_i+real(Qred)];
 Nui = size(Stot,1) - size(sim.matrices.P,1);
 PTT = blkdiag(sim.matrices.P, speye(Nui, Nui), ...
     sim.matrices.P, speye(Nui, Nui));
@@ -65,8 +85,7 @@ PTT = blkdiag(sim.matrices.P, speye(Nui, Nui), ...
 sim.misc.Q = Q;
 
 %assembling load vector
-Ftemp = [zeros(sim.Np + sim.results.Nu_r+sim.results.Nu_s,1); UH];
-Ftot = [real(Ftemp); -imag(Ftemp)];
+Ftot = [sim.matrices.F; zeros(Nu,1); real(UH); -sim.matrices.F; zeros(Nu,1); -imag(UH)];
 
 Xtot = zeros(size(Q,1), 1);
 for kiter = 1:15

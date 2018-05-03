@@ -128,5 +128,5 @@ end
 n_out = unique(Surfaces.get('Outer'));
 
 figure(1); clf; hold on;
-%tetramesh(t', p')
-plot3(p(1,n_out), p(2,n_out), p(3,n_out), 'ko');
+%tetramesh(t', p'); %plotting mesh, SLOW
+plot3(p(1,n_out), p(2,n_out), p(3,n_out), 'ko'); %plotting boundary nodes for verification

@@ -1,6 +1,12 @@
 function b = matrixTimesVector(M, v, trps, inverse, varargin)
 
-if size(M,1) == 4
+if size(M,1) == 1
+    if inverse
+        b = v./M;
+    else
+        b = M.*v;
+    end
+elseif size(M,1) == 4
     if trps
         ind_11 = 1;
         ind_21 = 3;

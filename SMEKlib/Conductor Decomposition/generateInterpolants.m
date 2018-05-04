@@ -4,9 +4,9 @@ function [interpolants, Pclosest] = generateInterpolants( PM, PS, bnd_edges_mast
 % 
 % Call syntax
 % [interpolants, Pclosest] = generateInterpolants( PM, PS, bnd_edges_master, slavePoints, PsFun, varargin )
-%   PM = 2xN_master containing the coordinates of the master mesh boundary
-%           nodes
-%   PS = 2xN_slave, the same for the slave mesh boundary
+%   PM = 2xN_master containing the coordinates of master mesh nodes
+%   PS = 2xN_slave, the same for the slave mesh
+%   slavePoints = indices of the boundary nodes of the slave mesh
 %   
 %   bnd_edges_master = definition of edges on the slave mesh boundary. Can
 %       be one of the following:
@@ -17,8 +17,8 @@ function [interpolants, Pclosest] = generateInterpolants( PM, PS, bnd_edges_mast
 %       - a cell array, where each entry is a array to similar to above,
 %       defining a set of edges of arbitrary order.
 %   In ANY case, the indices n_start, n_end (and others if applicable)
-%   refer to the boundary nodes only, i.e. the actual 2D edge is
-%   PS(:, n_start)-->PS(:, n_end)
+%   refer to the boundary nodes, i.e. the actual 2D edge is
+%   PM(:, n_start)-->PM(:, n_end)
 %   
 %   PsFun = a function for transforming the slave point coordinates. For
 %   example, a PsFun = @(X)( M_rotation*X ) would apply a rotation matrix
@@ -28,9 +28,14 @@ function [interpolants, Pclosest] = generateInterpolants( PM, PS, bnd_edges_mast
 %   machine.
 %   Otherwise, PsFun = @(X)( X ) will suffice.
 %
+% The function returns
+%   interpolants = [I J E] = Nx3 array; each row defining a sparse matrix
+%       triplet.
+%   Pclosest = the closest point to each master node
+%
 % (c) 2016-2018 Antti Lehikoinen / Aalto University
 
-Pclosest = PS(:, slavePoints);
+Pclosest = PS(:, slavePoints); %not used anymore, it seems
 if isa(bnd_edges_master, 'cell')
     %[interpolants, Pclosest] = internal_varyingOrderInt( PM, PS, bnd_edges_master, slavePoints, PsFun );
     [interpolants, Pclosest] = internal_varyingOrderInt_2( PM, PS, bnd_edges_master, slavePoints, PsFun );

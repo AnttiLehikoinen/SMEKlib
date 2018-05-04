@@ -53,6 +53,7 @@ elseif sim.dims.type_statorWinding == defs.decomposed
     sim.matrices.Ls = sparse(Ls(:, sum(abs(Ls),1)>0));
     sim.matrices.Ms = sparse(sim.Np,sim.Np);
     sim.matrices.Cs = sparse(sim.Np, size(Ls,1));
+    sim.matrices.Zew_s = sparse(size(Ls,2), size(Ls,2));
 else
     warning('Stator winding type not yet implemented.');
 end

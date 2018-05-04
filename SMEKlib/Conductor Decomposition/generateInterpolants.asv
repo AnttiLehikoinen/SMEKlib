@@ -7,26 +7,13 @@ function [interpolants, Pclosest] = generateInterpolants( PM, PS, bnd_edges_mast
 %   PM = 2xN_master containing the coordinates of the master mesh boundary
 %           nodes
 %   PS = 2xN_slave, the same for the slave mesh boundary
-%   
 %   bnd_edges_master = definition of edges on the slave mesh boundary. Can
-%       be one of the following:
+%   be one of the following:
 %       - 2xN array, where each column [n_start; n_end] defines a single
 %       first-order (linear) edge.
-%       - nxN array, where each column defines a single (n-1)-order edge as
-%           [n_start, n_mid_1, ..., n_end]
-%       - a cell array, where each entry is a array to similar to above,
-%       defining a set of edges of arbitrary order.
-%   In ANY case, the indices n_start, n_end (and others if applicable)
-%   refer to the boundary nodes only, i.e. the actual 2D edge is
-%   PS(:, n_start)-->PS(:, n_end)
-%   
-%   PsFun = a function for transforming the slave point coordinates. For
-%   example, a PsFun = @(X)( M_rotation*X ) would apply a rotation matrix
-%   M_rotation to the slave boundary points. This feature is mainly useful
-%   when the same slave mesh is used to present several repeated subdomains
-%   at different physical locations, such as the slots of an electrical
-%   machine.
-%   Otherwise, PsFun = @(X)( X ) will suffice.
+%       - nxN array, where each column defines a single (n-1)-order edge.
+%       - a cell array, where each entry is a vector to similar to above,
+%       defining a sing
 %
 % (c) 2016-2018 Antti Lehikoinen / Aalto University
 

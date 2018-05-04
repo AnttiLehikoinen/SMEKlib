@@ -98,6 +98,14 @@ else
     error('Initial conditions not computed.')
 end
 
+if isfield(pars.misc, 'computeSlave') && pars.misc.computeSlave
+    computeSlave = true;
+    Xslave = zeros( size(sim.msh.misc.msh_slave.p,2), Nsamples);
+else
+    computeSlave = false;
+    Xslave = [];
+end
+
 % adjusted CN for stability
 alpha2 = 1.1; %weight for implicit (k+1) step; 1 for CN, 2 for BE
 alpha1 = 2 - alpha2;

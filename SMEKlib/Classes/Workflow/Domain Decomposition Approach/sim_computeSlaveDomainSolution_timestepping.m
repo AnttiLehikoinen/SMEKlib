@@ -129,8 +129,6 @@ sim.misc.H_imp = H_imp;
 sim.misc.H_var = H_var;
 
 sim.misc.H_imp2 = H_imp2(2:kt,:);
-
-
 sim.misc.X_imp_T = X_imp(2:kt,:);
 
 %assigning the constant reduced matrices
@@ -178,6 +176,7 @@ DX0(nd, :) = P_D2s * D0;
 % time-stepping
 N_decay = 50;
 h_decay = zeros(Qs_sector*(ND+Nu), N_decay);
+X_decay = zeros(Qs_sector*(Np+Nu), N_decay);
 
 DXprev = real( DX0 );
 
@@ -210,6 +209,7 @@ for kt = 2:N_decay
         - 1/dims.leff*C*DXnew((Np+1):end,:));
         DXnew((Np+1):end,:)];
     h_decay(:, kt) = reshape(h_imp_temp, [], 1);
+    X_decay(:, kt) = reshape(DXnew, [], 1);
     
         %extracting Lagrance multipliers and voltages
     h_imp_temp = [-L*(S*DXnew(1:Np,:) + M*(DXnew(1:Np,:)-DXprev(1:Np,:))/dt_base ...
@@ -232,6 +232,7 @@ for kt = 2:N_decay
     end
 end
 sim.misc.h_decay = h_decay(:, 1:kt);
+sim.misc.X_decay = X_decay(:, 1:kt);
 sim.misc.h_decay2 = h_decay2(:, 1:kt);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

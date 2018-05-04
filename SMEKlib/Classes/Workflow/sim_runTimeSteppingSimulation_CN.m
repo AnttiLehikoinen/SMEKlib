@@ -69,7 +69,8 @@ alpha1 = 2 - alpha2;
 
 %initializing previous residual term
 [~, res_prev] = Jc.eval(Xsamples(:, 1), sim.nu_fun);
-res_prev = -res_prev - (sim.msh.get_AGmatrix(0, Ntot) + Sc)*Xsamples(:,1) + [zeros(Ntot-sim.results.Ni_s, 1); Ufun(0)];
+%res_prev = -res_prev - (sim.msh.get_AGmatrix(0, Ntot) + Sc)*Xsamples(:,1) + [zeros(Ntot-sim.results.Ni_s, 1); Ufun(0)];
+res_prev = -res_prev - (sim.msh.get_AGmatrix(0, Ntot) + Sc)*Xsamples(:,1) + [sim.matrices.F; zeros(Nu, 1); Ufun(0)];
 
 for kt = 2:Nsamples
     disp(['Time step ' num2str(kt) '...']);

@@ -13,8 +13,10 @@ else
 end
 
 %voltage-function
+Nin = 1;
 if isa(pars.U, 'function_handle')
     Ufun = pars.U;
+    Nin = nargin(Ufun);
 else
     U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -46,6 +48,7 @@ Ntot = size(Mtot, 1);
 Nui = Ntot - size(sim.matrices.P,1);
 Nu = sim.results.Nu_s + sim.results.Nu_r;
 PT = blkdiag(sim.matrices.P, speye(Nui));
+indI = (1:sim.results.Ni_s) + sim.Np+Nu;
 
 %Jacobian constructor object
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
@@ -69,8 +72,12 @@ alpha1 = 2 - alpha2;
 
 %initializing previous residual term
 [~, res_prev] = Jc.eval(Xsamples(:, 1), sim.nu_fun);
-%res_prev = -res_prev - (sim.msh.get_AGmatrix(0, Ntot) + Sc)*Xsamples(:,1) + [zeros(Ntot-sim.results.Ni_s, 1); Ufun(0)];
-res_prev = -res_prev - (sim.msh.get_AGmatrix(0, Ntot) + Sc)*Xsamples(:,1) + [sim.matrices.F; zeros(Nu, 1); Ufun(0)];
+if Nin == 1
+    Ustep = Ufun(0);
+elseif Nin == 3
+    Ustep = Ufun(Xsamples(indI, 1), 0, 0);
+end
+res_prev = -res_prev - (sim.msh.get_AGmatrix(0, Ntot) + Sc)*Xsamples(:,1) + [sim.matrices.F; zeros(Nu, 1); Ustep];
 
 for kt = 2:Nsamples
     disp(['Time step ' num2str(kt) '...']);
@@ -80,7 +87,12 @@ for kt = 2:Nsamples
     
     Qconst = S_ag + Sc + (2/alpha2)*Mtot;
     
-    Ustep = Ufun(tsamples(kt));
+    if Nin == 1
+        Ustep = Ufun(tsamples(kt));
+    elseif Nin == 3
+        Ustep = Ufun(Xsamples(indI, kt-1), wm*tsamples(kt), tsamples(kt));
+    end
+        
     FL = (2/alpha2)*Mtot*Xsamples(:,kt-1) + [sim.matrices.F; zeros(Nu, 1); Ustep(1:sim.results.Ni_s)];
     
     Xsamples(:,kt) = Xsamples(:,kt-1); %initial condition for NR

@@ -51,6 +51,7 @@ classdef AGtriangulation < handle
             else
                 rotorAngle = 0;
             end
+            
             [t_mov, p] = this.update(rotorAngle);            
             tag_local = [this.t_const t_mov];
             if nargout == 3
@@ -59,6 +60,15 @@ classdef AGtriangulation < handle
                 tag_global = [];
             end
         end
+        
+        function A_tag = tag_solution(this, A)
+            %Vector potential solution at airgap triangulation nodes,
+            %taking into account periodicity.
+
+            A_tag =A(this.el_table(2, :)) ...
+                    .* transpose(this.el_table(3, :));
+        end
+            
         
         function [t_moving, p_virt] = update(this, rotorAngle, varargin)
             [t_moving, p_virt] = ag_update(this, rotorAngle, varargin{:});

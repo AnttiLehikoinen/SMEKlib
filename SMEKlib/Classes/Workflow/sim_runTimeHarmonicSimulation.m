@@ -33,17 +33,16 @@ for kslip = 1:numel(slips)
     if isfield(pars.misc, 'isDC') && pars.misc.isDC
         Sag_r = sim.msh.get_AGmatrix(0, size(Stot,1));
         Sag_i = sim.msh.get_AGmatrix(+0.5*pi/sim.dims.p, size(Stot,1));
-        Q = [Stot+Sag_r w*Mtot;
-            -w*Mtot Stot+Sag_i];
+        Q = [Stot+Sag_r -w*Mtot;
+            w*Mtot Stot+Sag_i];
     else
         Stot = Stot + sim.msh.get_AGmatrix(0, size(Stot,1));
-        Q = [Stot w*Mtot;
-            -w*Mtot Stot];
+        Q = [Stot -w*Mtot;
+            w*Mtot Stot];
     end
 
     %sim.matrices.Stot = Stot;
     %sim.matrices.Mtot = Mtot;
-    %size(Stot)
 
     Nui = size(Stot,1) - size(sim.matrices.P,1);
     Nu = sim.results.Nu_r+sim.results.Nu_s;
@@ -65,7 +64,7 @@ for kslip = 1:numel(slips)
     %Ftemp = [sim.matrices.F; zeros(Nu,1); FI(1:sim.results.Ni_s)];
     %Ftot = [real(Ftemp); -imag(Ftemp)];
     Ftot = [sim.matrices.F; zeros(Nu,1); real(FI(1:sim.results.Ni_s));
-        -sim.matrices.F; zeros(Nu,1); -imag(FI(1:sim.results.Ni_s))];
+        sim.matrices.F; zeros(Nu,1); imag(FI(1:sim.results.Ni_s))];
 
     if kslip == 1
         Xtot = zeros(size(Q,1), numel(slips));

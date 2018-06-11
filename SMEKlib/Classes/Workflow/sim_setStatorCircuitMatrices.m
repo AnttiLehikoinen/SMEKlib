@@ -18,16 +18,13 @@ else
     sim.matrices.W = windingConfiguration_1(sim.dims.q, sim.dims.p);
 end
 
-%JF_struct = [];
 JF_c = MatrixConstructor;
 statorConductors = sim.msh.namedElements.get('statorConductors');
 if sim.dims.type_statorWinding == defs.stranded
     Nc_s = numel(statorConductors);
     for k = 1:Nc_s
-        %JF_struct = assemble_vector('', 'nodal', 1, k, statorConductors{k}, sim.msh, JF_struct);
         JF_c.assemble_vector(Nodal2D(Operators.I), k, 1, statorConductors{k}, sim.msh);
     end
-    %JF_s = sparseFinalize(JF_struct, sim.Np, Nc_s);
     JF_s = JF_c.finalize(sim.Np, Nc_s);
     cAs = sum(JF_s*eye(Nc_s),1);
     if isfield(sim.dims, 'l_halfCoil')

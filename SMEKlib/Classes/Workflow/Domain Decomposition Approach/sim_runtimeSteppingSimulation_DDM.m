@@ -22,9 +22,12 @@ end
 %voltage-function
 L_s = sim.matrices.Ls;
 if isa(pars.U, 'function_handle')
-    N_phases = numel(pars.U(0));
+    Nin =  nargin(pars.U);
+    %N_phases = numel(pars.U(0));
+    N_phases = 3; %quick fix
     N_inParallel = size(L_s,2) / N_phases;
-    Ufun = @(t)( kron(eye(N_phases), ones(N_inParallel,1))*pars.U(t) );
+    Mphase =  kron(eye(N_phases), ones(N_inParallel,1));
+    Ufun = @(t, varargin)(Mphase*pars.U(t, varargin{:}) );
 else
     U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
     %U = 400/2;
@@ -98,14 +101,6 @@ else
     error('Initial conditions not computed.')
 end
 
-if isfield(pars.misc, 'computeSlave') && pars.misc.computeSlave
-    computeSlave = true;
-    Xslave = zeros( size(sim.msh.misc.msh_slave.p,2), Nsamples);
-else
-    computeSlave = false;
-    Xslave = [];
-end
-
 % adjusted CN for stability
 alpha2 = 1.1; %weight for implicit (k+1) step; 1 for CN, 2 for BE
 alpha1 = 2 - alpha2;
@@ -123,7 +118,12 @@ for kt = 2:Nsamples
     %sim.misc.Sag = S_ag;
     
     %load function
-    Ustep = Ufun(tsamples(kt));
+    %Ustep = Ufun(tsamples(kt));
+    if Nin == 1
+        Ustep = Ufun(0);
+    elseif Nin == 3
+        Ustep = Ufun(Mphase'*Xsamples(indI, kt-1), wm*tsamples(kt), tsamples(kt));
+    end
     FL = (2/alpha2)*Mtot*Xsamples(:,kt-1) + [sim.matrices.F; zeros(Nu,1); Ustep(1:sim.results.Ni_s)];
     
     % updating the decomposed-domain contribution to F
@@ -164,13 +164,15 @@ for kt = 2:Nsamples
         + FD;
     
     %plotting currents
-    Mphase = kron(eye(N_phases), ones(N_inParallel,1))';
+    %%{
+    Mphase_plot = kron(eye(N_phases), ones(N_inParallel,1))';
     Is = Xsamples(indI(:), 1:kt);
-    Iphase = Mphase*Is;
-    figure(11); clf; hold on;
+    Iphase = Mphase_plot*Is;
+    figure(12); clf; hold on;
     plot( Iphase(1:3,:)' ); 
     plot( Is(1:N_inParallel,:)', 'b--');
     drawnow;
+    %}
 end
 
 sim.results.Xt = Xsamples;

@@ -30,6 +30,7 @@ if isa(pars.U, 'function_handle')
     Ufun = @(t, varargin)(Mphase*pars.U(t, varargin{:}) );
 else
     U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
+    Nin = 1;
     %U = 400/2;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %voltage function

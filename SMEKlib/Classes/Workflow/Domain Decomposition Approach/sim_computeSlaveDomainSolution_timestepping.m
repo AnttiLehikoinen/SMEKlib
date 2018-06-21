@@ -86,6 +86,11 @@ for kt = 2:N_imp
                 blkdiag(sparse(Np_free, ND), -DR*fs_imp(kt)) );
     end
     
+    
+    if kt == 2
+        sim.misc.temp = Xnew;
+    end
+    
     %extracting Lagrance multipliers and voltages
     h_imp_temp = [-P_D2s'*L*( S*Xnew(1:Np,:) + M*(Xnew(1:Np,:)-Xprev(1:Np,:))/dt_base ...
         - 1/dims.leff*C*Xnew((Np+1):end,:) );

@@ -145,6 +145,7 @@ s_prev = [reshape(P_m2D*Xsamples(indA, 1),[],Qs_sector); reshape(L_s*Xsamples(in
 
 
 for kt = 2:10%Nsamples
+
     disp(['Time step ' num2str(kt) '...']);
     
     S_ag = sim.msh.get_AGmatrix(wm*tsamples(kt), Ntot);
@@ -160,13 +161,15 @@ for kt = 2:10%Nsamples
     
     % updating the decomposed-domain contribution to F
     FD = zeros(Ntot, 1);
+
     xslave_prev = (-(alpha1/alpha2)*S_slave + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
+
     %hslave = Q_slave(nfree,nfree) \ xslave_prev(nfree,:);
     hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:))));    
     
     FD(indA) = FD(indA) - P_m2D'*reshape(P_D2s'*Q_slave(nd, nfree)*hslave(1:numel(nfree),:), [], 1);
     FD(indI) = FD(indI) - L_s' * reshape(hslave((numel(np_free)+1):end,:), [], 1);
-    
+
     
     FL = FL + FD;
     
@@ -194,27 +197,30 @@ for kt = 2:10%Nsamples
     
     %updating slave-domain solution    
     %%{
-    s_new = [reshape(P_m2D*Xsamples(indA, kt),[],Qs_sector); reshape(L_s*Xsamples(indI, kt),[],Qs_sector)];
-    xslav = XX*( (alpha1/alpha2)*s_prev + s_new);
-    
-    xslave_prev = (-(alpha1/alpha2)*S_slave + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
-    hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:)))); 
-    
-    xslav(nfree,:) = xslav(nfree,:) + hslave;
-    Xslave(:,kt) = reshape(xslav, [], 1);
-    s_prev = s_new;
-    %}
-    
+
     %{
     s_new = [reshape(P_m2D*Xsamples(indA, kt),[],Qs_sector); reshape(L_s*Xsamples(indI, kt),[],Qs_sector)];
-    xslav = XX*( (alpha1/alpha2)*s_prev + s_new);
+    xslav = XX*( (alpha1/alpha2)*s_prev*0 + s_new);
     
-    xslave_prev = (-(alpha1/alpha2)*S_slave + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
+    xslave_prev = (-(alpha1/alpha2)*S_slave*0 + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
     hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:)))); 
+    
     xslav(nfree,:) = xslav(nfree,:) + hslave;
     Xslave(:,kt) = reshape(xslav, [], 1);
     s_prev = s_new;
     %}
+    
+    s_new = [reshape(P_m2D*Xsamples(indA, kt),[],Qs_sector); reshape(L_s*Xsamples(indI, kt),[],Qs_sector)];
+    xslav = XX*( (alpha1/alpha2)*s_prev + s_new);
+    
+    xslave_prev = (-(alpha1/alpha2)*S_slave + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
+    hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:)))); 
+ 
+    xslav(nfree,:) = xslav(nfree,:) + hslave;
+    Xslave(:,kt) = reshape(xslav, [], 1);
+    s_prev = s_new;
+    %}
+
     
     %plotting currents
     %%{

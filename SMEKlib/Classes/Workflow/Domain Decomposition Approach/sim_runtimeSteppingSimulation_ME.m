@@ -10,7 +10,7 @@ function sim = sim_runtimeSteppingSimulation_ME(sim, pars, varargin)
 % [ ] switch to harmonic reluctivity? (maybe not required yet
 
 % adjusted CN for stability
-alpha2 = 2; %weight for implicit (k+1) step; 1 for CN, 2 for BE
+alpha2 = 1.1; %weight for implicit (k+1) step; 1 for CN, 2 for BE
 alpha1 = 2 - alpha2;
 
 %basic setup
@@ -35,7 +35,7 @@ if isa(pars.U, 'function_handle')
 else
     U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
     Nin = 1;
-    %U = 400/2;
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %voltage function
     phi0 = 0;
@@ -87,15 +87,13 @@ P_m2D = sim.msh.misc.P_m2D;
 P_D2s = sim.msh.misc.P_D2s;
 ND = size(P_D2s, 2);
 
-Nh = numel(nd);
-L = sparse(1:Nh, nd, ones(1, Nh), Nh, Np_slave);
-
 %assembling final matrices
 S_slave = [S -1/sim.dims.leff*C;
     sparse(Nu_slave, Np_slave) -speye(Nu_slave, Nu_slave)];
 M_slave = [M sparse(Np_slave, Nu_slave);
     DR*transpose(C) sparse(Nu_slave, Nu_slave)];
 Q_slave = S_slave + 2/(dt*alpha2)*M_slave;
+[Laux, Uaux, Paux, Qaux] = lu(Q_slave(nfree,nfree)) ;
 
 %"impulse" solutions
 XX = zeros(Np_slave+Nu_slave, ND + Nu_slave);
@@ -103,12 +101,8 @@ XX(nfree, :) = Q_slave(nfree,nfree) \ [...
     -Q_slave(nfree, nd)*P_D2s [sparse(numel(np_free), Nu_slave); -DR]];
 XX(nd, 1:ND) = P_D2s;
 
-sim.misc.temp = XX;
-
 Hvar = [P_D2s'*Q_slave(nd, 1:Np_slave)*XX(1:Np_slave,:);
     XX((Np_slave+1):end,:)];
-
-sim.misc.Hvar = Hvar;
 
 %dependencies on the newest time-step
 tempcell_SDD = cell(1, Qs_sector); [tempcell_SDD{:}] = deal( Hvar(1:ND, 1:ND) );
@@ -120,7 +114,9 @@ Q_SDI = P_m2D'*blkdiag(tempcell_SDI{:})*L_s; clear tempcell_SDI;
 Q_ID = L_s'*blkdiag(tempcell_ID{:})*P_m2D; clear tempcell_ID;
 Q_II = L_s'*blkdiag(tempcell_II{:})*L_s; clear tempcell_II;
 
+
 Xslave = zeros(Qs_sector*(Np_slave+Nu_slave), Nsamples);
+Xslave(:,1) = sim.results.Xslave0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -135,19 +131,20 @@ Xsamples = zeros(Ntot, Nsamples);
 
 %setting initial condition
 if isfield(sim.results, 'X0') && ~isempty( sim.results.X0 )
-    Xsamples(:, 1) = 0*sim.results.X0;
+    Xsamples(:, 1) = sim.results.X0;
     %Xsamples(:, 1) = sim.results.Xh(1:Ntot);
 else
-    Xsamples(:, 1) = 0*sim.results.Xh(1:Ntot);
-    %error('Initial conditions not computed.')
+    %Xsamples(:, 1) = sim.results.Xh(1:Ntot);
+    error('Initial conditions not computed.')
 end
 
 %initializing previous residual term
-%res_prev = sim.results.res_prev;
-res_prev = zeros(size(Xsamples,1),1);
+res_prev = sim.results.res_prev;
+s_prev = [reshape(P_m2D*Xsamples(indA, 1),[],Qs_sector); reshape(L_s*Xsamples(indI, 1),[],Qs_sector)];
+%res_prev = zeros(size(Xsamples,1),1);
 
 
-for kt = 2:Nsamples
+for kt = 2:15%Nsamples
     disp(['Time step ' num2str(kt) '...']);
     
     S_ag = sim.msh.get_AGmatrix(wm*tsamples(kt), Ntot);
@@ -163,15 +160,21 @@ for kt = 2:Nsamples
     
     % updating the decomposed-domain contribution to F
     FD = zeros(Ntot, 1);
-    xslave_prev = (2/(dt*alpha2))*M_slave*reshape(Xslave(:,kt-1), [], Qs_sector);
-    hslave = Q_slave(nfree,nfree) \ xslave_prev(nfree,:);
+    %xslave_prev = (-(alpha1/alpha2)*S_slave*0 + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
+    xslave_prev = (-(alpha1/alpha2)*S_slave*0 + (1/(dt))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
+    %hslave = Q_slave(nfree,nfree) \ xslave_prev(nfree,:);
+    hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:))));    
+    
     FD(indA) = FD(indA) - P_m2D'*reshape(P_D2s'*Q_slave(nd, nfree)*hslave(1:numel(nfree),:), [], 1);
     FD(indI) = FD(indI) - L_s' * reshape(hslave((numel(np_free)+1):end,:), [], 1);
     
-    if kt == 3
-        sim.misc.Fa = P_m2D'*reshape(P_D2s'*Q_slave(nd, nfree)*hslave(1:numel(nfree),:), [], 1);
-        sim.misc.Fi = L_s' * reshape(hslave((numel(np_free)+1):end,:), [], 1);
-    end
+    
+    x2 = reshape(Xslave(:,kt-1), [], Qs_sector);
+    h2 = [P_D2s'*(-(alpha1/alpha2)*S_slave(nd, nd) + 0*(2/(dt*alpha2))*M_slave(nd, nd))*x2(nd,:);
+        -(alpha1/alpha2)*x2((Np_slave+1):end,:)];
+    
+    %FD(indA) = FD(indA) + P_m2D'*reshape(h2(1:ND,:), [], 1);
+    %FD(indI) = FD(indI) + L_s'*reshape(h2((ND+1):end,:), [], 1);
     
     FL = FL + FD;
     
@@ -180,9 +183,6 @@ for kt = 2:Nsamples
         [J, res] = Jc.eval(Xsamples(:,kt), sim.nu_fun); 
         
         res_tot = PT'*(res + Qconst*Xsamples(:,kt) - FL - (alpha1/alpha2)*res_prev);
-        
-        %sim.misc.J = J;
-        %sim.misc.res = res;
         
         resNorm = norm(res_tot) / norm(FL);
         disp(['    Newton step ' num2str(kiter) ', relative residual ' num2str(resNorm) '.']);
@@ -201,9 +201,26 @@ for kt = 2:Nsamples
         + FD;
     
     %updating slave-domain solution    
-    xslav = XX*[reshape(P_m2D*Xsamples(indA, kt),[],Qs_sector); reshape(L_s*Xsamples(indI, kt),[],Qs_sector)];
+    %{
+    s_new = [reshape(P_m2D*Xsamples(indA, kt),[],Qs_sector); reshape(L_s*Xsamples(indI, kt),[],Qs_sector)];
+    xslav = XX*( (alpha1/alpha2)*s_prev*0 + s_new);
+    
+    xslave_prev = (-(alpha1/alpha2)*S_slave*0 + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
+    hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:)))); 
+    
     xslav(nfree,:) = xslav(nfree,:) + hslave;
     Xslave(:,kt) = reshape(xslav, [], 1);
+    s_prev = s_new;
+    %}
+    
+    s_new = [reshape(P_m2D*Xsamples(indA, kt),[],Qs_sector); reshape(L_s*Xsamples(indI, kt),[],Qs_sector)];
+    xslav = XX*( (alpha1/alpha2)*s_prev + s_new);
+    
+    xslave_prev = (-(alpha1/alpha2)*S_slave + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
+    hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:)))); 
+    xslav(nfree,:) = xslav(nfree,:) + hslave;
+    Xslave(:,kt) = reshape(xslav, [], 1);
+    s_prev = s_new;
     
     %plotting currents
     %%{

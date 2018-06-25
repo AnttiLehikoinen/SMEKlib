@@ -163,8 +163,8 @@ indA = 1:sim.Np;
 indI = (sim.Np + sim.results.Nu_r) + (1:sim.results.Ni_s);
 Qs_sector = sim.dims.Qs / sim.msh.symmetrySectors;
 
-D0 = P_m2D*Xh(indA,:); D0 = reshape(D0(:,1) -1i*D0(:,2), ND, []);
-I0 = Xh(indI,:); I0 = I0(:,1) - 1i*I0(:,2);
+D0 = P_m2D*Xh(indA,:); D0 = reshape(D0(:,1) + 1i*D0(:,2), ND, []);
+I0 = Xh(indI,:); I0 = I0(:,1) + 1i*I0(:,2);
 
 Qfree_slave0 = [S(nfree, nfree)+1i*w*M(nfree, nfree) -1/dims.leff*C(nfree,:);
     1i*w*DR*transpose(C(nfree,:)) -speye(Nu, Nu)];

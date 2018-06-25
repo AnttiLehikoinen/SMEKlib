@@ -40,7 +40,7 @@ end
 
 
 %effect of derivatives
-Finit = -(  w*Mtot*sim.results.Xh(Ntot + (1:Ntot), kslip) )  + [sim.matrices.F; zeros(Nui,1)];
+Finit = w*Mtot*sim.results.Xh(Ntot + (1:Ntot), kslip)  + [sim.matrices.F; zeros(Nui,1)];
 
 X0 = sim.results.Xh(1:Ntot, kslip);
 Sag = sim.msh.get_AGmatrix(0, Ntot);
@@ -64,5 +64,5 @@ end
 
 sim.results.X0 = X0;
 %sim.results.res_prev = Finit;
-sim.results.res_prev = -(  w*Mtot*sim.results.Xh(Ntot + (1:Ntot), kslip) )  - 0*[sim.matrices.F; zeros(Nui,1)];
+sim.results.res_prev = (  w*Mtot*sim.results.Xh(Ntot + (1:Ntot), kslip) )  - 0*[sim.matrices.F; zeros(Nui,1)];
 end

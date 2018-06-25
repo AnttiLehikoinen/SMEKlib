@@ -5,7 +5,6 @@ function sim = sim_runtimeHarmonicSimulation_DDM(sim, pars, varargin)
 
 f = pars.f;
 U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
-%U = 400/2
 w = 2*pi*f;
 
 if ~isempty(pars.slip)
@@ -76,8 +75,8 @@ else
 end
 
 
-Q = [Stot_r+real(Qred) w*Mtot+imag(Qred);
-    -w*Mtot-imag(Qred) Stot_i+real(Qred)];
+Q = [Stot_r+real(Qred) -w*Mtot-imag(Qred);
+    w*Mtot+imag(Qred) Stot_i+real(Qred)];
 Nui = size(Stot,1) - size(sim.matrices.P,1);
 PTT = blkdiag(sim.matrices.P, speye(Nui, Nui), ...
     sim.matrices.P, speye(Nui, Nui));
@@ -85,7 +84,7 @@ PTT = blkdiag(sim.matrices.P, speye(Nui, Nui), ...
 sim.misc.Q = Q;
 
 %assembling load vector
-Ftot = [sim.matrices.F; zeros(Nu,1); real(UH); -sim.matrices.F; zeros(Nu,1); -imag(UH)];
+Ftot = [sim.matrices.F; zeros(Nu,1); real(UH); sim.matrices.F; zeros(Nu,1); imag(UH)];
 
 Xtot = zeros(size(Q,1), 1);
 for kiter = 1:15

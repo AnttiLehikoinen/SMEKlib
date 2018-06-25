@@ -10,5 +10,5 @@ element types.
 
 [ ] Fix examples!
     [ ] New mesh coarse mesh generator functionality
-    [ ] Changed sign of imaginary unit in time-harmonic analysis.
+    [ ] Changed sign of imaginary unit in time-harmonic analysis??
 %}

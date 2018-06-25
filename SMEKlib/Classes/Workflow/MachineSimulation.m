@@ -143,7 +143,7 @@ classdef MachineSimulation < handle
             indI = this.Np + this.results.Nu_s + this.results.Nu_r + ...
                 (1:this.results.Ni_s);
             Nvars = size(this.results.Xh, 1)/2;
-            I = this.results.Xh(indI) - 1i*this.results.Xh(Nvars+indI);
+            I = this.results.Xh(indI) + 1i*this.results.Xh(Nvars+indI);
             if this.dims.connection_stator == defs.star
                 I = [1 0;0 1;-1 -1] * I;
             end

@@ -105,7 +105,7 @@ end
 % post-processing
 
 %obtaining stator current phasor
-Is = Xtot(indI) - 1i*Xtot(Nvars+indI); %minus since we are transforming from real to complex Fourier series representation
+Is = Xtot(indI) + 1i*Xtot(Nvars+indI);
 
 %surface plot of vector potential
 figure(3); clf;

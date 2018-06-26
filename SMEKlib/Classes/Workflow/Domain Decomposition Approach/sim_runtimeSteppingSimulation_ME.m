@@ -10,7 +10,7 @@ function sim = sim_runtimeSteppingSimulation_ME(sim, pars, varargin)
 % [ ] switch to harmonic reluctivity? (maybe not required yet
 
 % adjusted CN for stability
-alpha2 = 1.8; %weight for implicit (k+1) step; 1 for CN, 2 for BE
+alpha2 = 1.1; %weight for implicit (k+1) step; 1 for CN, 2 for BE
 alpha1 = 2 - alpha2;
 
 %basic setup
@@ -60,10 +60,10 @@ indI = (sim.Np + Nu) + (1:Ni_s);
 indA = 1:sim.Np;
 
 %circuit and other matrices
-[Sc, Mtot] = get_circuitMatrices(sim);
+[Scc, Mtot] = get_circuitMatrices(sim);
 Mtot = Mtot / dt;
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
-Ntot = size(Sc,1);
+Ntot = size(Scc,1);
 Nui = Ntot - sim.Np;
 PT = blkdiag(sim.matrices.P, speye(Nui));
 
@@ -120,7 +120,7 @@ Xslave(:,1) = sim.results.Xslave0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Sc = Sc + [Q_SDD sparse(sim.Np, Nu) Q_SDI sparse(sim.Np, Ni_r);
+Sc = Scc + [Q_SDD sparse(sim.Np, Nu) Q_SDI sparse(sim.Np, Ni_r);
     sparse(Nu, sim.Np + Nu + Ni_r + Ni_s);
     Q_ID sparse(Ni_s,Nu) Q_II];
 
@@ -144,7 +144,7 @@ s_prev = [reshape(P_m2D*Xsamples(indA, 1),[],Qs_sector); reshape(L_s*Xsamples(in
 %res_prev = zeros(size(Xsamples,1),1);
 
 
-for kt = 2:10%Nsamples
+for kt = 2:50%Nsamples
 
     disp(['Time step ' num2str(kt) '...']);
     
@@ -165,10 +165,18 @@ for kt = 2:10%Nsamples
     xslave_prev = (-(alpha1/alpha2)*S_slave + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
 
     %hslave = Q_slave(nfree,nfree) \ xslave_prev(nfree,:);
-    hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:))));    
+    hslave = zeros(size(Q_slave,1), Qs_sector);
+    hslave(nfree,:) = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:))));
+    hslave = hslave + alpha1/alpha2*reshape(Xslave(:,kt-1), [], Qs_sector);
     
-    FD(indA) = FD(indA) - P_m2D'*reshape(P_D2s'*Q_slave(nd, nfree)*hslave(1:numel(nfree),:), [], 1);
-    FD(indI) = FD(indI) - L_s' * reshape(hslave((numel(np_free)+1):end,:), [], 1);
+    %FD(indA) = FD(indA) - P_m2D'*reshape(P_D2s'*Q_slave(nd, nfree)*hslave(1:numel(nfree),:), [], 1);
+    %FD(indI) = FD(indI) - L_s' * reshape(hslave((numel(np_free)+1):end,:), [], 1);
+    FD(indA) = FD(indA) - P_m2D'*reshape(P_D2s'*Q_slave(nd, 1:Np_slave)*hslave(1:Np_slave,:), [], 1);
+    FD(indI) = FD(indI) - L_s' * reshape(hslave((Np_slave+1):end,:), [], 1);
+    
+    %hslave = reshape(Xslave(:,kt-1), [], Qs_sector);    
+    %FD(indA) = FD(indA) - alpha1/alpha2*P_m2D'*reshape(P_D2s'*Q_slave(nd, 1:Np_slave)*hslave(1:Np_slave,:), [], 1);
+    %FD(indI) = FD(indI) - alpha1/alpha2*L_s' * reshape(hslave((Np_slave+1):end,:), [], 1);
 
     
     FL = FL + FD;
@@ -193,7 +201,7 @@ for kt = 2:10%Nsamples
     
     %updating prev-residual term
     res_prev = -res - (S_ag + Sc)*Xsamples(:,kt) + [sim.matrices.F; zeros(Nu,1); Ustep(1:sim.results.Ni_s)] ...
-        + FD;
+        + 0*FD;
     
     %updating slave-domain solution    
     %%{

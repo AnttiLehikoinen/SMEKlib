@@ -9,6 +9,7 @@ classdef defs < handle
 	%}
 	methods (Static)		
 		%ugly non-enumeration-workaround for enumerations
+        function e = none();  e = -1; end;
 		function e = stranded();  e = 30; end;
 		function e = solid(); e = 31; end;
 		function e = cage(); e = 32; end;
@@ -19,5 +20,6 @@ classdef defs < handle
 		function e = star(); e = 37; end;
 		function e = delta(); e = 38; end;
         function e = current_supply(); e = 39; end;
+        function e = decomposed();  e = 40; end;
 	end
 end

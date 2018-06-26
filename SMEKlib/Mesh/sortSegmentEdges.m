@@ -1,5 +1,5 @@
 function n = sortSegmentEdges(p, e)
-%sortSegmentEdges sorts nodes of segment
+%sortSegmentEdges sorts nodes of circumferentially.
 %
 %
 % (c) 2018 Antti Lehikoinen / Smeklab

@@ -31,7 +31,7 @@ N = N1 + N2;
 %determining indices
 if nargout > 1
     inds_const_X = max(N_source - N_imp + 1, 1):(N_source-1);
-    inds_const_h = (2 + numel(inds_const_X) - 1):-1:2;
+    inds_con st_h = (2 + numel(inds_const_X) - 1):-1:2;
 else
     inds_const_X = max(N_source - N_imp + 1, 1):N_source;
     inds_const_h = (1 + numel(inds_const_X) - 1):-1:1;

@@ -1,4 +1,4 @@
-classdef SimulationParameters
+classdef SimulationParameters < dynamicprops
     %simulation parameters container
     properties
         U, f, N_stepsPerPeriod, N_periods, slip, misc
@@ -22,8 +22,17 @@ classdef SimulationParameters
                 try
                     this.(varargin{k}) = varargin{k+1};
                 catch
-                    error(['Invalid parameter "' num2str(varargin{k}) '"']);
+                    %non-default properties
+                    this.misc.(varargin{k}) = varargin{k+1};
                 end
+            end
+        end
+        
+        function p = miscpar(this, name)
+            if isfield(this.misc, name)
+                p = this.misc.name;
+            else
+                p = [];
             end
         end
         

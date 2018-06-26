@@ -17,6 +17,7 @@ classdef Elements < handle
 		function e = triangle2I(); e = 13; end;		
 		function e = prism(); e = 14; end;
 		function e = composite(); e = 15; end;
+        function e = tet(); e = 16; end;
         
         function bl = isIsoparametric(type)
             if type == Elements.triangle2I
@@ -26,6 +27,13 @@ classdef Elements < handle
         end
         function bl = isTriangle(type)
             if type == Elements.triangle || type == Elements.triangle2 || type == Elements.triangle2I
+                bl = true;
+                return;
+            end
+            bl = false;
+        end
+        function bl = isTet(type)
+            if type == Elements.tet
                 bl = true;
                 return;
             end

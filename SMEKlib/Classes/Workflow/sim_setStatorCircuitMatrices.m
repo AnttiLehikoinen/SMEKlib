@@ -3,7 +3,10 @@ function sim = sim_setStatorCircuitMatrices(sim)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % stator winding matrices
 
-if isfield(sim.dims, 'N_layers')
+if isfield(sim.dims, 'W')
+    %winding configuration matrix given
+    sim.matrices.W = sim.dims.W;
+elseif isfield(sim.dims, 'N_layers')
     W = windingConfiguration_1(sim.dims.q, sim.dims.p, sim.dims.a, sim.dims.c);
     temp = unique( abs(W(:, 1:(sim.dims.Qs/sim.msh.symmetrySectors))) );
     if mod(numel(temp), sim.dims.a)
@@ -15,16 +18,13 @@ else
     sim.matrices.W = windingConfiguration_1(sim.dims.q, sim.dims.p);
 end
 
-%JF_struct = [];
 JF_c = MatrixConstructor;
 statorConductors = sim.msh.namedElements.get('statorConductors');
 if sim.dims.type_statorWinding == defs.stranded
     Nc_s = numel(statorConductors);
     for k = 1:Nc_s
-        %JF_struct = assemble_vector('', 'nodal', 1, k, statorConductors{k}, sim.msh, JF_struct);
         JF_c.assemble_vector(Nodal2D(Operators.I), k, 1, statorConductors{k}, sim.msh);
     end
-    %JF_s = sparseFinalize(JF_struct, sim.Np, Nc_s);
     JF_s = JF_c.finalize(sim.Np, Nc_s);
     cAs = sum(JF_s*eye(Nc_s),1);
     if isfield(sim.dims, 'l_halfCoil')
@@ -41,8 +41,28 @@ if sim.dims.type_statorWinding == defs.stranded
     Ls = Ls(1:(size(Ls,1)/sim.msh.symmetrySectors),:); 
     sim.matrices.Ls = Ls(:, sum(abs(Ls),1)>0) * sim.dims.N_series;
     sim.matrices.Zew_s = sparse(sim.matrices.Ls'*DRs*sim.matrices.Ls);
+elseif sim.dims.type_statorWinding == defs.decomposed
+    % decomposed winding: A-parts handled elsewhere
+     %loop matrix
+    Ls = statorConnectionMatrix(sim.matrices.W, sim.dims.Nc_slot, sim.dims.N_series, 4, 3);
+    %Ls = statorConnectionMatrix(sim.matrices.W, sim.dims.Nc_slot, sim.dims.N_series);
+    Ls = Ls(1:(size(Ls,1)/sim.msh.symmetrySectors),:); 
+    sim.matrices.Ls = sparse(Ls(:, sum(abs(Ls),1)>0));
+    sim.matrices.Ms = sparse(sim.Np,sim.Np);
+    sim.matrices.Cs = sparse(sim.Np, size(Ls,1));
+    sim.matrices.Zew_s = sparse(size(Ls,2), size(Ls,2));
 else
-    error('Non-stranded stator windings not yet implemented.');
+    warning('Stator winding type not yet implemented.');
+end
+
+%end-winding inductance given?
+if isfield(sim.dims, 'Lew')
+    Lew = sim.dims.Lew;
+    if numel(Lew) == 1
+        sim.matrices.Zew_s = sim.matrices.Zew_s + 1i*Lew*eye(size(sim.matrices.Zew_s,1));
+    else
+        sim.matrices.Zew_s = sim.matrices.Zew_s + 1i*Lew;
+    end
 end
 
 end

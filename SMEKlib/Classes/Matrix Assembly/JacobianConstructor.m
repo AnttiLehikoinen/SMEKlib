@@ -1,7 +1,8 @@
 classdef JacobianConstructor < MatrixConstructorBase
     properties
         Fvals_test, Fvals_shape, DETF, Ires, msh, Ne
-        symmetric, x_quad, w
+        symmetric, x_quad, w,
+        dof_shape
     end
     methods
         function this = JacobianConstructor(msh, fun_test, fun_shape, symmetric)
@@ -12,6 +13,7 @@ classdef JacobianConstructor < MatrixConstructorBase
             %this.Np = size(msh.p, 2);
             this.Ne = size(msh.t, 2);
             this.msh = msh;
+            elements = 1:this.Ne;
             
             %checking symmetricity
             this.symmetric = symmetric;
@@ -44,7 +46,7 @@ classdef JacobianConstructor < MatrixConstructorBase
             this.Fvals_test = cell(N_quad, N_test);
             for k_quad = 1:N_quad
                 for k_test = 1:N_test
-                    this.Fvals_test{k_quad, k_test} = fun_test.eval(k_test, this.x_quad(:,k_quad), msh, Ffun(k_quad), detFun(k_quad));
+                    this.Fvals_test{k_quad, k_test} = fun_test.eval(k_test, this.x_quad(:,k_quad), msh, Ffun(k_quad), detFun(k_quad), elements);
                 end
             end
             if symmetric
@@ -54,21 +56,23 @@ classdef JacobianConstructor < MatrixConstructorBase
                 for k_quad = 1:N_quad
                     for k_shape = 1:N_shape
                         this.Fvals_shape{k_quad,k_shape} = ...
-                            fun_shape.eval(k_shape, this.x_quad(:,k_quad), msh, Ffun(k_quad), detFun(k_quad));
+                            fun_shape.eval(k_shape, this.x_quad(:,k_quad), msh, Ffun(k_quad), detFun(k_quad), elements);
                     end
                 end
             end
             
             %storing coordinates
             this.Ires = zeros(1, N_test*this.Ne);
+            this.dof_shape = zeros(N_test, this.Ne);
             for k_shape = 1:N_shape
+                this.dof_shape(k_shape,:) = fun_shape.getIndices(k_shape, msh);
                 if this.symmetric
                     %symmetric Jacobian
                     for k_test = k_shape:N_test
                         this.addCoordinates(fun_test.getIndices(k_test, msh), ...
                             fun_shape.getIndices(k_shape, msh));
                         if k_test ~= k_shape
-                            this.addCoordinates(msh.t(k_test,:), msh.t(k_shape,:));
+                            this.addCoordinates(fun_shape.getIndices(k_shape, msh), fun_test.getIndices(k_test, msh));
                         end
                     end
                 else
@@ -80,7 +84,7 @@ classdef JacobianConstructor < MatrixConstructorBase
                 end
             end
             for k_test = 1:N_test
-                this.Ires( (k_test-1)*this.Ne + (1:this.Ne) ) = msh.t(k_test,:);
+                this.Ires( (k_test-1)*this.Ne + (1:this.Ne) ) = fun_test.getIndices(k_test, msh);
             end
             this.I = this.I(1:this.Ncoord);
             this.J = this.J(1:this.Ncoord);
@@ -106,14 +110,26 @@ classdef JacobianConstructor < MatrixConstructorBase
                 ri = 1;
                 
                 %evaluating B
-                B = zeros(2, this.Ne);
+                B = zeros( size(this.Fvals_shape{1}) );
                 for k_shape = 1:Nshape
                     B = B + bsxfun(@times, this.Fvals_shape{k_quad, k_shape}, ...
-                        transpose(X(this.msh.t(k_shape,:))) );
+                        transpose(X( this.dof_shape(k_shape,:) )) );
                 end
                 
                 %evaluating material characteristics
                 [nu, dnu] = matfun(B);
+                if size(nu,1) == size(B,1)
+                    H = nu;
+                    dH = dnu;
+                else
+                    H = bsxfun(@times, B, nu);
+                    dH = [nu+2*dnu.*B(1,:).*B(1,:);
+                        2*dnu.*B(1,:).*B(2,:);
+                        2*dnu.*B(2,:).*B(1,:);
+                        nu+2*dnu.*B(2,:).*B(2,:)];
+                end
+                
+                %{
                 if size(nu, 1) == 1
                     %computing H and dH/dB
                     H = bsxfun(@times, B, nu);
@@ -127,6 +143,7 @@ classdef JacobianConstructor < MatrixConstructorBase
                     H = nu;
                     dH = dnu;
                 end
+                %}
                 
                 %accumulating matrix entries
                 for k_shape = 1:Nshape

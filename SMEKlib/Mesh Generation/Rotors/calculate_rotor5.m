@@ -1,4 +1,9 @@
-function msh = calculate_rotor5(msh,dim)
+function [p,t,m,FL,LL,ag] = calculate_rotor5(dim)
+
+%Boundaries
+FL = [1 42 41 40 39 38 37 36];
+LL = [1 24 25 26 27 28 29 30];
+ag = [36 35 34 33 32 31 30];
 
 %preallocation of memory
 p = zeros(42,2);
@@ -7,11 +12,11 @@ m = zeros(62,1);
 
 
 %help variables
-line = [dim.Rin dim.Rout-dim.hc_r2-dim.hc_r-dim.wc2_r/2 dim.Rout-dim.hc_r2-dim.hc_r ...
-        dim.Rout-dim.hc_r2-dim.hc_r/2 dim.Rout-dim.hc_r2 dim.Rout-dim.hc_r2+dim.wc3_r/2 ...
-        dim.Rout-dim.htt_r-dim.wc1_r dim.Rout-dim.htt_r-dim.wc1_r/2 dim.Rout-dim.htt_r dim.Rout];
-c = sqrt(line(8)^2+(dim.wc1_r/2)^2-2*((line(8)+line(9))/2)*(dim.wc1_r/2)*cosd(135));  
-alfa = asin((dim.wc1_r/2*sind(135))/c);
+line = [dim.Rin dim.Rout-dim.R_height4-dim.R_height3-dim.R_width6/2 dim.Rout-dim.R_height4-dim.R_height3 ...
+        dim.Rout-dim.R_height4-dim.R_height3/2 dim.Rout-dim.R_height4 dim.Rout-dim.R_height4+dim.R_width5/2 ...
+        dim.Rout-dim.R_height1-dim.R_width3 dim.Rout-dim.R_height1-dim.R_width3/2 dim.Rout-dim.R_height1 dim.Rout];
+c = sqrt(line(8)^2+(dim.R_width3/2)^2-2*((line(8)+line(9))/2)*(dim.R_width3/2)*cosd(135));  
+alfa = asin((dim.R_width3/2*sind(135))/c);
 
 
 %Nodes
@@ -22,23 +27,23 @@ p(2,2) = (line(1)+line(2))/2*sin(dim.angleR(1)/2);
 p(3,1) = line(2)*cos(dim.angleR(1)/2);
 p(3,2) = line(2)*sin(dim.angleR(1)/2);
 
-p(4,1) = sqrt(line(3)^2+(dim.wc2_r/2)^2)*cos(dim.angleR(1)/2-atan((dim.wc2_r/2)/line(3)));
-p(4,2) = sqrt(line(3)^2+(dim.wc2_r/2)^2)*sin(dim.angleR(1)/2-atan((dim.wc2_r/2)/line(3)));
+p(4,1) = sqrt(line(3)^2+(dim.R_width6/2)^2)*cos(dim.angleR(1)/2-atan((dim.R_width6/2)/line(3)));
+p(4,2) = sqrt(line(3)^2+(dim.R_width6/2)^2)*sin(dim.angleR(1)/2-atan((dim.R_width6/2)/line(3)));
 
-p(5,1) = sqrt(line(4)^2+(dim.wc2_r/4+dim.wc3_r/4)^2)*cos(dim.angleR(1)/2-atan((dim.wc2_r/4+dim.wc3_r/4)/line(4)));
-p(5,2) = sqrt(line(4)^2+(dim.wc2_r/4+dim.wc3_r/4)^2)*sin(dim.angleR(1)/2-atan((dim.wc2_r/4+dim.wc3_r/4)/line(4)));
+p(5,1) = sqrt(line(4)^2+(dim.R_width4/4+dim.R_width5/4)^2)*cos(dim.angleR(1)/2-atan((dim.R_width4/4+dim.R_width5/4)/line(4)));
+p(5,2) = sqrt(line(4)^2+(dim.R_width4/4+dim.R_width5/4)^2)*sin(dim.angleR(1)/2-atan((dim.R_width4/4+dim.R_width5/4)/line(4)));
 
-p(6,1) = sqrt(line(5)^2+(dim.wc3_r/2)^2)*cos(dim.angleR(1)/2-atan((dim.wc3_r/2)/line(5)));
-p(6,2) = sqrt(line(5)^2+(dim.wc3_r/2)^2)*sin(dim.angleR(1)/2-atan((dim.wc3_r/2)/line(5)));
+p(6,1) = sqrt(line(5)^2+(dim.R_width5/2)^2)*cos(dim.angleR(1)/2-atan((dim.R_width5/2)/line(5)));
+p(6,2) = sqrt(line(5)^2+(dim.R_width5/2)^2)*sin(dim.angleR(1)/2-atan((dim.R_width5/2)/line(5)));
 
-p(7,1) = sqrt(line(6)^2+(dim.wc2_r/2)^2)*cos(dim.angleR(1)/2-atan((dim.wc2_r/2)/line(6)));
-p(7,2) = sqrt(line(6)^2+(dim.wc2_r/2)^2)*sin(dim.angleR(1)/2-atan((dim.wc2_r/2)/line(6)));
+p(7,1) = sqrt(line(6)^2+(dim.R_width4/2)^2)*cos(dim.angleR(1)/2-atan((dim.R_width4/2)/line(6)));
+p(7,2) = sqrt(line(6)^2+(dim.R_width4/2)^2)*sin(dim.angleR(1)/2-atan((dim.R_width4/2)/line(6)));
 
-p(8,1) = sqrt(line(7)^2+(dim.wc2_r/2)^2)*cos(dim.angleR(1)/2-atan((dim.wc2_r/2)/line(7)));
-p(8,2) = sqrt(line(7)^2+(dim.wc2_r/2)^2)*sin(dim.angleR(1)/2-atan((dim.wc2_r/2)/line(7)));
+p(8,1) = sqrt(line(7)^2+(dim.R_width4/2)^2)*cos(dim.angleR(1)/2-atan((dim.R_width4/2)/line(7)));
+p(8,2) = sqrt(line(7)^2+(dim.R_width4/2)^2)*sin(dim.angleR(1)/2-atan((dim.R_width4/2)/line(7)));
 
-p(9,1) = sqrt(line(8)^2+(dim.wc1_r/2)^2)*cos(dim.angleR(1)/2-atan((dim.wc1_r/2)/line(8)));
-p(9,2) = sqrt(line(8)^2+(dim.wc1_r/2)^2)*sin(dim.angleR(1)/2-atan((dim.wc1_r/2)/line(8)));
+p(9,1) = sqrt(line(8)^2+(dim.R_width3/2)^2)*cos(dim.angleR(1)/2-atan((dim.R_width3/2)/line(8)));
+p(9,2) = sqrt(line(8)^2+(dim.R_width3/2)^2)*sin(dim.angleR(1)/2-atan((dim.R_width3/2)/line(8)));
 
 p(10,1) = c*cos(dim.angleR(1)/2-alfa);
 p(10,2) = c*sin(dim.angleR(1)/2-alfa);
@@ -49,23 +54,23 @@ p(11,2) = line(9)*sin(dim.angleR(1)/2);
 p(12,1) = c*cos(dim.angleR(1)/2+alfa);
 p(12,2) = c*sin(dim.angleR(1)/2+alfa);
 
-p(13,1) = sqrt(line(8)^2+(dim.wc1_r/2)^2)*cos(dim.angleR(1)/2+atan((dim.wc1_r/2)/line(8)));
-p(13,2) = sqrt(line(8)^2+(dim.wc1_r/2)^2)*sin(dim.angleR(1)/2+atan((dim.wc1_r/2)/line(8)));
+p(13,1) = sqrt(line(8)^2+(dim.R_width3/2)^2)*cos(dim.angleR(1)/2+atan((dim.R_width3/2)/line(8)));
+p(13,2) = sqrt(line(8)^2+(dim.R_width3/2)^2)*sin(dim.angleR(1)/2+atan((dim.R_width3/2)/line(8)));
 
-p(14,1) = sqrt(line(7)^2+(dim.wc2_r/2)^2)*cos(dim.angleR(1)/2+atan((dim.wc2_r/2)/line(7)));
-p(14,2) = sqrt(line(7)^2+(dim.wc2_r/2)^2)*sin(dim.angleR(1)/2+atan((dim.wc2_r/2)/line(7)));
+p(14,1) = sqrt(line(7)^2+(dim.R_width4/2)^2)*cos(dim.angleR(1)/2+atan((dim.R_width4/2)/line(7)));
+p(14,2) = sqrt(line(7)^2+(dim.R_width4/2)^2)*sin(dim.angleR(1)/2+atan((dim.R_width4/2)/line(7)));
 
-p(15,1) = sqrt(line(6)^2+(dim.wc2_r/2)^2)*cos(dim.angleR(1)/2+atan((dim.wc2_r/2)/line(6)));
-p(15,2) = sqrt(line(6)^2+(dim.wc2_r/2)^2)*sin(dim.angleR(1)/2+atan((dim.wc2_r/2)/line(6)));
+p(15,1) = sqrt(line(6)^2+(dim.R_width4/2)^2)*cos(dim.angleR(1)/2+atan((dim.R_width4/2)/line(6)));
+p(15,2) = sqrt(line(6)^2+(dim.R_width4/2)^2)*sin(dim.angleR(1)/2+atan((dim.R_width4/2)/line(6)));
 
-p(16,1) = sqrt(line(5)^2+(dim.wc3_r/2)^2)*cos(dim.angleR(1)/2+atan((dim.wc3_r/2)/line(5)));
-p(16,2) = sqrt(line(5)^2+(dim.wc3_r/2)^2)*sin(dim.angleR(1)/2+atan((dim.wc3_r/2)/line(5)));
+p(16,1) = sqrt(line(5)^2+(dim.R_width5/2)^2)*cos(dim.angleR(1)/2+atan((dim.R_width5/2)/line(5)));
+p(16,2) = sqrt(line(5)^2+(dim.R_width5/2)^2)*sin(dim.angleR(1)/2+atan((dim.R_width5/2)/line(5)));
 
-p(17,1) = sqrt(line(4)^2+(dim.wc2_r/4+dim.wc3_r/4)^2)*cos(dim.angleR(1)/2+atan((dim.wc2_r/4+dim.wc3_r/4)/line(4)));
-p(17,2) = sqrt(line(4)^2+(dim.wc2_r/4+dim.wc3_r/4)^2)*sin(dim.angleR(1)/2+atan((dim.wc2_r/4+dim.wc3_r/4)/line(4)));
+p(17,1) = sqrt(line(4)^2+(dim.R_width4/4+dim.R_width5/4)^2)*cos(dim.angleR(1)/2+atan((dim.R_width4/4+dim.R_width5/4)/line(4)));
+p(17,2) = sqrt(line(4)^2+(dim.R_width4/4+dim.R_width5/4)^2)*sin(dim.angleR(1)/2+atan((dim.R_width4/4+dim.R_width5/4)/line(4)));
 
-p(18,1) = sqrt(line(3)^2+(dim.wc2_r/2)^2)*cos(dim.angleR(1)/2+atan((dim.wc2_r/2)/line(3)));
-p(18,2) = sqrt(line(3)^2+(dim.wc2_r/2)^2)*sin(dim.angleR(1)/2+atan((dim.wc2_r/2)/line(3)));
+p(18,1) = sqrt(line(3)^2+(dim.R_width6/2)^2)*cos(dim.angleR(1)/2+atan((dim.R_width6/2)/line(3)));
+p(18,2) = sqrt(line(3)^2+(dim.R_width6/2)^2)*sin(dim.angleR(1)/2+atan((dim.R_width6/2)/line(3)));
 
 p(19,1) = line(3)*cos(dim.angleR(1)/2);
 p(19,2) = line(3)*sin(dim.angleR(1)/2);
@@ -76,11 +81,11 @@ p(20,2) = line(5)*sin(dim.angleR(1)/2);
 p(21,1) = line(8)*cos(dim.angleR(1)/2);
 p(21,2) = line(8)*sin(dim.angleR(1)/2);
 
-p(22,1) = line(9)*cos(4*dim.angleR(1)/5);
-p(22,2) = line(9)*sin(4*dim.angleR(1)/5);
+p(22,1) = 0.5*(line(8)+line(9))*cos(4*dim.angleR(1)/5);
+p(22,2) = 0.5*(line(8)+line(9))*sin(4*dim.angleR(1)/5);
 
-p(23,1) = line(9)*cos(dim.angleR(1)/5);
-p(23,2) = line(9)*sin(dim.angleR(1)/5);
+p(23,1) = 0.5*(line(8)+line(9))*cos(dim.angleR(1)/5);
+p(23,2) = 0.5*(line(8)+line(9))*sin(dim.angleR(1)/5);
 
 p(24,1) = line(1)*cos(dim.angleR(1));
 p(24,2) = line(1)*sin(dim.angleR(1));
@@ -97,30 +102,34 @@ p(27,2) = line(5)*sin(dim.angleR(1));
 p(28,1) = line(8)*cos(dim.angleR(1));
 p(28,2) = line(8)*sin(dim.angleR(1));
 
-p(29,1) = line(9)*cos(dim.angleR(1));
-p(29,2) = line(9)*sin(dim.angleR(1));
+p(29,1) = 0.5*(line(8)+line(9))*cos(dim.angleR(1));
+p(29,2) = 0.5*(line(8)+line(9))*sin(dim.angleR(1));
 
 p(30,1) = line(10)*cos(dim.angleR(1));
 p(30,2) = line(10)*sin(dim.angleR(1));
 
-p(31,1) = line(10)*cos(4*dim.angleR(1)/5);
-p(31,2) = line(10)*sin(4*dim.angleR(1)/5);
+%p(31,1) = line(10)*cos(4*dim.angleR(1)/5);
+%p(31,2) = line(10)*sin(4*dim.angleR(1)/5);
+p(31,1) = line(10)*cos(dim.angleR(1)*5/6); p(31,2) = line(10)*sin(dim.angleR(1)*5/6);
 
-p(32,1) = sqrt(line(10)^2+(dim.wc1_r/2)^2)*cos(dim.angleR(1)/2+atan((dim.wc1_r/2)/line(10)));
-p(32,2) = sqrt(line(10)^2+(dim.wc1_r/2)^2)*sin(dim.angleR(1)/2+atan((dim.wc1_r/2)/line(10)));
+%p(32,1) = sqrt(line(10)^2+(dim.R_width3/2)^2)*cos(dim.angleR(1)/2+atan((dim.R_width3/2)/line(10)));
+%p(32,2) = sqrt(line(10)^2+(dim.R_width3/2)^2)*sin(dim.angleR(1)/2+atan((dim.R_width3/2)/line(10)));
+p(32,1) = line(10)*cos(dim.angleR(1)*4/6); p(32,2) = line(10)*sin(dim.angleR(1)*4/6);
 
 p(33,1) = line(10)*cos(dim.angleR(1)/2);
 p(33,2) = line(10)*sin(dim.angleR(1)/2);
 
-p(34,1) = sqrt(line(10)^2+(dim.wc1_r/2)^2)*cos(dim.angleR(1)/2-atan((dim.wc1_r/2)/line(10)));
-p(34,2) = sqrt(line(10)^2+(dim.wc1_r/2)^2)*sin(dim.angleR(1)/2-atan((dim.wc1_r/2)/line(10)));
+%p(34,1) = sqrt(line(10)^2+(dim.R_width3/2)^2)*cos(dim.angleR(1)/2-atan((dim.R_width3/2)/line(10)));
+%p(34,2) = sqrt(line(10)^2+(dim.R_width3/2)^2)*sin(dim.angleR(1)/2-atan((dim.R_width3/2)/line(10)));
+p(34,1) = line(10)*cos(dim.angleR(1)/6*2);
+p(34,2) = line(10)*sin(dim.angleR(1)/6*2);
 
-p(35,1) = line(10)*cos(dim.angleR(1)/5);
-p(35,2) = line(10)*sin(dim.angleR(1)/5);
+p(35,1) = line(10)*cos(dim.angleR(1)/6);
+p(35,2) = line(10)*sin(dim.angleR(1)/6);
 
 p(36,1) = line(10);
 
-p(37,1) = line(9);
+p(37,1) = 0.5*(line(8)+line(9));
 
 p(38,1) = line(8);
 
@@ -321,14 +330,5 @@ m(61) = 9999;
 
 t(62,:) = [13 14 21];
 m(62) = 9999;
-
-%additional quality improvements
-p(37,:) = 0.5*p(36,:) + 0.5*p(38,:);
-p(29,:) = 0.5*p(30,:) + 0.5*p(28,:);
-
-msh.t = t;
-msh.matel = m;
-msh.p = p;
-msh.index_p = size(p,1);
 
 end

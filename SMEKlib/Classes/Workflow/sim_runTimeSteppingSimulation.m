@@ -1,5 +1,5 @@
 function sim = sim_runTimeSteppingSimulation(sim, pars)
-%sim_runTimeSteppingSimulation time-stepping simulation
+%sim_runTimeSteppingSimulation time-stepping simulation (implicit Euler).
 % 
 % (c) 2017 Antti Lehikoinen / Aalto University
 
@@ -13,11 +13,16 @@ else
     slip = sim.dims.slip;
 end
 
+%{
 dt = 1/f / pars.N_stepsPerPeriod; %time-step length
-wm = w/sim.dims.p * (1-slip);
-
 Nsamples = ceil( (pars.N_periods/f) / dt );
 tsamples = (0:(Nsamples-1))*dt;
+%}
+
+wm = w/sim.dims.p * (1-slip);
+tsamples = pars.ts;
+Nsamples = numel(tsamples);
+dt = tsamples(2) - tsamples(1);
 
 
 [Sc, Mtot] = get_circuitMatrices(sim);
@@ -61,7 +66,7 @@ for kt = 2:Nsamples
     Qconst = S_ag + Sc + Mtot;
     
     Ustep = Ufun(tsamples(kt));
-    FL = Mtot*Xsamples(:,kt-1) + [zeros(Ntot-sim.results.Ni_s, 1); Ustep(1:sim.results.Ni_s)];
+    FL = Mtot*Xsamples(:,kt-1) + [sim.matrices.F; zeros(Nu, 1); Ustep(1:sim.results.Ni_s)];
     
     Xsamples(:,kt) = Xsamples(:,kt-1); %initial condition for NR
     for kiter = 1:50

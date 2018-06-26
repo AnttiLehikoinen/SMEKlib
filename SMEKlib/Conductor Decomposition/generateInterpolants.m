@@ -1,5 +1,41 @@
 function [interpolants, Pclosest] = generateInterpolants( PM, PS, bnd_edges_master, slavePoints, PsFun, varargin )
-Pclosest = PS(:, slavePoints);
+%generateInterpolants generates interpolation matrix between master and
+%slave meshes.
+% 
+% Call syntax
+% [interpolants, Pclosest] = generateInterpolants( PM, PS, bnd_edges_master, slavePoints, PsFun, varargin )
+%   PM = 2xN_master containing the coordinates of master mesh nodes
+%   PS = 2xN_slave, the same for the slave mesh
+%   slavePoints = indices of the boundary nodes of the slave mesh
+%   
+%   bnd_edges_master = definition of edges on the slave mesh boundary. Can
+%       be one of the following:
+%       - 2xN array, where each column [n_start; n_end] defines a single
+%       first-order (linear) edge.
+%       - nxN array, where each column defines a single (n-1)-order edge as
+%           [n_start, n_mid_1, ..., n_end]
+%       - a cell array, where each entry is a array to similar to above,
+%       defining a set of edges of arbitrary order.
+%   In ANY case, the indices n_start, n_end (and others if applicable)
+%   refer to the boundary nodes, i.e. the actual 2D edge is
+%   PM(:, n_start)-->PM(:, n_end)
+%   
+%   PsFun = a function for transforming the slave point coordinates. For
+%   example, a PsFun = @(X)( M_rotation*X ) would apply a rotation matrix
+%   M_rotation to the slave boundary points. This feature is mainly useful
+%   when the same slave mesh is used to present several repeated subdomains
+%   at different physical locations, such as the slots of an electrical
+%   machine.
+%   Otherwise, PsFun = @(X)( X ) will suffice.
+%
+% The function returns
+%   interpolants = [I J E] = Nx3 array; each row defining a sparse matrix
+%       triplet.
+%   Pclosest = the closest point to each master node
+%
+% (c) 2016-2018 Antti Lehikoinen / Aalto University
+
+Pclosest = PS(:, slavePoints); %not used anymore, it seems
 if isa(bnd_edges_master, 'cell')
     %[interpolants, Pclosest] = internal_varyingOrderInt( PM, PS, bnd_edges_master, slavePoints, PsFun );
     [interpolants, Pclosest] = internal_varyingOrderInt_2( PM, PS, bnd_edges_master, slavePoints, PsFun );

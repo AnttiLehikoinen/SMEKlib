@@ -13,8 +13,10 @@ else
 end
 
 %voltage-function
+Nin = 1;
 if isa(pars.U, 'function_handle')
     Ufun = pars.U;
+    Nin = nargin(Ufun);
 else
     U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -27,11 +29,16 @@ else
     end
 end
 
+%{
 dt = 1/f / pars.N_stepsPerPeriod; %time-step length
-wm = w/sim.dims.p * (1-slip);
-
 Nsamples = ceil( (pars.N_periods/f) / dt );
 tsamples = (0:(Nsamples-1))*dt;
+%}
+
+wm = w/sim.dims.p * (1-slip);
+tsamples = pars.ts;
+Nsamples = numel(tsamples);
+dt = tsamples(2) - tsamples(1);
 
 
 [Sc, Mtot] = get_circuitMatrices(sim);
@@ -39,7 +46,9 @@ Mtot = Mtot/dt;
 
 Ntot = size(Mtot, 1);
 Nui = Ntot - size(sim.matrices.P,1);
+Nu = sim.results.Nu_s + sim.results.Nu_r;
 PT = blkdiag(sim.matrices.P, speye(Nui));
+indI = (1:sim.results.Ni_s) + sim.Np+Nu;
 
 %Jacobian constructor object
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
@@ -56,13 +65,19 @@ else
 end
 
 % adjusted CN for stability
-alpha2 = 1.1; %weight for implicit (k+1) step; 1 for CN, 2 for BE
+%alpha2 = 1.1; %weight for implicit (k+1) step; 1 for CN, 2 for BE
+alpha2 = 1.1;
 alpha1 = 2 - alpha2;
 
 
 %initializing previous residual term
 [~, res_prev] = Jc.eval(Xsamples(:, 1), sim.nu_fun);
-res_prev = -res_prev - (sim.msh.get_AGmatrix(0, Ntot) + Sc)*Xsamples(:,1) + [zeros(Ntot-sim.results.Ni_s, 1); Ufun(0)];
+if Nin == 1
+    Ustep = Ufun(0);
+elseif Nin == 3
+    Ustep = Ufun(Xsamples(indI, 1), 0, 0);
+end
+res_prev = -res_prev - (sim.msh.get_AGmatrix(0, Ntot) + Sc)*Xsamples(:,1) + [sim.matrices.F; zeros(Nu, 1); Ustep];
 
 for kt = 2:Nsamples
     disp(['Time step ' num2str(kt) '...']);
@@ -72,8 +87,13 @@ for kt = 2:Nsamples
     
     Qconst = S_ag + Sc + (2/alpha2)*Mtot;
     
-    Ustep = Ufun(tsamples(kt));
-    FL = (2/alpha2)*Mtot*Xsamples(:,kt-1) + [zeros(Ntot-sim.results.Ni_s, 1); Ustep(1:sim.results.Ni_s)];
+    if Nin == 1
+        Ustep = Ufun(tsamples(kt));
+    elseif Nin == 3
+        Ustep = Ufun(Xsamples(indI, kt-1), wm*tsamples(kt), tsamples(kt));
+    end
+        
+    FL = (2/alpha2)*Mtot*Xsamples(:,kt-1) + [sim.matrices.F; zeros(Nu, 1); Ustep(1:sim.results.Ni_s)];
     
     Xsamples(:,kt) = Xsamples(:,kt-1); %initial condition for NR
     for kiter = 1:50
@@ -96,7 +116,7 @@ for kt = 2:Nsamples
     
     %updating prev-residual term
     res_prev = -res - (S_ag + Sc)*Xsamples(:,kt) + ...
-        [zeros(Ntot-sim.results.Ni_s, 1); Ustep(1:sim.results.Ni_s)];
+        [sim.matrices.F; zeros(Nu, 1); Ustep(1:sim.results.Ni_s)];
 end
 
 sim.results.Xt = Xsamples;

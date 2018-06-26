@@ -23,6 +23,7 @@ wms = linspace(0, 1200, 49); %range of rotor speeds analysed
 
 %meshing and extracting geometry
 geo_path = [pwd '\Problem30a.geo']; %geometry definition file
+%geo_path = [pwd '\Problem30a_denser.geo']; %geometry with 10k DoF
 gw = gwrap(gmsh_path); %creating gwrap object
 gw.mesh(geo_path); %meshing geometry if gmsh is installed
 [p, t, Surfaces] = gw.loadMesh(geo_path); %loading mesh

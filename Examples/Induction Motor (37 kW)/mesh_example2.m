@@ -28,21 +28,22 @@ dim.angleS = (2*pi)/dim.Qs:(2*pi)/dim.Qs:2*pi;
 
 %setting stator dimensions
 dim.S = 4;
-dim.hs_s = 23.90E-03;
-dim.htt_s = 1e-3;
-dim.hc_s = 17.5e-3;
-dim.wso_s = 3.5e-3;
-dim.wc1_c = 6.5e-3;
-dim.wc2_s = 8.8e-3;
+dim.S_height = 23.90E-03;
+dim.S_height1 = 1e-3;
+dim.S_height3 = 17.5e-3;
+dim.S_width1 = 3.5e-3;
+dim.S_width2 = 6.5e-3;
+dim.S_width3 = 8.8e-3;
 
 %setting rotor dimensions
 dim.R = 5;
-dim.htt_r = 0.7e-3;
-dim.hc_r = 17.8e-3;
-dim.hc_r2 = 16.1e-3;
-dim.wc1_r = 6e-3;
-dim.wc2_r = 2.5e-3;
-dim.wc3_r = 5.85e-3;
+dim.R_height1 = 0.7e-3; %tooth tip height
+dim.R_height3 = 17.8e-3; %distance from bottom bar top segment center to bottom bar bottom segment center
+dim.R_height4 = 16.1e-3; %distance from airgap to bottom bar top segment center
+dim.R_width3 = 6e-3; %top bar top segment diameter
+dim.R_width4 = 2.5e-3; %area between top bar and bottom bar width
+dim.R_width5 = 5.85e-3; %bottom bar top segment diameter
+dim.R_width6 = 2.95e-3; %bottom bar bottom segment diameter
 
 %rotor slot opening
 dim.RO = 2;
@@ -56,5 +57,3 @@ data.rotel = 1:data.index_t;
 data = stator4(data,dim);
 data.SC = data.SC';
 data.RC = data.RC';
-
-%

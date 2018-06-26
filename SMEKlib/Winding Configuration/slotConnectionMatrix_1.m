@@ -55,17 +55,19 @@ elseif transp == 3
 elseif transp == 4
     % alternating block transposition
     if mod(k,2)
-        blockSize = varargin{2};
+        N_blocks = varargin{2};
+        blockSize = ceil(N_inParallel/N_blocks);
         elementaryBlock = kron(ones(N_series, 1), ...
-            kron(fliplr(eye(blockSize)), eye(N_inParallel/blockSize)) );
+            kron(fliplr(eye(N_blocks)), eye(blockSize)) );
+        %elementaryBlock = elementaryBlock(1:(N_series*N_inParallel), 1:N_inParallel);
     end
     Ck = kron(indicatorMatrix, elementaryBlock);
 elseif transp == 5
     % alternating reversed block transposition
     if mod(k,2)
-        blockSize = varargin{2};
+        N_blocks = varargin{2};
         elementaryBlock = kron(ones(N_series, 1), ...
-            kron(eye(blockSize), fliplr(eye(N_inParallel/blockSize))) );
+            kron(eye(N_blocks), fliplr(eye(N_inParallel/N_blocks))) );
     end
     Ck = kron(indicatorMatrix, elementaryBlock);
 else

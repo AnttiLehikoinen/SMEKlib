@@ -1,4 +1,4 @@
-function [] = number_elements(p, t)
+function [] = number_elements(p, t, varargin)
 %number_elements plots element numbers.
 % 
 % number_elements(p, t) plots the indices of the elements (in t) in their
@@ -11,6 +11,6 @@ y = mean( reshape(p(2,t), size(t,1), []), 1);
 
 %plot(x, y, 'ko', 'Markersize', 12);
 text(x, y, num2str((1:size(t,2))'), 'VerticalAlignment', 'middle', ...
-    'HorizontalAlignment', 'center','Fontsize',8);
+    'HorizontalAlignment', 'center','Fontsize',8, varargin{:});
 
 end

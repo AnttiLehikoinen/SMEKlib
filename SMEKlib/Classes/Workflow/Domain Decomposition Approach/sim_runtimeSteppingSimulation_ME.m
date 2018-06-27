@@ -101,8 +101,9 @@ XX(nfree, :) = Q_slave(nfree,nfree) \ [...
     -Q_slave(nfree, nd)*P_D2s [sparse(numel(np_free), Nu_slave); -DR]];
 XX(nd, 1:ND) = P_D2s;
 
-Hvar = [P_D2s'*Q_slave(nd, 1:Np_slave)*XX(1:Np_slave,:);
+Hvar = [P_D2s'*Q_slave(nd, :)*XX(:,:);
     XX((Np_slave+1):end,:)];
+
 
 %dependencies on the newest time-step
 tempcell_SDD = cell(1, Qs_sector); [tempcell_SDD{:}] = deal( Hvar(1:ND, 1:ND) );
@@ -121,6 +122,9 @@ Xslave(:,1) = sim.results.Xslave0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Sc = Scc + [Q_SDD sparse(sim.Np, Nu) Q_SDI sparse(sim.Np, Ni_r);
+    sparse(Nu, sim.Np + Nu + Ni_r + Ni_s);
+    Q_ID sparse(Ni_s,Nu) Q_II];
+Stemp = [Q_SDD sparse(sim.Np, Nu) Q_SDI sparse(sim.Np, Ni_r);
     sparse(Nu, sim.Np + Nu + Ni_r + Ni_s);
     Q_ID sparse(Ni_s,Nu) Q_II];
 
@@ -144,7 +148,7 @@ s_prev = [reshape(P_m2D*Xsamples(indA, 1),[],Qs_sector); reshape(L_s*Xsamples(in
 %res_prev = zeros(size(Xsamples,1),1);
 
 
-for kt = 2:50%Nsamples
+for kt = 2:100%Nsamples
 
     disp(['Time step ' num2str(kt) '...']);
     
@@ -162,24 +166,18 @@ for kt = 2:50%Nsamples
     % updating the decomposed-domain contribution to F
     FD = zeros(Ntot, 1);
 
-    xslave_prev = (-(alpha1/alpha2)*S_slave + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
+    xtemp = reshape(Xslave(:,kt-1), [], Qs_sector);
+    xslave_prev = (-(alpha1/alpha2)*S_slave(nfree,nfree) + (2/(dt*alpha2))*M_slave(nfree,nfree))*xtemp(nfree,:);
 
     %hslave = Q_slave(nfree,nfree) \ xslave_prev(nfree,:);
     hslave = zeros(size(Q_slave,1), Qs_sector);
-    hslave(nfree,:) = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:))));
+    hslave(nfree,:) = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev)));
     hslave = hslave + alpha1/alpha2*reshape(Xslave(:,kt-1), [], Qs_sector);
     
     %FD(indA) = FD(indA) - P_m2D'*reshape(P_D2s'*Q_slave(nd, nfree)*hslave(1:numel(nfree),:), [], 1);
     %FD(indI) = FD(indI) - L_s' * reshape(hslave((numel(np_free)+1):end,:), [], 1);
-    FD(indA) = FD(indA) - P_m2D'*reshape(P_D2s'*Q_slave(nd, 1:Np_slave)*hslave(1:Np_slave,:), [], 1);
+    FD(indA) = FD(indA) - P_m2D'*reshape(P_D2s'*S_slave(nd, nfree)*hslave(nfree,:), [], 1);
     FD(indI) = FD(indI) - L_s' * reshape(hslave((Np_slave+1):end,:), [], 1);
-    
-    %hslave = reshape(Xslave(:,kt-1), [], Qs_sector);    
-    %FD(indA) = FD(indA) - alpha1/alpha2*P_m2D'*reshape(P_D2s'*Q_slave(nd, 1:Np_slave)*hslave(1:Np_slave,:), [], 1);
-    %FD(indI) = FD(indI) - alpha1/alpha2*L_s' * reshape(hslave((Np_slave+1):end,:), [], 1);
-    %hslave = -reshape(Xslave(:,kt-1), [], Qs_sector);    
-    %FD(indA) = FD(indA) - alpha1/alpha2*P_m2D'*reshape(P_D2s'*Q_slave(nd, 1:Np_slave)*hslave(1:Np_slave,:), [], 1);
-    %FD(indI) = FD(indI) - alpha1/alpha2*L_s' * reshape(hslave((Np_slave+1):end,:), [], 1);
     
     FL = FL + FD;
     
@@ -202,7 +200,7 @@ for kt = 2:50%Nsamples
     end
     
     %updating prev-residual term
-    res_prev = -res - (S_ag + Scc)*Xsamples(:,kt) + [sim.matrices.F; zeros(Nu,1); Ustep(1:sim.results.Ni_s)] ...
+    res_prev = -res - (S_ag + Sc)*Xsamples(:,kt) + [sim.matrices.F; zeros(Nu,1); Ustep(1:sim.results.Ni_s)] ...
         + 0*FD;
     
     %updating slave-domain solution    
@@ -223,8 +221,12 @@ for kt = 2:50%Nsamples
     s_new = [reshape(P_m2D*Xsamples(indA, kt),[],Qs_sector); reshape(L_s*Xsamples(indI, kt),[],Qs_sector)];
     xslav = XX*( (alpha1/alpha2)*s_prev + s_new);
     
-    xslave_prev = (-(alpha1/alpha2)*S_slave + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
-    hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:)))); 
+    %xslave_prev = (-(alpha1/alpha2)*S_slave + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
+    %hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:)))); 
+    
+    xtemp = reshape(Xslave(:,kt-1), [], Qs_sector);
+    xslave_prev = (-(alpha1/alpha2)*S_slave(nfree,nfree) + (2/(dt*alpha2))*M_slave(nfree,nfree))*xtemp(nfree,:);
+    hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev)));
  
     xslav(nfree,:) = xslav(nfree,:) + hslave;
     Xslave(:,kt) = reshape(xslav, [], 1);

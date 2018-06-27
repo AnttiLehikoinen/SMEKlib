@@ -177,7 +177,9 @@ for kt = 2:50%Nsamples
     %hslave = reshape(Xslave(:,kt-1), [], Qs_sector);    
     %FD(indA) = FD(indA) - alpha1/alpha2*P_m2D'*reshape(P_D2s'*Q_slave(nd, 1:Np_slave)*hslave(1:Np_slave,:), [], 1);
     %FD(indI) = FD(indI) - alpha1/alpha2*L_s' * reshape(hslave((Np_slave+1):end,:), [], 1);
-
+    %hslave = -reshape(Xslave(:,kt-1), [], Qs_sector);    
+    %FD(indA) = FD(indA) - alpha1/alpha2*P_m2D'*reshape(P_D2s'*Q_slave(nd, 1:Np_slave)*hslave(1:Np_slave,:), [], 1);
+    %FD(indI) = FD(indI) - alpha1/alpha2*L_s' * reshape(hslave((Np_slave+1):end,:), [], 1);
     
     FL = FL + FD;
     
@@ -200,7 +202,7 @@ for kt = 2:50%Nsamples
     end
     
     %updating prev-residual term
-    res_prev = -res - (S_ag + Sc)*Xsamples(:,kt) + [sim.matrices.F; zeros(Nu,1); Ustep(1:sim.results.Ni_s)] ...
+    res_prev = -res - (S_ag + Scc)*Xsamples(:,kt) + [sim.matrices.F; zeros(Nu,1); Ustep(1:sim.results.Ni_s)] ...
         + 0*FD;
     
     %updating slave-domain solution    

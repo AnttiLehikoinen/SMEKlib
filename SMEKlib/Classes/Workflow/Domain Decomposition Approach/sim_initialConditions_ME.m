@@ -62,7 +62,8 @@ for kiter = 1:15
 end
 
 sim.results.X0 = X0;
-sim.results.res_prev = (  w*Mtot*sim.results.Xh(Ntot + (1:Ntot), kslip) )  - 0*[sim.matrices.F; zeros(Nui,1)];
+%sim.results.res_prev = (  -w*Mtot*sim.results.Xh(Ntot + (1:Ntot), kslip) )  - [sim.matrices.F; zeros(Nui,1)];
+sim.results.res_prev = res;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % initial conditions for slave domain
@@ -84,7 +85,8 @@ ND = size(P_D2s, 2);
 
 %conductor nodes
 [Itemp, ~] = find(C); nc = toRow(unique(Itemp));
-np_free = setdiff(1:Np_slave, [nd nc]);
+%np_free = setdiff(1:Np_slave, [nd nc]);
+np_free = setdiff(1:Np_slave, nd);
 nfree = [np_free (Np_slave+1):(Np_slave+Nu_slave)]; 
 
 %assembling final matrices
@@ -110,10 +112,13 @@ Xslave0 = sim.misc.Ximp_H * [D0; I0];
 xs = w*M_slave*imag(Xslave0);
 Xslave0 = real(Xslave0);
 
+%{
+nd = setdiff( 1:size(S_slave,1), nfree );
 Fbnd = S_slave(nfree,nd)*Xslave0(nd,:);
-Fi = [zeros(numel(np_free) ,size(I0,2)); DR*real(I0)];
+Fi = [zeros(numel(np_free), size(I0,2)); DR*real(I0)];
 
-Xslave0(nfree,:) =  S_slave(nfree, nfree) \ ( -Fbnd - Fi - 0*xs(nfree,:) );
+Xslave0(nfree,:) =  S_slave(nfree, nfree) \ ( -Fbnd - Fi + 0*xs(nfree,:) );
+%}
 
 sim.results.Xslave0 = reshape(Xslave0, [], 1);
 

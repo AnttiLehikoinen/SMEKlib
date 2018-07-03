@@ -124,9 +124,6 @@ Xslave(:,1) = sim.results.Xslave0;
 Sc = Scc + [Q_SDD sparse(sim.Np, Nu) Q_SDI sparse(sim.Np, Ni_r);
     sparse(Nu, sim.Np + Nu + Ni_r + Ni_s);
     Q_ID sparse(Ni_s,Nu) Q_II];
-Stemp = [Q_SDD sparse(sim.Np, Nu) Q_SDI sparse(sim.Np, Ni_r);
-    sparse(Nu, sim.Np + Nu + Ni_r + Ni_s);
-    Q_ID sparse(Ni_s,Nu) Q_II];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -142,16 +139,29 @@ else
     error('Initial conditions not computed.')
 end
 
+s_prev = [reshape(P_m2D*Xsamples(indA, 1),[],Qs_sector); reshape(L_s*Xsamples(indI, 1),[],Qs_sector)];
+
 %initializing previous residual term
 res_prev = sim.results.res_prev;
-s_prev = [reshape(P_m2D*Xsamples(indA, 1),[],Qs_sector); reshape(L_s*Xsamples(indI, 1),[],Qs_sector)];
-%res_prev = zeros(size(Xsamples,1),1);
+if Nin == 1
+    Ustep = Ufun(tsamples(1));
+elseif Nin == 3
+    Ustep = Ufun(Mphase'*Xsamples(indI, 1-1), wm*tsamples(1), tsamples(1));
+end
+res_prev = -res_prev - (sim.msh.get_AGmatrix(0, Ntot) + Sc)*Xsamples(:,1) + [sim.matrices.F; zeros(Nu, 1); Ustep];
 
+%{
+xslav = XX*( (alpha1/alpha2)*s_prev + s_prev);
+xtemp = reshape(Xslave(:, 1), [], Qs_sector);
+xslave_prev = (-(alpha1/alpha2)*S_slave(nfree,nfree) + (2/(dt*alpha2))*M_slave(nfree,nfree))*xtemp(nfree,:);
+hslave_m = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev)));
+xslav(nfree,:) = xslav(nfree,:) + hslave_m;
+Xslave(:, 1) = reshape(xslav, [], 1);
+%}
 
-for kt = 2:Nsamples
+for kt = 2:10%Nsamples
 
     disp(['Time step ' num2str(kt) '...']);
-    tic;
     
     S_ag = sim.msh.get_AGmatrix(wm*tsamples(kt), Ntot);
     Qconst = S_ag + Sc + (2/alpha2)*Mtot;
@@ -167,7 +177,7 @@ for kt = 2:Nsamples
     % updating the decomposed-domain contribution to F
     FD = zeros(Ntot, 1);
 
-    xtemp = reshape(Xslave(:,kt-1), [], Qs_sector);
+    xtemp = reshape(Xslave(:,kt-1), [], Qs_sec tor);
     xslave_prev = (-(alpha1/alpha2)*S_slave(nfree,nfree) + (2/(dt*alpha2))*M_slave(nfree,nfree))*xtemp(nfree,:);
 
     %hslave = Q_slave(nfree,nfree) \ xslave_prev(nfree,:);
@@ -201,8 +211,7 @@ for kt = 2:Nsamples
     end
     
     %updating prev-residual term
-    res_prev = -res - (S_ag + Sc)*Xsamples(:,kt) + [sim.matrices.F; zeros(Nu,1); Ustep(1:sim.results.Ni_s)] ...
-        + 0*FD;
+    res_prev = -res - (S_ag + Sc)*Xsamples(:,kt) + [sim.matrices.F; zeros(Nu,1); Ustep(1:sim.results.Ni_s)];
     
     %updating slave-domain solution    
     %%{
@@ -236,7 +245,7 @@ for kt = 2:Nsamples
 
     
     %plotting currents
-    %{
+    %%{
     
     Mphase_plot = kron(eye(N_phases), ones(N_inParallel,1))';
     Is = Xsamples(indI(:), 1:kt);
@@ -251,7 +260,7 @@ for kt = 2:Nsamples
     %}
     
     %plotting currents for demo
-    %%{
+    %{
     delay = toc;
     Mphase_plot = kron(eye(N_phases), ones(N_inParallel,1))';
     Is = Xsamples(indI(:), 1:kt);

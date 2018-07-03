@@ -8,7 +8,9 @@ element types.
 [ ] Polynomial interpolation inside an AGT-child class--> better BEMF.
 [ ] Finish WST2 function.
 
-[ ] Fix examples!
-    [ ] New mesh coarse mesh generator functionality
+[x] Fix examples!
+    [x] New mesh coarse mesh generator functionality
     [ ] Changed sign of imaginary unit in time-harmonic analysis??
+
+[ ] @folder-style class definitions; otherwise Octave dies
 %}

@@ -2,13 +2,14 @@ classdef SimpleMesh < handle
     %SimpleMesh a mesh class reduced functionality.
     properties
         elementType
-        p, t
+        p, t, matel
     end
     
     methods
         function msh = SimpleMesh(p, t)
             msh.p = p;
             msh.t = t;
+            msh.matel = [];
             switch size(t, 1)
                 case 3
                     msh.elementType = Elements.triangle;

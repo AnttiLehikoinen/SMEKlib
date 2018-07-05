@@ -159,7 +159,7 @@ xslav(nfree,:) = xslav(nfree,:) + hslave_m;
 Xslave(:, 1) = reshape(xslav, [], 1);
 %}
 
-for kt = 2:10%Nsamples
+for kt = 2:Nsamples
 
     disp(['Time step ' num2str(kt) '...']);
     
@@ -177,7 +177,7 @@ for kt = 2:10%Nsamples
     % updating the decomposed-domain contribution to F
     FD = zeros(Ntot, 1);
 
-    xtemp = reshape(Xslave(:,kt-1), [], Qs_sec tor);
+    xtemp = reshape(Xslave(:,kt-1), [], Qs_sector);
     xslave_prev = (-(alpha1/alpha2)*S_slave(nfree,nfree) + (2/(dt*alpha2))*M_slave(nfree,nfree))*xtemp(nfree,:);
 
     %hslave = Q_slave(nfree,nfree) \ xslave_prev(nfree,:);

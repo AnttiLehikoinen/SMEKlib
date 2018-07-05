@@ -88,6 +88,8 @@ BH2 = internal_extendBH(BH);
 
 nu_init = BH(:,2) ./ BH(:,1);
 
+%figure(); clf; plot(BH(:,1), nu_init);
+
 if isnan(nu_init(1))
     nu_init(1) = nu_init(2);
 end

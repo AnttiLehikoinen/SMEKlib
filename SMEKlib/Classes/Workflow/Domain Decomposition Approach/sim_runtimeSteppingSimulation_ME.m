@@ -10,7 +10,7 @@ function sim = sim_runtimeSteppingSimulation_ME(sim, pars, varargin)
 % [ ] switch to harmonic reluctivity? (maybe not required yet
 
 % adjusted CN for stability
-alpha2 = 1.1; %weight for implicit (k+1) step; 1 for CN, 2 for BE
+alpha2 = 2; %weight for implicit (k+1) step; 1 for CN, 2 for BE
 alpha1 = 2 - alpha2;
 
 %basic setup
@@ -159,7 +159,7 @@ xslav(nfree,:) = xslav(nfree,:) + hslave_m;
 Xslave(:, 1) = reshape(xslav, [], 1);
 %}
 
-for kt = 2:Nsamples
+for kt = 2:100%Nsamples
 
     disp(['Time step ' num2str(kt) '...']);
     
@@ -231,6 +231,9 @@ for kt = 2:Nsamples
     s_new = [reshape(P_m2D*Xsamples(indA, kt),[],Qs_sector); reshape(L_s*Xsamples(indI, kt),[],Qs_sector)];
     xslav = XX*( (alpha1/alpha2)*s_prev + s_new);
     
+    xslav(nd,:) = P_D2s*s_new(1:ND,:);
+    %xslav([nd (Np_slave+1):(Np_slave+Nu_slave)], :) = XX([nd (Np_slave+1):(Np_slave+Nu_slave)],:)*s_new;
+    
     %xslave_prev = (-(alpha1/alpha2)*S_slave + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
     %hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:)))); 
     
@@ -245,7 +248,7 @@ for kt = 2:Nsamples
 
     
     %plotting currents
-    %{    
+    %%{    
     Mphase_plot = kron(eye(N_phases), ones(N_inParallel,1))';
     Is = Xsamples(indI(:), 1:kt);
     Iphase = Mphase_plot*Is;
@@ -301,6 +304,6 @@ for kt = 2:Nsamples
 end
 
 sim.results.Xt = Xsamples;
-
+sim.results.Xslave = Xslave;
 
 end

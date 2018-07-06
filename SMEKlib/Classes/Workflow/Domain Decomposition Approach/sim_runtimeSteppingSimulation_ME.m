@@ -146,7 +146,7 @@ res_prev = sim.results.res_prev;
 if Nin == 1
     Ustep = Ufun(tsamples(1));
 elseif Nin == 3
-    Ustep = Ufun(Mphase'*Xsamples(indI, 1-1), wm*tsamples(1), tsamples(1));
+    Ustep = Ufun(Mphase'*Xsamples(indI, 1), wm*tsamples(1), tsamples(1));
 end
 res_prev = -res_prev - (sim.msh.get_AGmatrix(0, Ntot) + Sc)*Xsamples(:,1) + [sim.matrices.F; zeros(Nu, 1); Ustep];
 
@@ -245,8 +245,7 @@ for kt = 2:Nsamples
 
     
     %plotting currents
-    %%{
-    
+    %{    
     Mphase_plot = kron(eye(N_phases), ones(N_inParallel,1))';
     Is = Xsamples(indI(:), 1:kt);
     Iphase = Mphase_plot*Is;

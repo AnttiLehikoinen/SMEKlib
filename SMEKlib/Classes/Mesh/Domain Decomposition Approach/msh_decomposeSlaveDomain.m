@@ -1,4 +1,4 @@
-function msh = msh_decomposeSlaveDomain(msh, dims, els)
+function msh = msh_decomposeSlaveDomain(msh, dims, els, varargin)
 %msh_decomposeSlaveDomain Remove slave domain from mesh etc.
 % 
 % (c) 2018 Antti Lehikoinen / Aalto University
@@ -37,41 +37,69 @@ msh.misc.Xc = Xc;
 drawConductors(reff, Xc, 'EdgeColor', 'r'); axis equal;
 
 % generating mesh for slot
-
-%now with this fancy new pdetoolbox
-slot_model = createpde(1);
-
-%geometry description
-slot_g_bnd = [2 size(Xslot,2) Xslot(1,:) Xslot(2,:)]'; %slot boundaries
-slot_g_strands = [ones(1, dims.Nc_slot); Xc; rc*ones(dims.Nc_slot)];
-
-slot_g = zeropadcat(slot_g_bnd, slot_g_strands(:,:));
-
-%namespace
-slot_ns = ['b' char('s'*ones(1,dims.Nc_slot))];
-
-%set formula
-slot_sf = 'b';
-
-%decomposed geometry object
-[slot_dl, slot_bt] = decsg(slot_g, slot_sf, slot_ns);
-
-%adding geometry to the model
-geometryFromEdges(slot_model, slot_dl);
-
-%meshing
-Hmax = rc/2;
-if Hmax > 0
-    generateMesh(slot_model, 'GeometricOrder', 'linear', 'Hmax', Hmax);
+if numel(varargin)
+    Nc = dims.Nc_slot;
+    gmsh_path = varargin{1};
+    gw = gwrap(gmsh_path);
+    
+    disp(['Filling factor: ' num2str(Nc*pi*rc^2 / polyarea(Xslot(1,:), Xslot(2,:)))])
+    
+    Hmax = rc/2;
+    Nangles = max(5, ceil(2*pi*rc/Hmax));
+    angles = linspace(0, 2*pi*(1-1/Nangles), Nangles);
+    xc = rc*cos(angles);
+    yc = rc*sin(angles);
+    for kc = 1:Nc
+        gw.addSurface([Xc(1,kc)+xc; Xc(2,kc)+yc], ['c' num2str(kc)]);
+    end
+    gw.addSurface(Xslot, 'OuterBoundary', Hmax*2);
+    
+    gw.removeDuplicates();
+    gw.writeFile();
+    gw.mesh();
+    [p, t, Surfaces] = gw.loadMesh();
+    
+    conductors_slave = cell(1, Nc);
+    for kc = 1:Nc
+        conductors_slave{kc} = Surfaces.get( ['c' num2str(kc)] );
+    end    
+    msh_slave = SimpleMesh(p, t);
 else
-    generateMesh(slot_model, 'GeometricOrder', 'linear');
-end
-%
-msh_slave = SimpleMesh(slot_model.Mesh.Nodes, slot_model.Mesh.Elements);
+    %now with this fancy new pdetoolbox
+    slot_model = createpde(1);
 
-%getting conductor elements
-[~, ~, t_temp] = meshToPet(slot_model.Mesh);
-conductors_slave = get_elementsInDomain(slot_bt(:,2:end), t_temp(4,:));
+    %geometry description
+    slot_g_bnd = [2 size(Xslot,2) Xslot(1,:) Xslot(2,:)]'; %slot boundaries
+    slot_g_strands = [ones(1, dims.Nc_slot); Xc; rc*ones(dims.Nc_slot)];
+
+    slot_g = zeropadcat(slot_g_bnd, slot_g_strands(:,:));
+
+    %namespace
+    slot_ns = ['b' char('s'*ones(1,dims.Nc_slot))];
+
+    %set formula
+    slot_sf = 'b';
+
+    %decomposed geometry object
+    [slot_dl, slot_bt] = decsg(slot_g, slot_sf, slot_ns);
+
+    %adding geometry to the model
+    geometryFromEdges(slot_model, slot_dl);
+
+    %meshing
+    Hmax = rc/2;
+    if Hmax > 0
+        generateMesh(slot_model, 'GeometricOrder', 'linear', 'Hmax', Hmax);
+    else
+        generateMesh(slot_model, 'GeometricOrder', 'linear');
+    end
+    %
+    msh_slave = SimpleMesh(slot_model.Mesh.Nodes, slot_model.Mesh.Elements);
+
+    %getting conductor elements
+    [~, ~, t_temp] = meshToPet(slot_model.Mesh);
+    conductors_slave = get_elementsInDomain(slot_bt(:,2:end), t_temp(4,:));
+end
 
 %plotting
 figure(6); clf; hold on; box on;

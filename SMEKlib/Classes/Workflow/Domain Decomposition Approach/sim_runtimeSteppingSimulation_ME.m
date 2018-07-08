@@ -10,7 +10,8 @@ function sim = sim_runtimeSteppingSimulation_ME(sim, pars, varargin)
 % [ ] switch to harmonic reluctivity? (maybe not required yet
 
 % adjusted CN for stability
-alpha2 = 2; %weight for implicit (k+1) step; 1 for CN, 2 for BE
+alpha2 = 1.1; %weight for implicit (k+1) step; 1 for CN, 2 for BE
+%alpha2 = 2;
 alpha1 = 2 - alpha2;
 
 %basic setup
@@ -159,7 +160,7 @@ xslav(nfree,:) = xslav(nfree,:) + hslave_m;
 Xslave(:, 1) = reshape(xslav, [], 1);
 %}
 
-for kt = 2:100%Nsamples
+for kt = 2:Nsamples
 
     disp(['Time step ' num2str(kt) '...']);
     

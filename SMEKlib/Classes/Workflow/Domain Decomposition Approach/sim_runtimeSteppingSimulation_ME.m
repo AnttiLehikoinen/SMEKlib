@@ -14,6 +14,8 @@ alpha2 = 1.1; %weight for implicit (k+1) step; 1 for CN, 2 for BE
 %alpha2 = 2;
 alpha1 = 2 - alpha2;
 
+sim.misc.alpha1 = alpha1; sim.misc.alpha2 = alpha2;
+
 %basic setup
 f = pars.f;
 w = 2*pi*f;
@@ -249,7 +251,7 @@ for kt = 2:Nsamples
 
     
     %plotting currents
-    %%{    
+    %{    
     Mphase_plot = kron(eye(N_phases), ones(N_inParallel,1))';
     Is = Xsamples(indI(:), 1:kt);
     Iphase = Mphase_plot*Is;

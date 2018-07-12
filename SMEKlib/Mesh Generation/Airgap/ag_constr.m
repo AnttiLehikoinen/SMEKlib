@@ -35,6 +35,7 @@ else
         N_mid = ceil( 0.5*(N_ag_s + N_ag_r) ) - 1;
         %N_mid = ceil(0.5*N_ag_s) - 1;
         %N_mid = 2*(N_ag_s-1) + 1;
+        %N_mid = ceil( 0.9*N_ag_r )
 
         %angles = linspace(0, 2*pi/msh.symmetrySectors, N_mid);
         angle_start = (atan2(msh.p(2,n_ag_s(1)), msh.p(1,n_ag_s(1))) + ...

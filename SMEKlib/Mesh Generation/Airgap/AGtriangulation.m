@@ -2,7 +2,7 @@ classdef AGtriangulation < handle
     properties
         agNodes_global
         t_const
-        t_moving
+        t_moving 
         p_virt
         msh_ag
         n_moving

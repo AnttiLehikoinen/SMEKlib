@@ -14,7 +14,7 @@ p = this.p(:, 1:this.N_points);
 %p_id = round( p / TOL );
 %[~, IA, IC] = unique(p_id', 'rows');
 
-[~, IA, IC] = uniqueWithTol(p', TOL, 'ByRows', true);
+[~, IA, IC] = uniqueWithTol(p(1:2,:)', TOL, 'ByRows', true);
 
 Np_new = numel(IA);
 temp = 1:Np_new;

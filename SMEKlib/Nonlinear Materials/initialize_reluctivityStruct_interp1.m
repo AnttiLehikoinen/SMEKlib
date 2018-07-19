@@ -40,9 +40,9 @@ for kmat = 1:Nmats
     
     
     %initializing temporary interpolation splines (for easy derivation)
-    pp = spline(BH2(:,1).^2, nu); %spline for nu(B^2)
+    %pp = spline(BH2(:,1).^2, nu); %spline for nu(B^2)
     %pp = pchip(BH2(:,1).^2, nu); %these might also be worth a try
-    %pp = csaps(BH2(:,1).^2, nu);
+    pp = csaps(BH2(:,1).^2, nu);
 
     ppder = derivate_pp(pp); %spline for d/dB^2 nu(B^2)
     

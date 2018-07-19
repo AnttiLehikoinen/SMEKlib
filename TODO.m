@@ -1,4 +1,7 @@
 %{
+[ ] Error in replicate_sector_fixed: order of ccl nodes gets mixed
+    sometimes.
+
 [ ] Generalize gwrap's loadmesh for several element types, by scanning
 entire elements description into an array, and then chopping it into
 element types.

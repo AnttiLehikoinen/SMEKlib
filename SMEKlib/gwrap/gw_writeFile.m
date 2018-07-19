@@ -10,7 +10,11 @@ fid = fopen(filename, 'w');
 
 %printing points
 for k = 1:gm.N_points
-    fprintf(fid, 'Point (%d) = {%f, %f, 0};\n', k, gm.p(1, k), gm.p(2,k));
+    if gm.p(3, k) > 0
+        fprintf(fid, 'Point (%d) = {%f, %f, 0, %f};\n', k, gm.p(1, k), gm.p(2,k), gm.p(3,k));
+    else
+        fprintf(fid, 'Point (%d) = {%f, %f, 0};\n', k, gm.p(1, k), gm.p(2,k));
+    end
 end
 
 fprintf(fid, '\n');

@@ -36,6 +36,7 @@ for kc = 1:size(I,2)
     Babs(:, (1:Ne) + (kc-1)*Ne) = Babs_t(I(:,kc), :);
 end
 
-h = fill(X,Y, Babs, plotArgs{:});
+%h = fill(X,Y, Babs, plotArgs{:});
+h = patch(X,Y, Babs, plotArgs{:});
 
 end

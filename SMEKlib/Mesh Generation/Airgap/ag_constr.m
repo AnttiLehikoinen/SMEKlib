@@ -32,15 +32,17 @@ else
         mid_given = true;
     else
         %no middle layer nodes given --> generating middle layer
-        N_mid = ceil( 0.5*(N_ag_s + N_ag_r) ) - 1;
+        %N_mid = ceil( 0.75*(N_ag_s + N_ag_r) ) - 1;
         %N_mid = ceil(0.5*N_ag_s) - 1;
-        %N_mid = 2*(N_ag_s-1) + 1;
+        N_mid = 2*(N_ag_s-1) ;
         %N_mid = ceil( 0.9*N_ag_r )
 
-        %angles = linspace(0, 2*pi/msh.symmetrySectors, N_mid);
-        angle_start = (atan2(msh.p(2,n_ag_s(1)), msh.p(1,n_ag_s(1))) + ...
-            atan2(msh.p(2,n_ag_r(1)), msh.p(1,n_ag_r(1))))/2;
-        angles = linspace(0, 2*pi/msh.symmetrySectors, N_mid) + angle_start;
+        angles = linspace(0, 2*pi/msh.symmetrySectors, N_mid);
+        %angle_start = (atan2(msh.p(2,n_ag_s(1)), msh.p(1,n_ag_s(1))) + ...
+        %    atan2(msh.p(2,n_ag_r(1)), msh.p(1,n_ag_r(1))))/2;
+        %angles = linspace(0, 2*pi/msh.symmetrySectors, N_mid) + angle_start;
+
+        %angles([1 end])
 
         rin = mean( sum(msh.p(:,n_ag_r).^2,1).^0.5 );
         rout = mean( sum(msh.p(:,n_ag_s).^2,1).^0.5 );
@@ -49,12 +51,23 @@ else
         n_mid = size(msh.p, 2) + (1:N_mid);
 
         %adding mid-nodes to the mesh
-        msh.p = [msh.p p_mid];
+        if msh.symmetrySectors > 1
+            msh.p = [msh.p p_mid];
+        else
+            msh.p = [msh.p p_mid(:, 1:(end-1))];
+            n_mid = n_mid(1:(end-1));
+            N_mid = N_mid-1;
+        end
     end
 
     %layer-triangulations
-    t_in = singleLayerAGtriangulation_2(msh, n_mid, n_ag_r);
-    t_out = singleLayerAGtriangulation_2(msh, n_ag_s, n_mid);
+    if msh.symmetrySectors > 1
+        t_in = singleLayerAGtriangulation_2(msh, n_mid, n_ag_r);
+        t_out = singleLayerAGtriangulation_2(msh, n_ag_s, n_mid);
+    else
+        t_in = singleLayerAGtriangulation_2(msh, n_mid([1:end 1]), n_ag_r);
+        t_out = singleLayerAGtriangulation_2(msh, n_ag_s, n_mid([1:end 1]));
+    end
 end
 
 agNodes_global = [n_ag_s n_ag_r n_mid];
@@ -137,7 +150,7 @@ this.el_table = [1:size(p_ag_virt, 2);
             msh.periodicityCoeff.^virt_sectors];
         
 %adding periodic nodes
-if ~mid_given
+if ~mid_given && msh.symmetrySectors > 1
     msh.namedNodes.add('Periodic_master', n_mid(1));
     msh.namedNodes.add('Periodic_slave', n_mid(end));
 end

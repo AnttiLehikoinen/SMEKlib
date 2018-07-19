@@ -251,7 +251,7 @@ for kt = 2:Nsamples
 
     
     %plotting currents
-    %{    
+    %%{    
     Mphase_plot = kron(eye(N_phases), ones(N_inParallel,1))';
     Is = Xsamples(indI(:), 1:kt);
     Iphase = Mphase_plot*Is;

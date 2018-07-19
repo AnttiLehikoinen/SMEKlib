@@ -45,6 +45,8 @@ n_center = intersect(n_slave, n_master);
 if isempty(n_center)
     n_center = 0;
 end
+n_slave = setdiff(n_slave, n_center);
+n_master = setdiff(n_master, n_center);
 
 %special case: mirroring
 if mirror

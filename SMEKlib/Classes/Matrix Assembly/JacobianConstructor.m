@@ -214,6 +214,7 @@ classdef JacobianConstructor < MatrixConstructorBase
                     Bi = Bi + bsxfun(@times, this.Fvals_shape{k_quad, k_shape}, ...
                         transpose(X(N + this.msh.t(k_shape,:))) );
                 end
+                %disp([max(abs(Br(:))) max(abs(Bi(:)))])
                 
                 %evaluating material characteristics
                 [nu, dnu] = matfun( sum(Br.^2+Bi.^2,1) );

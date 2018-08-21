@@ -85,8 +85,6 @@ msh_fill(msh, iron, [1 1 1]*0.5);
 shaft = find( msh.matel == 1 );
 msh_fill(msh, shaft, [1 0.5 0.2]);
 
-return
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % determining winding configuration etc.
 

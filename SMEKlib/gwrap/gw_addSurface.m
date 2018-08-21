@@ -44,7 +44,7 @@ lldef = (1:Np) + Nl_orig;
 this.addLineloop(lldef);
 
 %adding surface
-if numel(other_args) && islogical(other_args{1})
+if numel(other_args) && (islogical(other_args{1}) || islogical(other_args{end}))
     % surface is a hole
     this.surfaces.add(surfacename, -this.N_lineloops);
 else

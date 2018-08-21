@@ -20,14 +20,14 @@ function this = gw_addPcws(this, varargin)
 % (c) 2017 Antti Lehikoinen / Aalto University
 
 %array for holding the surface points
-x = zeros(2, 1000); np = 0;
+x = zeros(3, 1000); np = 0;
 function addx(xp)
     % nested function for incrementing the array
     if (np+size(xp,2)) > size(x,2)
         nadd = min(2*size(x,2), size(xp,2));
-        x = [x zeros(2,nadd)];
+        x = [x zeros(3,nadd)];
     end
-    x(:,(np+1):(np+size(xp,2))) = xp;
+    x(1:size(xp,1),(np+1):(np+size(xp,2))) = xp;
     np = np + size(xp,2);
 end
 
@@ -49,11 +49,20 @@ while true
         % line segment
         xstart = varargin{ri+1};
         xend = varargin{ri+2};
+      
         tol = varargin{ri+3};
         ri = ri + 4;
         
-        Np = ceil( norm(xend-xstart)/tol ) + 1;
-        xp = bsxfun(@plus, xstart, bsxfun(@times, xend-xstart, linspace(0,1,Np)));
+        Np = ceil( norm(xend(1:2)-xstart(1:2))/tol ) + 1;
+        xp = bsxfun(@plus, xstart(1:2,:), bsxfun(@times, xend(1:2,:)-xstart(1:2,:), linspace(0,1,Np)));
+        
+        if numel(xstart)==3
+            xp(3,1) = xstart(3);
+        end
+        if numel(xend)==3
+            xp(3,end) = xend(3);
+        end
+        
         addx(xp(:,1:(end-1)));
         
         if strcmpi(varargin{ri}, 'linename')
@@ -96,7 +105,7 @@ while true
         Np = ceil( r*abs(angleDiff) / tol ) + 1;
         angles = angle_start + linspace(0, angleDiff, Np);
         angles = angles(1:(end-1));
-        addx( r*[cos(angles); sin(angles)] );
+        addx( r*[cos(angles); sin(angles); 0*angles] );
         
         if strcmpi(varargin{ri}, 'linename')
             addl(1:(Np-1), varargin{ri+1});
@@ -107,9 +116,13 @@ while true
     end
 end
 
+%varargin{ri:end}
+
 if nln > 0
     this.addSurface(x(:,1:np), varargin{ri}, 'Linenames', lnames{1:nln}, varargin{(ri+1):end});
     %lnames{1:nln}
+    %disp('dsdas')
+    %varargin{(ri+1):end}
 else
     this.addSurface(x(:,1:np), varargin{ri:end});
 end

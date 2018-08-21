@@ -10,8 +10,11 @@ function sim = sim_runtimeSteppingSimulation_ME(sim, pars, varargin)
 % [ ] switch to harmonic reluctivity? (maybe not required yet
 
 % adjusted CN for stability
-alpha2 = 1.8; %weight for implicit (k+1) step; 1 for CN, 2 for BE
+alpha2 = 1.1; %weight for implicit (k+1) step; 1 for CN, 2 for BE
+%alpha2 = 2;
 alpha1 = 2 - alpha2;
+
+sim.misc.alpha1 = alpha1; sim.misc.alpha2 = alpha2;
 
 %basic setup
 f = pars.f;
@@ -60,10 +63,10 @@ indI = (sim.Np + Nu) + (1:Ni_s);
 indA = 1:sim.Np;
 
 %circuit and other matrices
-[Sc, Mtot] = get_circuitMatrices(sim);
+[Scc, Mtot] = get_circuitMatrices(sim);
 Mtot = Mtot / dt;
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
-Ntot = size(Sc,1);
+Ntot = size(Scc,1);
 Nui = Ntot - sim.Np;
 PT = blkdiag(sim.matrices.P, speye(Nui));
 
@@ -101,8 +104,9 @@ XX(nfree, :) = Q_slave(nfree,nfree) \ [...
     -Q_slave(nfree, nd)*P_D2s [sparse(numel(np_free), Nu_slave); -DR]];
 XX(nd, 1:ND) = P_D2s;
 
-Hvar = [P_D2s'*Q_slave(nd, 1:Np_slave)*XX(1:Np_slave,:);
+Hvar = [P_D2s'*Q_slave(nd, :)*XX(:,:);
     XX((Np_slave+1):end,:)];
+
 
 %dependencies on the newest time-step
 tempcell_SDD = cell(1, Qs_sector); [tempcell_SDD{:}] = deal( Hvar(1:ND, 1:ND) );
@@ -120,7 +124,7 @@ Xslave(:,1) = sim.results.Xslave0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Sc = Sc + [Q_SDD sparse(sim.Np, Nu) Q_SDI sparse(sim.Np, Ni_r);
+Sc = Scc + [Q_SDD sparse(sim.Np, Nu) Q_SDI sparse(sim.Np, Ni_r);
     sparse(Nu, sim.Np + Nu + Ni_r + Ni_s);
     Q_ID sparse(Ni_s,Nu) Q_II];
 
@@ -138,13 +142,27 @@ else
     error('Initial conditions not computed.')
 end
 
+s_prev = [reshape(P_m2D*Xsamples(indA, 1),[],Qs_sector); reshape(L_s*Xsamples(indI, 1),[],Qs_sector)];
+
 %initializing previous residual term
 res_prev = sim.results.res_prev;
-s_prev = [reshape(P_m2D*Xsamples(indA, 1),[],Qs_sector); reshape(L_s*Xsamples(indI, 1),[],Qs_sector)];
-%res_prev = zeros(size(Xsamples,1),1);
+if Nin == 1
+    Ustep = Ufun(tsamples(1));
+elseif Nin == 3
+    Ustep = Ufun(Mphase'*Xsamples(indI, 1), wm*tsamples(1), tsamples(1));
+end
+res_prev = -res_prev - (sim.msh.get_AGmatrix(0, Ntot) + Sc)*Xsamples(:,1) + [sim.matrices.F; zeros(Nu, 1); Ustep];
 
+%{
+xslav = XX*( (alpha1/alpha2)*s_prev + s_prev);
+xtemp = reshape(Xslave(:, 1), [], Qs_sector);
+xslave_prev = (-(alpha1/alpha2)*S_slave(nfree,nfree) + (2/(dt*alpha2))*M_slave(nfree,nfree))*xtemp(nfree,:);
+hslave_m = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev)));
+xslav(nfree,:) = xslav(nfree,:) + hslave_m;
+Xslave(:, 1) = reshape(xslav, [], 1);
+%}
 
-for kt = 2:10%Nsamples
+for kt = 2:Nsamples
 
     disp(['Time step ' num2str(kt) '...']);
     
@@ -162,14 +180,18 @@ for kt = 2:10%Nsamples
     % updating the decomposed-domain contribution to F
     FD = zeros(Ntot, 1);
 
-    xslave_prev = (-(alpha1/alpha2)*S_slave + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
+    xtemp = reshape(Xslave(:,kt-1), [], Qs_sector);
+    xslave_prev = (-(alpha1/alpha2)*S_slave(nfree,nfree) + (2/(dt*alpha2))*M_slave(nfree,nfree))*xtemp(nfree,:);
 
     %hslave = Q_slave(nfree,nfree) \ xslave_prev(nfree,:);
-    hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:))));    
+    hslave_m = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev)));
+    %hslave = hslave_m + alpha1/alpha2*reshape(Xslave(nfree,kt-1), [], Qs_sector);
+    hslave = hslave_m + alpha1/alpha2*xtemp(nfree,:);
     
-    FD(indA) = FD(indA) - P_m2D'*reshape(P_D2s'*Q_slave(nd, nfree)*hslave(1:numel(nfree),:), [], 1);
+    %FD(indA) = FD(indA) - P_m2D'*reshape(P_D2s'*Q_slave(nd, nfree)*hslave(1:numel(nfree),:), [], 1);
+    %FD(indI) = FD(indI) - L_s' * reshape(hslave((numel(np_free)+1):end,:), [], 1);
+    FD(indA) = FD(indA) - P_m2D'*reshape(P_D2s'*S_slave(nd, nfree)*hslave, [], 1);
     FD(indI) = FD(indI) - L_s' * reshape(hslave((numel(np_free)+1):end,:), [], 1);
-
     
     FL = FL + FD;
     
@@ -192,8 +214,7 @@ for kt = 2:10%Nsamples
     end
     
     %updating prev-residual term
-    res_prev = -res - (S_ag + Sc)*Xsamples(:,kt) + [sim.matrices.F; zeros(Nu,1); Ustep(1:sim.results.Ni_s)] ...
-        + FD;
+    res_prev = -res - (S_ag + Sc)*Xsamples(:,kt) + [sim.matrices.F; zeros(Nu,1); Ustep(1:sim.results.Ni_s)];
     
     %updating slave-domain solution    
     %%{
@@ -213,23 +234,65 @@ for kt = 2:10%Nsamples
     s_new = [reshape(P_m2D*Xsamples(indA, kt),[],Qs_sector); reshape(L_s*Xsamples(indI, kt),[],Qs_sector)];
     xslav = XX*( (alpha1/alpha2)*s_prev + s_new);
     
-    xslave_prev = (-(alpha1/alpha2)*S_slave + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
-    hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:)))); 
+    xslav(nd,:) = P_D2s*s_new(1:ND,:);
+    %xslav([nd (Np_slave+1):(Np_slave+Nu_slave)], :) = XX([nd (Np_slave+1):(Np_slave+Nu_slave)],:)*s_new;
+    
+    %xslave_prev = (-(alpha1/alpha2)*S_slave + (2/(dt*alpha2))*M_slave)*reshape(Xslave(:,kt-1), [], Qs_sector);
+    %hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev(nfree,:)))); 
+    
+    %xtemp = reshape(Xslave(:,kt-1), [], Qs_sector);
+    %xslave_prev = (-(alpha1/alpha2)*S_slave(nfree,nfree) + (2/(dt*alpha2))*M_slave(nfree,nfree))*xtemp(nfree,:);
+    %hslave = Qaux * (Uaux \ (Laux \ (Paux*xslave_prev)));
  
-    xslav(nfree,:) = xslav(nfree,:) + hslave;
+    xslav(nfree,:) = xslav(nfree,:) + hslave_m;
     Xslave(:,kt) = reshape(xslav, [], 1);
     s_prev = s_new;
     %}
 
     
     %plotting currents
-    %%{
+    %{    
     Mphase_plot = kron(eye(N_phases), ones(N_inParallel,1))';
     Is = Xsamples(indI(:), 1:kt);
     Iphase = Mphase_plot*Is;
-    figure(13); clf; hold on;
+    h = figure(13); clf; hold on;
     plot( Iphase(1:3,:)' ); 
     plot( Is(1:N_inParallel,:)', 'b--');
+    drawnow;
+    
+
+    
+    %}
+    
+    %plotting currents for demo
+    %{
+    delay = toc;
+    Mphase_plot = kron(eye(N_phases), ones(N_inParallel,1))';
+    Is = Xsamples(indI(:), 1:kt);
+    Iphase = Mphase_plot*Is;
+    if kt > 110
+        h = figure(13); clf; hold on; box on;
+        plot(tsamples(110:kt)*1e3, Iphase(1:3,110:kt)' ); 
+        plot(tsamples(110:kt)*1e3, Is(1:N_inParallel,110:kt)', 'b--');
+        xlabel('Time (ms)');
+        ylabel('Current (A)');
+        ax = gca;
+        ax.XLim = [tsamples(110) tsamples(end)]*1e3;
+        
+        filename = 'currents.gif';
+        frame = getframe(h);
+        im = frame2im(frame);
+        [imind,cm] = rgb2ind(im,256);
+
+        if kt == 111
+            imwrite(imind,cm,filename,'gif', 'Loopcount',inf, 'DelayTime', delay);
+        elseif kt < Nsamples;
+            imwrite(imind,cm,filename,'gif', 'WriteMode','append', 'DelayTime', delay);
+        else
+            imwrite(imind,cm,filename,'gif','WriteMode','append', 'DelayTime', 1.5);
+        end
+
+    end
     drawnow;
     %}
     
@@ -244,6 +307,6 @@ for kt = 2:10%Nsamples
 end
 
 sim.results.Xt = Xsamples;
-
+sim.results.Xslave = Xslave;
 
 end

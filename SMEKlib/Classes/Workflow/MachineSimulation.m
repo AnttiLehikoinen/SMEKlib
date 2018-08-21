@@ -106,10 +106,10 @@ classdef MachineSimulation < handle
             
             
             if step == -1
-                A = this.results.Xh(1:this.Np);
+                A = this.results.Xh(1:this.Np, 1);
                 step = 1;
             elseif isempty(step)
-                A = this.results.Xs(1:this.Np);
+                A = this.results.Xs(1:this.Np, 1);
                 step = 1;
             else
                 A = this.results.Xt(1:this.Np, step);

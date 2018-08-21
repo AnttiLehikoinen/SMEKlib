@@ -40,9 +40,9 @@ for kmat = 1:Nmats
     
     
     %initializing temporary interpolation splines (for easy derivation)
-    pp = spline(BH2(:,1).^2, nu); %spline for nu(B^2)
+    %pp = spline(BH2(:,1).^2, nu); %spline for nu(B^2)
     %pp = pchip(BH2(:,1).^2, nu); %these might also be worth a try
-    %pp = csaps(BH2(:,1).^2, nu);
+    pp = csaps(BH2(:,1).^2, nu);
 
     ppder = derivate_pp(pp); %spline for d/dB^2 nu(B^2)
     
@@ -88,6 +88,8 @@ BH2 = internal_extendBH(BH);
 
 nu_init = BH(:,2) ./ BH(:,1);
 
+%figure(); clf; plot(BH(:,1), nu_init);
+
 if isnan(nu_init(1))
     nu_init(1) = nu_init(2);
 end
@@ -107,7 +109,13 @@ mu0 = pi*4e-7;
 Next = 100;
 
 B_ext = [BH(:,1)' BH(end,1)+(1:Next)*dB];
-H_ext = min(interp1(BH(:,1), BH(:,2), B_ext, 'linear', 'extrap'), B_ext/mu0);
+
+%old approach
+%H_ext = min(interp1(BH(:,1), BH(:,2), B_ext, 'linear', 'extrap'), B_ext/mu0);
+
+%constant magnetization
+muM = BH(end, 1) - mu0*BH(end,2);
+H_ext = (B_ext - muM)/ mu0;
 
 BH2 = [B_ext' H_ext'];
 

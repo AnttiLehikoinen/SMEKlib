@@ -23,7 +23,7 @@ classdef gwrap < handle
             this.N_surfaces = 0;
             
             %initializing arrays
-            this.p = zeros(2, 1000);
+            this.p = zeros(3, 1000);
             this.l = zeros(2, 1000);
             this.ll = cell(1, 1000);
             this.surfaces = SLContainer();

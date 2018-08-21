@@ -44,7 +44,9 @@ if sim.dims.type_statorWinding == defs.stranded
 elseif sim.dims.type_statorWinding == defs.decomposed
     % decomposed winding: A-parts handled elsewhere
      %loop matrix
-    Ls = statorConnectionMatrix(sim.matrices.W, sim.dims.Nc_slot, sim.dims.N_series, 4, 3);
+    %Ls = statorConnectionMatrix(sim.matrices.W, sim.dims.Nc_slot, sim.dims.N_series, 4, 3);
+    Ls = statorConnectionMatrix(sim.matrices.W, sim.dims.Nc_slot, sim.dims.N_series, ...
+        sim.dims.transpositionArgs{:});
     %Ls = statorConnectionMatrix(sim.matrices.W, sim.dims.Nc_slot, sim.dims.N_series);
     Ls = Ls(1:(size(Ls,1)/sim.msh.symmetrySectors),:); 
     sim.matrices.Ls = sparse(Ls(:, sum(abs(Ls),1)>0));

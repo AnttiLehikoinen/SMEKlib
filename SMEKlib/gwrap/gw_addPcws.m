@@ -7,15 +7,18 @@ function this = gw_addPcws(this, varargin)
 %
 % Each segment is defined by one of the following sets of arguments:
 %
-% line: 'line', xstart, xend, tol
+% line: 'line', xstart, xend, tol, <opt>
 %
-% arc: 'arc', center, astart, aend, tol
+% arc: 'arc', center, astart, aend, tol, <opt>
 %   where astart and aend can be either scalars corresponding to the polar
 %   coordinate, or 2x1 vectors describing a point in the xy-plane
 %
-% arc: 'arc', center, astart, aend, radius, tol
+% arc: 'arc', center, astart, aend, radius, tol, <opt>
 %
-% Each line segment consists of >=2 nodes, with mutual distances <= tol.
+% Each line segment consists of automatically-added >=2 nodes, with mutual distances <= tol.
+%
+% <opt> = 'linename', name_goes_here
+%   can be used to name the nodes belonging to the segment, 
 %
 % (c) 2017 Antti Lehikoinen / Aalto University
 

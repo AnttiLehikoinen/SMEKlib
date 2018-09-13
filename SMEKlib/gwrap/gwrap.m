@@ -44,6 +44,8 @@ classdef gwrap < handle
             this = gw_addSurface(this, points, surfacename, varargin{:});
         end
         function this = addPcws(this, varargin)
+            %Add surface piecewise. 
+            %   help gw_addPcws for more details.
             this = gw_addPcws(this, varargin{:});
         end
         function this = addpcw(this, varargin)

@@ -116,7 +116,7 @@ for ksample = 1:Nsamples
         
     end
 end
-ro-ri
+disp(['Radius of airgap used in calculations: ' num2str(ro-ri)]);
 T = T / (mu0*(ro-ri));
 
 end

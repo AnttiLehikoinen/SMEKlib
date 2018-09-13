@@ -17,12 +17,13 @@ function BH = get_defaultMaterials(matNumber)
 % 3 = slot wedge material
 % 4 = M27 steel
 % 5 = linear iron (mu_r = 1000)
+% 6 = linear PM (mu_r = 1.05)
 %
 % Feel free to add your own :)
 
 if matNumber < 0
     % number of default materials asked
-    BH = 5; return;
+    BH = 6; return;
 elseif matNumber == 0
     BH = [0 1; 0 1/(pi*4e-7)]'; return
 elseif matNumber <= 3
@@ -168,6 +169,11 @@ elseif matNumber == 5
     H = B / (1000*pi*4e-7);
     BH = [B H];
     return
+elseif matNumber == 6
+    B = linspace(0, 2, 2)';
+    H = B / (1.05*pi*4e-7);
+    BH = [B H];
+    return;
 else
     error('Material not available');
 end

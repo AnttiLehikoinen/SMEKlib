@@ -94,7 +94,7 @@ classdef MachineSimulation < handle
             this = sim_runStaticSimulation(this, varargin{:});
         end
         
-        function [] = fluxplot(this, step, pars)
+        function [] = fluxplot(this, step, pars, varargin)
             %Flux density plot.
             % 
             % Call syntax:
@@ -104,23 +104,30 @@ classdef MachineSimulation < handle
             %   [] = this.fluxplot(-1, pars)
             %       for harmonic analysis results.
             
-            
-            if step == -1
-                A = this.results.Xh(1:this.Np, 1);
-                step = 1;
-            elseif isempty(step)
-                A = this.results.Xs(1:this.Np, 1);
-                step = 1;
-            else
-                A = this.results.Xt(1:this.Np, step);
-            end
             if any(pars.slip)
                 slip = pars.slip;
             else
                 slip = this.dims.slip;
             end
-            rotorangle = (step-1)*(1-slip)*(2*pi*pars.f/this.dims.p) * ...
-                (1/pars.f) / pars.N_stepsPerPeriod;
+            
+            if step == -1
+                A = this.results.Xh(1:this.Np, 1);
+                step = 1;
+                rotorangle = (step-1)*(1-slip)*(2*pi*pars.f/this.dims.p) * ...
+                    (1/pars.f) / pars.N_stepsPerPeriod;
+            elseif numel(varargin)>0 && strcmp(varargin{1}, 'static')
+                A = this.results.Xs(1:this.Np, step);
+                if isempty(pars.rotorAngle)
+                    rotorangle = 0;
+                else
+                    rotorangle = pars.rotorAngle;
+                    rotorangle = rotorangle(step);
+                end
+            else
+                A = this.results.Xt(1:this.Np, step);
+                rotorangle = (step-1)*(1-slip)*(2*pi*pars.f/this.dims.p) * ...
+                    (1/pars.f) / pars.N_stepsPerPeriod;
+            end
             
             drawFluxDensity(this.msh, A, rotorangle, 'LineStyle', 'none'); 
             colormap('jet'); colorbar; caxis([0 2]);

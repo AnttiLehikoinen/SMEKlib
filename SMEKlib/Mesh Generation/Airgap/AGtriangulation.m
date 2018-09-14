@@ -84,7 +84,7 @@ classdef AGtriangulation < handle
                 %this.p_virt(1,:) ); %not needed, it seems
                 this.misc.nr = setdiff(this.n_moving, this.n_bnd); %rotor boundary nodes
             end
-            a = atan2(x(2), x(1)); %angle of the displacement
+            %a = atan2(x(2), x(1)); %angle of the displacement
             nmid = this.n_bnd;
             %this.p_virt(:, nmid) = this.misc.p_orig(:,nmid) + ...
             %    r*[cos(this.misc.agAngles_all(nmid)-a); sin(this.misc.agAngles_all(nmid)-a)];

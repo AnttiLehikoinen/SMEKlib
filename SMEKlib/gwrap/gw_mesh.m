@@ -7,5 +7,5 @@ else
 end
 
 %system(['"' gm.gpath '"' 'gmsh ' '"' filename '"' ' -2']);
-system(['"' gm.gpath '"' 'gmsh ' '"' filename '"' ' -2 -format msh2'])
+system(['"' gm.gpath '"' 'gmsh ' '"' filename '"' ' -2 -format msh2']);
 end

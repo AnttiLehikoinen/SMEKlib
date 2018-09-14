@@ -1,7 +1,8 @@
 classdef SimulationParameters < dynamicprops
     %simulation parameters container
     properties
-        U, f, N_stepsPerPeriod, N_periods, slip, misc, rotorAngle
+        U, f, N_stepsPerPeriod, N_periods, slip, misc, rotorAngle,
+        Is, rotorDisplacement
     end
     
     methods
@@ -13,6 +14,8 @@ classdef SimulationParameters < dynamicprops
             this.N_periods = 2;
             this.slip = [];
             this.rotorAngle = 0;
+            this.Is = [];
+            this.rotorDisplacement;
             this.misc = struct('Info', 'Miscellaneous parameters etc.');
             
             if mod(numel(varargin), 2)

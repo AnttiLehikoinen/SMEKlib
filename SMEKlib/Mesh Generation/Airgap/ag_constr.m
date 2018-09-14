@@ -32,9 +32,9 @@ else
         mid_given = true;
     else
         %no middle layer nodes given --> generating middle layer
-        %N_mid = ceil( 0.75*(N_ag_s + N_ag_r) ) - 1;
+        N_mid = ceil( 0.75*(N_ag_s + N_ag_r) ) - 1;
         %N_mid = ceil(0.5*N_ag_s) - 1;
-        N_mid = 2*(N_ag_s-1) ;
+        %N_mid = 2*(N_ag_s-1) ;
         %N_mid = ceil( 0.9*N_ag_r )
 
         angles = linspace(0, 2*pi/msh.symmetrySectors, N_mid);
@@ -143,7 +143,10 @@ this.original_positions = originalPositions_rotor;
 this.shiftTol = 2*pi / numel(this.n_bnd);
 %this.n_moving_local = sortedNodes_moving;
 
-this.msh_ag = MachineMesh(this.p_virt, this.t_moving);
+this.msh_ag = MachineMesh(this.p_virt, [this.t_const this.t_moving]);
+
+figure(11); clf;
+msh_triplot(this.msh_ag, [], 'b');
 
 this.el_table = [1:size(p_ag_virt, 2);
             virt_identities;
@@ -157,9 +160,7 @@ end
 
 %setting constant part of AG matrix
 this.setConstantAGmatrix(size(msh.p,2));
-
 this.msh_ag.t = this.t_moving;
-
 end
 
 

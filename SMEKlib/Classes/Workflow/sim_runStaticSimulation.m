@@ -15,16 +15,27 @@ PT = blkdiag(sim.matrices.P, speye(Nui));
 %Jacobian constructor object
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 
+rotorDisplacements = pars.rotorDisplacement;
 if numel(pars.rotorAngle) == 1
+    if ~isempty(rotorDisplacements)
+        sim.msh.bandData.setEccentricity(rotorDisplacements);
+    end
+    
     S_ag = sim.msh.get_AGmatrix(0, Ntot);
     Qconst = S_ag + Sc;
 else
     rotorAngles = pars.rotorAngle;
 end
 
-N = size(pars.U, 2);
+%parsing source vector(s)
+if isempty(pars.Is)
+    Fsc = pars.U; %general supply
+else
+    Fsc = sim.matrices.Cs*sim.matrices.Ls*pars.Is; %current supply
+end
+FL = bsxfun(@plus, Fsc, sim.matrices.F);
+N = size(FL, 2);
 
-FL = bsxfun(@plus, pars.U, sim.matrices.F);
 Xs_all = zeros(Ntot, N);
 
 for k = 1:N
@@ -35,6 +46,10 @@ for k = 1:N
     end
     
     if numel(pars.rotorAngle) > 1
+        if ~isempty(rotorDisplacements)
+            sim.msh.bandData.setEccentricity(rotorDisplacements(:,k))
+        end
+        
         S_ag = sim.msh.get_AGmatrix(rotorAngles(k), Ntot);
         Qconst = S_ag + Sc;
     end
@@ -59,5 +74,10 @@ for k = 1:N
 end
 
 sim.results.Xs = Xs_all;
+
+%resetting eccentricity
+if ~isempty(rotorDisplacements)
+    sim.msh.bandData.setEccentricity( [0;0] );
+end
 
 end

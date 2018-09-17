@@ -82,7 +82,7 @@ while true
         r = -1;
         %parsing end and start points
         if numel(arg1) == 2
-            angle_start = atan2(arg1(2)-center(2), arg1(1)-center(1))
+            angle_start = atan2(arg1(2)-center(2), arg1(1)-center(1));
             r = norm( center - arg1 );
         elseif numel(arg1) == 1
             angle_start = arg1;
@@ -90,7 +90,7 @@ while true
             error('Invalid start');
         end
         if numel(arg2) == 2
-            angle_end = atan2(arg2(2)-center(2), arg2(1)-center(1))
+            angle_end = atan2(arg2(2)-center(2), arg2(1)-center(1));
             r = norm(center - arg2);
         elseif numel(arg2) == 1
             angle_end = arg2;
@@ -104,9 +104,9 @@ while true
             tol = varargin{ri}; ri = ri + 1;
         end
         
-        angleDiff = angleDifference(angle_end, angle_start)
+        angleDiff = angleDifference(angle_end, angle_start);
         Np = ceil( r*abs(angleDiff) / tol ) + 1;
-        angles = angle_start + linspace(0, angleDiff, Np)
+        angles = angle_start + linspace(0, angleDiff, Np);
         angles = angles(1:(end-1));
         points = bsxfun(@plus, r*[cos(angles); sin(angles) ], center);
         addx( points );

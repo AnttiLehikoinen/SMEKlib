@@ -12,6 +12,8 @@ function [Torque, Force] = sim_compute_torque(sim, pars, simtype)
 %initializing
 if strcmp(simtype, 'static')
     A = sim.results.Xs(1:sim.Np, :);
+elseif strcmp(simtype, 'stepping');
+    A = sim.results.Xt(1:sim.Np,:);
 end
 Nsamples = size(A,2);
 

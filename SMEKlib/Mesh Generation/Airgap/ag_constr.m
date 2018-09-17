@@ -145,8 +145,6 @@ this.shiftTol = 2*pi / numel(this.n_bnd);
 
 this.msh_ag = MachineMesh(this.p_virt, [this.t_const this.t_moving]);
 
-figure(11); clf;
-msh_triplot(this.msh_ag, [], 'b');
 
 this.el_table = [1:size(p_ag_virt, 2);
             virt_identities;

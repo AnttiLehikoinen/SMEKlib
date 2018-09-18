@@ -28,7 +28,10 @@ Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.cur
 for kslip = 1:numel(slips)
     slip = slips(kslip);
     
-    [Stot, Mtot] = get_circuitMatrices(sim, slip);
+    %[Stot, Mtot] = get_circuitMatrices(sim, slip); %rotor currents
+    %eliminated
+    [Stot, Mtot] = get_circuitMatrices_2(sim, slip); %rotor currents as variables
+
     
     if isfield(pars.misc, 'isDC') && pars.misc.isDC
         Sag_r = sim.msh.get_AGmatrix(0, size(Stot,1));
@@ -59,12 +62,15 @@ for kslip = 1:numel(slips)
     else
         FI = U.* [exp(1i*w*t0); exp(1i*w*t0-1i*pi/3)];
     end
+    if size(FI,1) == sim.results.Ni_s
+        FI = [FI; zeros(sim.results.Ni_r,size(FI,2))];
+    end
 
     %assembling load vector
     %Ftemp = [sim.matrices.F; zeros(Nu,1); FI(1:sim.results.Ni_s)];
     %Ftot = [real(Ftemp); -imag(Ftemp)];
-    Ftot = [sim.matrices.F; zeros(Nu,1); real(FI(1:sim.results.Ni_s));
-        sim.matrices.F; zeros(Nu,1); imag(FI(1:sim.results.Ni_s))];
+    Ftot = [sim.matrices.F; zeros(Nu,1); real(FI);
+        sim.matrices.F; zeros(Nu,1); imag(FI)];
 
     if kslip == 1
         Xtot = zeros(size(Q,1), numel(slips));
@@ -75,7 +81,7 @@ for kslip = 1:numel(slips)
         [J11, J12, J21, J22, res11, res22] = Jc.eval_complex(Xtot(:,kslip), nu_fun); 
 
         %finalizing
-        Jtot = PTT'*( [J11 J12; J21 J22] + Q )*PTT;    
+        Jtot = PTT'*( [J11 J12; J21 J22] + Q )*PTT;
         res_tot = PTT'*( Q*Xtot(:,kslip) - Ftot + [res11;res22] );
 
         %checking convergence

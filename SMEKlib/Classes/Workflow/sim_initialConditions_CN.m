@@ -20,7 +20,9 @@ Nui = Ntot - size(sim.matrices.P,1);
 kslip = 1;
 
 slip = slips(kslip);
-[Stot, Mtot] = get_circuitMatrices(sim, slip);
+%[Stot, Mtot] = get_circuitMatrices(sim, slip);
+[Stot, Mtot] = get_circuitMatrices_2(sim, slip);
+
 
 %{
 %finding indices to free non-damped variables (non-conductive regions,

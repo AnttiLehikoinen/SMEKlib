@@ -66,7 +66,8 @@ while true
             xp(3,end) = xend(3);
         end
         
-        addx(xp(:,1:(end-1)));
+        %addx(xp(:,1:(end-1)));
+        addx(xp);
         
         if strcmpi(varargin{ri}, 'linename')
             addl(1:(size(xp,2)-1), varargin{ri+1});
@@ -107,7 +108,7 @@ while true
         angleDiff = angleDifference(angle_end, angle_start);
         Np = ceil( r*abs(angleDiff) / tol ) + 1;
         angles = angle_start + linspace(0, angleDiff, Np);
-        angles = angles(1:(end-1));
+        %angles = angles(1:(end-1));
         points = bsxfun(@plus, r*[cos(angles); sin(angles) ], center);
         addx( points );
         

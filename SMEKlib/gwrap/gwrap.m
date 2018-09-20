@@ -9,8 +9,8 @@ classdef gwrap < handle
     methods
         function this = gwrap(gmsh_path)
             
-            if gmsh_path(end)~='\'
-                 this.gpath = [gmsh_path '\'];
+            if gmsh_path(end)~='/'
+                 this.gpath = [gmsh_path '/'];
             else
                 this.gpath = gmsh_path;
             end

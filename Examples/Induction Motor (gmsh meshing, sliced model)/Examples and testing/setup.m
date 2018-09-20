@@ -3,8 +3,6 @@
 %
 % Copyright (c) 2016 Antti Lehikoinen / Aalto University
 
-addpath(genpath('..\..\SMEKlib'));
-
 %meshing; see the script files for details
 mesh_stator; 
 mesh_rotor;

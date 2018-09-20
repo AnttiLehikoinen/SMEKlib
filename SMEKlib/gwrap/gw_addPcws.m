@@ -67,6 +67,7 @@ while true
         end
         
         addx(xp(:,1:(end-1)));
+        %addx(xp);
         
         if strcmpi(varargin{ri}, 'linename')
             addl(1:(size(xp,2)-1), varargin{ri+1});

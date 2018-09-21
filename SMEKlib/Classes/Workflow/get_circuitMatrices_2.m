@@ -56,7 +56,7 @@ end
 sim.results.Ni_s = Ni_s; sim.results.Nu_s = Nu_s;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if sim.dims.type_rotorWinding == defs.cage
+if sim.dims.type_rotorWinding == defs.cage || sim.dims.type_rotorWinding == defs.user_defined
     Nu_r = size(sim.matrices.Lr, 1); 
     Ni_r = size(sim.matrices.Lr, 2);
     
@@ -84,7 +84,8 @@ else
     S_UI_r = []; M_IA_r = []; S_IU_r = [];
     S_II_r = []; M_II_r = [];
     Nu_r = 0; Ni_r = 0;
-end
+end     
+
 sim.results.Nu_r = Nu_r; sim.results.Ni_r = Ni_r;
 
 if numel(varargin)

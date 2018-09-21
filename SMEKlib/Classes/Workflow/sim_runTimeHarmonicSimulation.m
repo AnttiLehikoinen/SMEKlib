@@ -35,7 +35,7 @@ for kslip = 1:numel(slips)
     
     if isfield(pars.misc, 'isDC') && pars.misc.isDC
         Sag_r = sim.msh.get_AGmatrix(0, size(Stot,1));
-        Sag_i = sim.msh.get_AGmatrix(+0.5*pi/sim.dims.p, size(Stot,1));
+        Sag_i = sim.msh.get_AGmatrix(-0.5*pi/sim.dims.p, size(Stot,1));
         Q = [Stot+Sag_r -w*Mtot;
             w*Mtot Stot+Sag_i];
     else
@@ -55,12 +55,13 @@ for kslip = 1:numel(slips)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %voltage vector
     t0 = 0;
+    phi0 = pars.phi0;
     if numel(pars.U) > 1
         FI = pars.U;
     elseif sim.dims.connection_stator == defs.delta
-        FI = U.*[exp(1i*w*t0); exp(1i*w*t0-1i*2*pi/3); exp(1i*w*t0-1i*4*pi/3)];
+        FI = U.*[exp(1i*w*t0-1i*phi0); exp(1i*w*t0-1i*2*pi/3-1i*phi0); exp(1i*w*t0-1i*4*pi/3-1i*phi0)];
     else
-        FI = U.* [exp(1i*w*t0); exp(1i*w*t0-1i*pi/3)];
+        FI = U.* [exp(1i*w*t0-1i*phi0); exp(1i*w*t0-1i*pi/3-1i*phi0)];
     end
     if size(FI,1) == sim.results.Ni_s
         FI = [FI; zeros(sim.results.Ni_r,size(FI,2))];

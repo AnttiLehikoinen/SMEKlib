@@ -104,7 +104,7 @@ classdef MachineSimulation < handle
             %   [] = this.fluxplot(-1, pars)
             %       for harmonic analysis results.
             
-            if any(pars.slip)
+            if ~isempty(pars.slip)
                 slip = pars.slip;
             else
                 slip = this.dims.slip;

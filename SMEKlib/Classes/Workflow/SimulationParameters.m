@@ -3,7 +3,7 @@ classdef SimulationParameters < dynamicprops
     properties
         U, f, N_stepsPerPeriod, N_periods, slip, misc, rotorAngle,
         Is, rotorDisplacement,
-        alpha2
+        alpha2, phi0
     end
     
     methods
@@ -17,6 +17,7 @@ classdef SimulationParameters < dynamicprops
             this.rotorAngle = 0;
             this.Is = [];
             this.rotorDisplacement;
+            this.phi0 = 0; %voltage phase angle
             this.alpha2 = 1.1; %weight factor for k+1 step. 
                 %2=implicit Euler; 1 = Crank-Nicolson
             

@@ -21,7 +21,7 @@ else
     U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %voltage function
-    phi0 = 0;
+    phi0 = pars.phi0;
     if sim.dims.connection_stator == defs.delta
         Ufun = @(t)(  U*[cos(w*t-phi0); cos(w*t - 2*pi/3-phi0); cos(w*t - 4*pi/3-phi0)] );
     else

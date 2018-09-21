@@ -56,21 +56,48 @@ while true
         tol = varargin{ri+3};
         ri = ri + 4;
         
-        Np = ceil( norm(xend(1:2)-xstart(1:2))/tol ) + 1;
+        if tol > 0
+            Np = ceil( norm(xend(1:2)-xstart(1:2))/tol ) + 1;
+        else
+            Np = -tol;
+        end
+        
+        %periodic boundary? --> fixing number of nodes
+        %{
+        if strcmpi(varargin{ri}, 'linename')
+            if strcmpi(varargin{ri+1}, 'n_ccl')
+                Np_cand = size( this.physicalLines.get('n_cl'), 2 ) 
+                if Np_cand >0; Np = Np_cand; end;
+            elseif strcmpi(varargin{ri+1}, 'n_cl')
+                Np_cand = size( this.physicalLines.get('n_ccl'), 2 ) 
+                if Np_cand >0; Np = Np_cand; end;
+            end
+            Np
+        end
+        %}
         xp = bsxfun(@plus, xstart(1:2,:), bsxfun(@times, xend(1:2,:)-xstart(1:2,:), linspace(0,1,Np)));
         
-        if numel(xstart)==3
-            xp(3,1) = xstart(3);
+        %characteristic lengths given
+        if numel(xstart) == 3
+            lc_start = xstart(3);
+        else
+            lc_start = this.lc;
         end
-        if numel(xend)==3
-            xp(3,end) = xend(3);
+        if numel(xend) == 3
+            lc_end = xend(3);
+        else
+            lc_end = this.lc;
         end
         
-        addx(xp(:,1:(end-1)));
-        %addx(xp);
+        xp = [xp(:,1:(end-1)); linspace(lc_start, lc_end, size(xp,2)-1)];
+        
+        
+        %addx(xp(:,1:(end-1)));
+        addx(xp);
         
         if strcmpi(varargin{ri}, 'linename')
-            addl(1:(size(xp,2)-1), varargin{ri+1});
+            %addl(1:(size(xp,2)-1), varargin{ri+1});
+            addl(1:(size(xp,2)), varargin{ri+1});
             ri = ri + 2;
         end        
     elseif strcmpi(varargin{ri}, 'arc')
@@ -82,17 +109,17 @@ while true
         
         r = -1;
         %parsing end and start points
-        if numel(arg1) == 2
+        if numel(arg1) >= 2
             angle_start = atan2(arg1(2)-center(2), arg1(1)-center(1));
-            r = norm( center - arg1 );
+            r = norm( center - arg1(1:2) );
         elseif numel(arg1) == 1
             angle_start = arg1;
         else
             error('Invalid start');
         end
-        if numel(arg2) == 2
+        if numel(arg2) >= 2
             angle_end = atan2(arg2(2)-center(2), arg2(1)-center(1));
-            r = norm(center - arg2);
+            r = norm(center - arg2(1:2));
         elseif numel(arg2) == 1
             angle_end = arg2;
         else
@@ -110,6 +137,20 @@ while true
         angles = angle_start + linspace(0, angleDiff, Np);
         angles = angles(1:(end-1));
         points = bsxfun(@plus, r*[cos(angles); sin(angles) ], center);
+        
+        %characteristic lengths given
+        if numel(arg1) == 3
+            lc_start = arg1(3);
+        else
+            lc_start = this.lc;
+        end
+        if numel(arg2) == 3
+            lc_end = arg2(3);
+        else
+            lc_end = this.lc;
+        end
+        points = [points; linspace(lc_start, lc_end, size(points,2))];
+        
         addx( points );
         
         if strcmpi(varargin{ri}, 'linename')

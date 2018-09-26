@@ -32,6 +32,7 @@ if sim.dims.type_statorWinding == defs.stranded
     else
         DRs = sparsediag(sim.dims.leff ./(sim.dims.sigma_stator*cAs)) / sim.dims.fillingFactor; %resistance matrix
     end
+    sim.matrices.cAs = cAs;
     sim.matrices.DRs = DRs;
     sim.matrices.Cs = bsxfun(@times, JF_s, 1./cAs);    
     sim.matrices.Ms = sparse(sim.Np, sim.Np);    

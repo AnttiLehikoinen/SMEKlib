@@ -31,7 +31,6 @@ for kslip = 1:numel(slips)
     %[Stot, Mtot] = get_circuitMatrices(sim, slip); %rotor currents
     %eliminated
     [Stot, Mtot] = get_circuitMatrices_2(sim, slip); %rotor currents as variables
-
     
     if isfield(pars.misc, 'isDC') && pars.misc.isDC
         Sag_r = sim.msh.get_AGmatrix(0, size(Stot,1));

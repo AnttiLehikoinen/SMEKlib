@@ -4,7 +4,7 @@ classdef MachineSimulation < handle
     % (c) 2017 Antti Lehikoinen / Aalto University
     
     properties
-        msh, dims, results, Ne, Np, matrices, nu_fun, nu_struct, misc
+        msh, dims, results, Ne, Np, matrices, nu_fun, nu_struct, misc,
     end
     
     methods

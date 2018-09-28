@@ -3,7 +3,8 @@ classdef SimulationParameters < dynamicprops
     properties
         U, f, N_stepsPerPeriod, N_periods, slip, misc, rotorAngle,
         Is, rotorDisplacement,
-        alpha2, phi0
+        alpha2, phi0,
+        silent
     end
     
     methods
@@ -20,6 +21,7 @@ classdef SimulationParameters < dynamicprops
             this.phi0 = 0; %voltage phase angle
             this.alpha2 = 1.1; %weight factor for k+1 step. 
                 %2=implicit Euler; 1 = Crank-Nicolson
+            this.silent = false;
             
             this.misc = struct('Info', 'Miscellaneous parameters etc.');
             
@@ -48,6 +50,12 @@ classdef SimulationParameters < dynamicprops
         function t = ts(this)
             dt = (1/this.f) / this.N_stepsPerPeriod;
             t = dt * (0:(this.N_stepsPerPeriod*this.N_periods-1));
+        end
+        
+        function [] = dispf(this, varargin)
+            if ~this.silent
+                disp(varargin{:});
+            end
         end
     end
 end

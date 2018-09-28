@@ -6,9 +6,9 @@ function sim = sim_runStaticSimulation(sim, pars)
 % (c) 2018 Antti Lehikoinen / Smeklab
 
 
-[Sc, ~] = get_circuitMatrices(sim);
+[Sc, ~] = get_circuitMatrices_2(sim);
 
-Ntot = size(Sc, 1);
+Ntot = size(Sc, 1); Sc = 0*Sc;
 Nui = Ntot - size(sim.matrices.P,1);
 PT = blkdiag(sim.matrices.P, speye(Nui));
 
@@ -26,6 +26,7 @@ if numel(pars.rotorAngle) == 1
 else
     rotorAngles = pars.rotorAngle;
 end
+
 
 %parsing source vector(s)
 if isempty(pars.Is)
@@ -60,7 +61,7 @@ for k = 1:N
         res_tot = PT'*(res + Qconst*Xs - FL(:,k));
 
         resNorm = norm(res_tot) / norm(FL(:,k));
-        disp(['    Newton step ' num2str(kiter) ', relative residual ' num2str(resNorm) '.']);
+        pars.dispf(['    Newton step ' num2str(kiter) ', relative residual ' num2str(resNorm) '.']);
         %disp(['    Newton step ' num2str(kiter) ', relative residual ' num2str(resNorm) '.']); fflush(stdout); uncomment in Octave
         if resNorm < 1e-6
             break;

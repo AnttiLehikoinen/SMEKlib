@@ -45,8 +45,9 @@ n_center = intersect(n_slave, n_master);
 if isempty(n_center)
     n_center = 0;
 end
+%n_master_orig = n_master;
 n_slave = setdiff(n_slave, n_center, 'stable');
-n_master = setdiff(n_master, n_center, 'stable');
+[n_master, IA_master] = setdiff(n_master, n_center, 'stable');
 
 %special case: mirroring
 if mirror
@@ -119,12 +120,28 @@ if mirror
         end
         varargout{kout} = n_other_rep;
     end
+    
+    if n_center
+        n_master_temp = zeros(1, numel(n_master_final)+1);
+        n_master_temp(IA_master) = n_master_final;
+        n_master_temp( setdiff(1:numel(n_master_temp), IA_master) ) = n_center;
+        n_master_final = n_master_temp;
+    end
+    
     return;      
 end
 
 %updating nodal indices
 %n_master_final = n_master + Np_el + (N-2)*Np_rep;
 n_master_final = pinds_new( n_master ) + Np_el + (N-2)*Np_rep;
+%n_master_final = pinds_new( n_master_orig ) + Np_el + (N-2)*Np_rep;
+
+if n_center
+    n_master_temp = zeros(1, numel(n_master_final)+1);
+    n_master_temp(IA_master) = n_master_final;
+    n_master_temp( setdiff(1:numel(n_master_temp), IA_master) ) = n_center;
+    n_master_final = n_master_temp;
+end
 
 n_ag_rep = pinds_new( n_ag(2:end) ) + Np_el;
 n_ag = [n_ag repmat(n_ag_rep, 1, N-1)+kron(0:(N-2), Np_rep*ones(1,numel(n_ag_rep)))];

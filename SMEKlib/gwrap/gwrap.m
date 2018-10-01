@@ -3,7 +3,7 @@ classdef gwrap < handle
         gpath
         N_points, N_lines, N_lineloops, N_surfaces,
         p, l, ll
-        surfaces, holesInSurfaces, physicalLines
+        surfaces, holesInSurfaces, physicalLines, lc
     end
     
     methods
@@ -29,6 +29,9 @@ classdef gwrap < handle
             this.surfaces = SLContainer();
             this.holesInSurfaces = SLContainer();
             this.physicalLines = SLContainer();
+            
+            %characteristic length
+            this.lc = 0;
         end
         
         function this = addPoints(this, p, varargin)

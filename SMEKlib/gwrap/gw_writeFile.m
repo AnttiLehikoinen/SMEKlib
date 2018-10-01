@@ -8,6 +8,9 @@ else
 end
 fid = fopen(filename, 'w');
 
+%setting characteristic length
+gm.p(3, gm.p(3,:)==0) = gm.lc;
+
 %printing points
 for k = 1:gm.N_points
     if gm.p(3, k) > 0

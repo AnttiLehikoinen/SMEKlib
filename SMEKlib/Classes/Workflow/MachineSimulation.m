@@ -4,7 +4,7 @@ classdef MachineSimulation < handle
     % (c) 2017 Antti Lehikoinen / Aalto University
     
     properties
-        msh, dims, results, Ne, Np, matrices, nu_fun, nu_struct, misc
+        msh, dims, results, Ne, Np, matrices, nu_fun, nu_struct, misc,
     end
     
     methods
@@ -104,7 +104,7 @@ classdef MachineSimulation < handle
             %   [] = this.fluxplot(-1, pars)
             %       for harmonic analysis results.
             
-            if any(pars.slip)
+            if ~isempty(pars.slip)
                 slip = pars.slip;
             else
                 slip = this.dims.slip;

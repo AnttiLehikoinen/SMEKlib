@@ -75,7 +75,7 @@ for kslip = 1:numel(slips)
     if kslip == 1
         Xtot = zeros(size(Q,1), numel(slips));
     end
-    for kiter = 1:15
+    for kiter = 1:pars.maxIter
         % assembling Jacobian and residual blocks
         %[J11, J12, J21, J22, res11, res22] = assemble_ComplexJacobian(sim.nu_fun, Xtot(:,kslip), [], sim.msh);    
         [J11, J12, J21, J22, res11, res22] = Jc.eval_complex(Xtot(:,kslip), nu_fun); 

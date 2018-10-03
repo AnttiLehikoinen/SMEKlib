@@ -15,6 +15,7 @@ else
     %generating triangulatio
     n_ag_s = msh.namedNodes.get('n_ag_s');
     n_ag_r = msh.namedNodes.get('n_ag_r');
+        
     N_ag_s = numel(n_ag_s);
     N_ag_r = numel(n_ag_r);
 
@@ -32,7 +33,7 @@ else
         mid_given = true;
     else
         %no middle layer nodes given --> generating middle layer
-        N_mid = ceil( 0.75*(N_ag_s + N_ag_r) ) - 1;
+        N_mid = ceil( 0.75*(N_ag_s + N_ag_r)/2 )*2 - 1;
         %N_mid = ceil(0.5*N_ag_s) - 1;
         %N_mid = 2*(N_ag_s-1) ;
         %N_mid = ceil( 0.9*N_ag_r )
@@ -51,6 +52,7 @@ else
         n_mid = size(msh.p, 2) + (1:N_mid);
 
         %adding mid-nodes to the mesh
+        p_orig = msh.p;
         if msh.symmetrySectors > 1
             msh.p = [msh.p p_mid];
         else
@@ -59,29 +61,51 @@ else
             N_mid = N_mid-1;
         end
     end
+    
+    if msh.elementType == Elements.triangle2 || msh.elementType == Elements.triangle2I
+        %n_ag_s_orig = n_ag_s;
+        %n_ag_r_orig = n_ag_r;
+        %n_mid_orig = n_mid;
+        %n_ag_s = n_ag_s(1:2:end);
+        %n_ag_r = n_ag_r(1:2:end);
+        %n_mid = n_mid(1:2:end);
+    end
 
     %layer-triangulations
-    if msh.symmetrySectors > 1
+    if msh.elementType == Elements.triangle2 || msh.elementType == Elements.triangle2I
+        if msh.symmetrySectors > 1
+            [t_in, pe] = singleLayerAGtriangulation_2nd(msh, n_mid, n_ag_r);
+            %msh.p = [msh.p pe];
+            
+            [t_out, pe2] = singleLayerAGtriangulation_2nd(msh, n_ag_s, n_mid);
+            pe = [pe pe2];
+            msh.p = [p_orig pe p_mid];
+        end            
+    elseif msh.symmetrySectors > 1
         t_in = singleLayerAGtriangulation_2(msh, n_mid, n_ag_r);
         t_out = singleLayerAGtriangulation_2(msh, n_ag_s, n_mid);
     else
         t_in = singleLayerAGtriangulation_2(msh, n_mid([1:end 1]), n_ag_r);
         t_out = singleLayerAGtriangulation_2(msh, n_ag_s, n_mid([1:end 1]));
-    end
+    end   
 end
 
-agNodes_global = [n_ag_s n_ag_r n_mid];
+agNodes_global = [n_ag_s n_ag_r (n_mid(end)+1):size(msh.p,2) n_mid ];
 
 %{
 figure(12); clf; hold on; axis equal;
 p = msh.p;
-triplot(t_in(:,:)', p(1,:), p(2,:), 'r');
+triplot(t_in(1:3,:)', p(1,:), p(2,:), 'r');
 %t_in(:,1:10)
-triplot(t_out', p(1,:), p(2,:), 'b');
+triplot(t_out(1:3,:)', p(1,:), p(2,:), 'b');
 
-plot(p(1, n_mid), p(2,n_mid), 'ro-');
-plot(p(1, n_ag_s), p(2, n_ag_s), 'bo-');
-plot(p(1, n_ag_r), p(2, n_ag_r), 'go-');
+%plot(p(1, n_mid), p(2,n_mid), 'ro-');
+%plot(p(1, n_ag_s), p(2, n_ag_s), 'bo-');
+%plot(p(1, n_ag_r), p(2, n_ag_r), 'go-');
+
+plot(p(1, t_out(4:6,:)), p(2, t_out(4:6,:)), 'bx');
+plot(p(1, t_in(4:6,:)), p(2, t_in(4:6,:)), 'rx');
+
 %}
 
 %switching from global to local indexing
@@ -97,13 +121,14 @@ t_out = reshape(inds_local(:), size(t_out,1), []);
 symm = msh.symmetrySectors;
 
 %adding virtual rotor surface nodes
+Nc = numel( (n_mid(end)+1):size(msh.p,2) );
 p_ag_virt = [msh.p(:,agNodes_global) zeros(2, (symm-1)*N_mid)];
 virt_sectors = zeros(1, size(p_ag_virt, 2));
-virt_identities = [n_ag_s n_ag_r repmat(n_mid, 1, symm)];
+virt_identities = [n_ag_s n_ag_r (n_mid(end)+1):size(msh.p,2) repmat(n_mid, 1, symm)];
 for k_sector = 1:(symm-1)
     rA = k_sector * 2*pi/symm;
     
-    inds = (N_ag_s + N_ag_r + N_mid) + (1:N_mid) + (k_sector-1)*N_mid;
+    inds = (N_ag_s + N_ag_r + Nc + N_mid) + (1:N_mid) + (k_sector-1)*N_mid;
     
     p_ag_virt(:, inds) = ...
         [cos(rA) -sin(rA);sin(rA) cos(rA)] * msh.p(:, n_mid);
@@ -114,7 +139,7 @@ end
 %getting rid of redundant dublicate virtual nodes
 if symm > 1
     Ntemp = size(p_ag_virt, 2);
-    inds2keep = setdiff(1:Ntemp, [((N_ag_s+N_ag_r + N_mid +1):N_mid:Ntemp) Ntemp]);
+    inds2keep = setdiff(1:Ntemp, [((N_ag_s+N_ag_r+Nc+ N_mid +1):N_mid:Ntemp) Ntemp]);
     p_ag_virt = p_ag_virt(:, inds2keep);
     virt_sectors = virt_sectors(inds2keep);
     virt_identities = virt_identities(inds2keep);
@@ -122,7 +147,7 @@ end
 
 % indices of moving interface node within the moving-band triangulation
 inds_r = find( ismember(agNodes_global(t_out(:)), n_mid ) );
-sortedNodes_moving = (N_ag_s + N_ag_r + 1):size(p_ag_virt,2);
+sortedNodes_moving = (N_ag_s + N_ag_r + Nc + 1):size(p_ag_virt,2);
 [~, originalPositions_rotor] = ismember( t_out(inds_r), sortedNodes_moving );
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -135,7 +160,7 @@ this.p_virt = p_ag_virt;
 %this.n_moving = [n_ag_r n_mid];
 this.t_moving = t_out;
 this.n_moving = (N_ag_s + 1):size(p_ag_virt,2);
-this.n_bnd = (N_ag_s + N_ag_r + 1):size(p_ag_virt,2);
+this.n_bnd = (N_ag_s + N_ag_r + Nc + 1):size(p_ag_virt,2);
 
 this.inds_r = inds_r;
 this.original_positions = originalPositions_rotor;

@@ -13,9 +13,14 @@ newPositions = mod(this.original_positions - 1 + nodeShift, numel(this.n_bnd) ) 
 if this.msh_ag.elementType == Elements.triangle2 || this.msh_ag.elementType == Elements.triangle2I
     msh_ag = this.msh_ag;
     %updating edge center node positions
-    p_virt(:, msh_ag.edges(3,:)) = ...
-        0.5*p_virt(:, msh_ag.edges(1,:)) + ...
-        0.5*p_virt(:, msh_ag.edges(2,:));
+    %p_virt(:, msh_ag.edges(3,:)) = ...
+    %    0.5*p_virt(:, msh_ag.edges(1,:)) + ...
+    %    0.5*p_virt(:, msh_ag.edges(2,:));
+    
+    %should improve efficiency here!
+    p_virt(:, msh_ag.t(4,:)) = 0.5*(p_virt(:, msh_ag.t(1,:)) + p_virt(:, msh_ag.t(2,:)));
+    p_virt(:, msh_ag.t(5,:)) = 0.5*(p_virt(:, msh_ag.t(2,:)) + p_virt(:, msh_ag.t(3,:)));
+    p_virt(:, msh_ag.t(6,:)) = 0.5*(p_virt(:, msh_ag.t(3,:)) + p_virt(:, msh_ag.t(1,:)));
 end
 
 t_moving = this.t_moving;

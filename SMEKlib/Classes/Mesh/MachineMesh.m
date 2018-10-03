@@ -211,6 +211,9 @@ classdef MachineMesh < MeshBase
             Np = size(this.p, 2);
             [this.p, this.t] = to2ndOrder(this.p, this.t, this.edges, this.t2e);            
             this.edges = [this.edges; (Np+1):(Np+size(this.edges,2))];
+            
+            this = msh_updateNamedNodes(this);
+            
             this.elementType = Elements.triangle2;
         end
         

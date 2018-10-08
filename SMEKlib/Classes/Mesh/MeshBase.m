@@ -41,7 +41,7 @@ classdef MeshBase < handle
                 if size(t,1)~=3
                     %t = t';
                 end
-                %t = sort(t, 1);
+                t = sort(t, 1);
 
                 %defining edges an' pals
                 [medges, me2t, mt2e] = getEdges(t);

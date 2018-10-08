@@ -38,6 +38,11 @@ classdef MachineSimulation < handle
                 n_dir = this.msh.namedNodes.get('Dirichlet');
                 np_master = this.msh.namedNodes.get('Periodic_master');
                 np_slave = this.msh.namedNodes.get('Periodic_slave');
+                
+                n_dir = [n_dir intersect(np_master, np_slave)];
+                np_master = setdiff(np_master, n_dir, 'stable');
+                np_slave = setdiff(np_slave, n_dir, 'stable');
+                
                 P_data = {[np_slave; np_master; this.msh.periodicityCoeff*ones(1, numel(np_master))], ...
                 [n_dir; zeros(2, numel(n_dir))]};
                 this.matrices.P = assemble_TotalMasterSlaveMatrix(this.Np, P_data, []);

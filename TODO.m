@@ -16,4 +16,5 @@ element types.
     [ ] Changed sign of imaginary unit in time-harmonic analysis??
 
 [ ] @folder-style class definitions; otherwise Octave dies
+[ ] Add extra periodic nodes to 2nd-order AGT
 %}

@@ -52,7 +52,7 @@ PT = blkdiag(sim.matrices.P, speye(Nui));
 indI = (1:sim.results.Ni_s) + sim.Np+Nu;
 
 %Jacobian constructor object
-Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
+Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), true);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % simulating

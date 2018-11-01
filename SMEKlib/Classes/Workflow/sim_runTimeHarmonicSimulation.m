@@ -60,7 +60,7 @@ for kslip = 1:numel(slips)
     elseif sim.dims.connection_stator == defs.delta
         FI = U.*[exp(1i*w*t0-1i*phi0); exp(1i*w*t0-1i*2*pi/3-1i*phi0); exp(1i*w*t0-1i*4*pi/3-1i*phi0)];
     else
-        FI = U.* [exp(1i*w*t0-1i*phi0); exp(1i*w*t0-1i*pi/3-1i*phi0)];
+        FI = U.* [exp(1i*w*t0-1i*phi0); exp(1i*w*t0 - 1i*pi/3-1i*phi0)];
     end
     if size(FI,1) == sim.results.Ni_s
         FI = [FI; zeros(sim.results.Ni_r,size(FI,2))];
@@ -82,6 +82,7 @@ for kslip = 1:numel(slips)
 
         %finalizing
         Jtot = PTT'*( [J11 J12; J21 J22] + Q )*PTT;
+        
         res_tot = PTT'*( Q*Xtot(:,kslip) - Ftot + [res11;res22] );
 
         %checking convergence

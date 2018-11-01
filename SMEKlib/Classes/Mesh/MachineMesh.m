@@ -160,7 +160,7 @@ classdef MachineMesh < MeshBase
                 return;
             end
             n_master_cand = find( (msh.p(2,:) < TOL) & (msh.p(1,:)>0) );
-            n_master_cand = setdiff(n_master_cand, msh.namedNodes.get('Dirichlet'));
+            %n_master_cand = setdiff(n_master_cand, msh.namedNodes.get('Dirichlet'));
             
             %sorting based on radius and adding
             r2 = sum(msh.p(:,n_master_cand).^2,1); [~,I] = sort(r2);
@@ -173,8 +173,8 @@ classdef MachineMesh < MeshBase
                 temp = cos(sectorAngle)*msh.p(2,:) - sin(sectorAngle)*msh.p(1,:);
                 n_slave_cand = find(abs(temp)<TOL);
             end
-            n_slave_cand = setdiff(n_slave_cand, ...
-                [msh.namedNodes.get('Dirichlet') msh.namedNodes.get('Periodic_master')]);
+            %n_slave_cand = setdiff(n_slave_cand, ...
+            %    [msh.namedNodes.get('Dirichlet') msh.namedNodes.get('Periodic_master')]);
             r2 = sum(msh.p(:,n_slave_cand).^2,1);  [~,I] = sort(r2);
             
             msh.namedNodes.add('Periodic_slave', n_slave_cand(I));

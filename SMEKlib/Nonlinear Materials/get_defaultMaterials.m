@@ -178,6 +178,7 @@ else
     error('Material not available');
 end
 
+
 matIndex = mod(matNumber - 1, 5) + 1;
 BH = HBdata(:, (matIndex-1)*2+[2 1]);
 

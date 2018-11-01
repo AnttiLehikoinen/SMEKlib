@@ -115,7 +115,7 @@ classdef MachineSimulation < handle
                 slip = this.dims.slip;
             end
             
-            if step == -1
+            if step == -1 || numel(varargin)>0 && strcmp(varargin{1}, 'harmonic')
                 A = this.results.Xh(1:this.Np, 1);
                 step = 1;
                 rotorangle = (step-1)*(1-slip)*(2*pi*pars.f/this.dims.p) * ...

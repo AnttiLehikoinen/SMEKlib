@@ -1,11 +1,14 @@
-function BH = get_defaultMaterials(matNumber)
+function [BH, lossCoeffs] = get_defaultMaterials(matNumber)
 %get_defaultMaterials returns the BH curve for some materials
 %
 % BH = get_defaultMaterials(matNumber)
 % returns the BH curve of the FCSMEK default material matnumber, in the
 % format BH = [B H];
 %
-% supplying a matNumber < 0 returns the number of available materials
+% [BH, lossCoeffs] = get_defaultMaterials(matNumber) also returns the
+% hysteresis, eddy-current and excess loss coefficients (as W/kg).
+%
+% Supplying a matNumber < 0 returns the number of available materials
 %
 % Copyright (c) 2016 Antti Lehikoinen / Aalto University
 
@@ -18,12 +21,15 @@ function BH = get_defaultMaterials(matNumber)
 % 4 = M27 steel
 % 5 = linear iron (mu_r = 1000)
 % 6 = linear PM (mu_r = 1.05)
+% 7 = Cogent
 %
 % Feel free to add your own :)
 
+lossCoeffs = zeros(1, 3);
+
 if matNumber < 0
     % number of default materials asked
-    BH = 6; return;
+    BH = 7; return;
 elseif matNumber == 0
     BH = [0 1; 0 1/(pi*4e-7)]'; return
 elseif matNumber <= 3
@@ -172,6 +178,48 @@ elseif matNumber == 5
 elseif matNumber == 6
     B = linspace(0, 2, 2)';
     H = B / (1.05*pi*4e-7);
+    BH = [B H];
+    return;
+elseif matNumber == 7;
+    B = [0
+        0.1000
+        0.2000
+        0.3000
+        0.4000
+        0.5000
+        0.6000
+        0.7000
+        0.8000
+        0.9000
+        1.0000
+        1.1000
+        1.2000
+        1.3000
+        1.4000
+        1.5000
+        1.6000
+        1.7000
+        1.8000];
+    H = 1e4*[         0
+        0.0025
+        0.0033
+        0.0038
+        0.0043
+        0.0048
+        0.0054
+        0.0061
+        0.0069
+        0.0079
+        0.0094
+        0.0115
+        0.0156
+        0.0260
+        0.0690
+        0.1950
+        0.4410
+        0.7630
+        1.2000];
+    lossCoeffs = [0.8534 0.1678 0];
     BH = [B H];
     return;
 else

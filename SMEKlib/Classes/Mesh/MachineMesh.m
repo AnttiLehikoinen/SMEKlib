@@ -121,7 +121,11 @@ classdef MachineMesh < MeshBase
             try ri = dims.D_ri / 2; catch; ri = 0;  end
             n_out = find( abs(sum(msh.p.^2,1) - ro^2) < (TOL) );
             n_in = find( abs(sum(msh.p.^2,1) - ri^2) < (0.1*TOL) );
-            msh.namedNodes.add('Dirichlet', [toRow(n_out) toRow(n_in)]);
+            
+            n_dir = [sortSegmentEdges(msh.p, toRow(n_out)) ...
+                sortSegmentEdges(msh.p, toRow(n_in))];
+            
+            msh.namedNodes.add('Dirichlet', n_dir);
         end
         
         function msh = setMachinePeriodicNodes(msh, varargin)

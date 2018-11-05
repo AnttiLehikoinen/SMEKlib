@@ -32,7 +32,7 @@ if numel(varargin) == 0
    %h = fill(X,Y, Jplot(msh.t(:,elements)), 'LineStyle', 'none');
    h = patch(X,Y, Jplot(msh.t(:,elements)), 'LineStyle', 'none');
 else
-    h = fill(X,Y, Jplot(msh.t(:,elements)), plotArgs{:});
+    h = patch(X,Y, Jplot(msh.t(:,elements)), plotArgs{:});
 end
 
 

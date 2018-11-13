@@ -12,7 +12,7 @@ dim.SM = 2; %stator core material index
 dim.RM = 2; %rotor core material index
 dim.sM = 1; %shaft material
 dim.Sout = 150e-3 / 2; %outer radius
-dim.Sin = 95e-3 / 2; %inner radius
+dim.Sin = 104e-3 / 2; %inner radius
 dim.Rout = dim.Sin - 0.5e-3;
 dim.Rin = 20e-3;
 
@@ -20,16 +20,17 @@ dim.Qs = 48; %number of stator slots
 dim.Qr = 36;
 
 %(rectangular) slot dimensions
-dim.S_height = 16e-3; %airgap to slot bottom distance
+dim.S_height = 12e-3; %airgap to slot bottom distance
 h_tt = 1.7e-3; %tooth tip height
 
 dim.S_height1 = h_tt; %slot wedge height
 
 dim.S_height3 = dim.S_height - h_tt; %conductor area height
-dim.S_width1 = 1.5e-3; %slot opening width
+dim.S_width1 = 1.8e-3; %slot opening width
 
-dim.S_width2 = 2.7e-3; %slot width (opening side)
-dim.S_width3 = 4.2e-3; %slot width (bottom side)
+%dim.S_width2 = 2.7e-3; %slot width (opening side)
+%dim.S_width3 = 4.2e-3; %slot width (bottom side)
+w_tooth = 4e-3;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % generating gwrap geometry
@@ -37,7 +38,7 @@ dim.S_width3 = 4.2e-3; %slot width (bottom side)
 gw = gwrap(gmsh_path); %gwrap object
 
 %tolerances = max distances between points
-tol_ag = 0.5e-3; %airgap
+tol_ag = 1.1e-3; %airgap
 tol_core1 = 1e-3; %slot opening area
 tol_core2 = 2e-3; %slot sides
 tol_core3 = 10e-3; %stator yoke
@@ -46,6 +47,8 @@ tol_out = 15e-3; %stator back-iron
 alpha_slot = 2*pi/dim.Qs; %slot pitch angle
 %rotation matrix
 Dt = [cos(alpha_slot/2) -sin(alpha_slot/2);sin(alpha_slot/2) cos(alpha_slot/2)];
+D = Dt*[1 0;0 -1]*Dt'; %mirror matrix over the slot center line (radial)
+%Dt = D'*Dt;
 
 
 %angular pitch of slot opening
@@ -53,27 +56,28 @@ aso = alpha_slot/2 - dim.S_width1/dim.Sin/2;
 
 %defining control points for slot
 Xso = Dt*[dim.Sin; -dim.S_width1/2]; %slot opening corner (airgap side)
-Xsoi = Dt*[dim.Sin+h_tt; -dim.S_width1/2]; %slot opening corner (inner side)
+Xso = Xso*dim.Sin/norm(Xso);
+Xsoi = Dt*[dim.Sin+h_tt/2; -dim.S_width1/2]; %slot opening corner (inner side)
 
 %conductor area, airgap side
-Xco = Dt*[dim.Sin+dim.S_height-dim.S_height3; -dim.S_width2/2];
+Xco = [dim.Sin+dim.S_height-dim.S_height3; w_tooth/2];
 
 %slot bottom
-Xcb = Dt*[dim.Sin+dim.S_height; -dim.S_width3/2]; %corner point
+Xcb = [dim.Sin+dim.S_height; w_tooth/2]; %corner point
 Xcb1 = Xcb-[1e-3;0]; %adding "fillet"
 Xcb2 = Xcb+[0;1e-3];
 
 r_lr = 0.5; %layer height ratio, FIX
 Xcc = r_lr*Xco + (1-r_lr)*Xcb; %corner point between layers
 
-D = Dt*[1 0;0 -1]*Dt'; %mirror matrix over the slot center line (radial)
-
 
 %adding surfaces
-gw.addPcws('line', Xso, Xco, tol_core1, ...
+gw.addPcws('line', Xso, Xsoi, tol_core1, ...
+    'line', Xsoi, Xco, tol_core1, ...
     'line', Xco, D*Xco, tol_core1, ...
-    'line', D*Xco, D*Xso, tol_core1, ...
-    'line', D*Xso, Xso, tol_ag, 'linename', 'n_ag_s', ......
+    'line', D*Xco, D*Xsoi, tol_core1, ...
+    'line', D*Xsoi, D*Xso, tol_core1, ...
+    'arc', [0;0], D*Xso, Xso, tol_ag, 'linename', 'n_ag_s', ......
     'Wedge');
 
 %conductor layers
@@ -95,11 +99,11 @@ gw.addPcws('line', Xcc, Xcb1, tol_core2, ...
 Xin = [dim.Sin; 0];
 Xout = [dim.Sout; 0];
 Xmid = [dim.Sin+dim.S_height; 0];
-gw.addPcws('line', Xin, Xmid, tol_core2, 'linename', 'n_cl', ...
-    'line', Xmid, Xout, tol_core3, 'linename', 'n_cl', ...
+gw.addPcws('line', Xin, Xmid, -5, 'linename', 'n_cl', ...
+    'line', Xmid, Xout, -3, 'linename', 'n_cl', ...
     'arc', [0;0], Xout, D*Xout, tol_out, 'linename', 'n_dir', ...
-    'line', D*Xout, D*Xmid, tol_core3, 'linename', 'n_ccl', ...
-    'line', D*Xmid, D*Xin, tol_core2, 'linename', 'n_ccl', ...
+    'line', D*Xout, D*Xmid, -3, 'linename', 'n_ccl', ...
+    'line', D*Xmid, D*Xin, -5, 'linename', 'n_ccl', ...
     'arc', [0;0], D*Xin, D*Xso, tol_ag, 'linename', 'nag_s', ...
     'arc', [0;0], D*Xso, Xso, tol_ag, 'linename', 'nag_s', ...
     'arc', [0;0], Xso, Xin, tol_ag, 'linename', 'nag_s', ...
@@ -110,6 +114,8 @@ gw.plotSurface('Wedge', 'ro-');
 gw.plotSurface('Layer1', 'gv-');
 gw.plotSurface('Layer2', 'bo-');
 gw.plotSurface('Iron', 'co-');
+
+plot( Xsoi(1), Xsoi(2), 'ro', 'MarkerSize', 10);
 
 %return
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

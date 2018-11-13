@@ -9,8 +9,8 @@ Br = 1.25;
 mur_PM = 1.05;
 
 %dimensions
-delta = 1e-3; %airgap
-hpm = 2e-3; %magnet height
+delta = 2e-3; %airgap
+hpm = 3.2e-3; %magnet height
 hyr = 12e-3; %yoke thickness
 p = 4; %number of pole-pairs
 N_segments = 3; %number of segments
@@ -20,13 +20,14 @@ alpha_pm = 0.8; %magnet pitch
 r_magnet = dim.Sin - delta;
 r_rotorCore = r_magnet - hpm;
 r_shaft = r_rotorCore - hyr;
+dim.Rout = r_magnet;
 
 gamma_pole = 2*pi / 8; %pole pitch
 gamma_mag = gamma_pole*alpha_pm; %magnet pitch
 
 
 tol_core = 3e-3;
-tol_air = 0.8e-3;
+tol_air = 1.1e-3;
 tol_mag = 0.25e-2;
 
 O = [0;0]; %origin
@@ -130,7 +131,7 @@ for k = 1:N_segments
     angle_pm = 0.5*(mag_angles(k) + mag_angles(k+1));
     
     PMs{2, k} = Surfaces_r.get(['Magnet' num2str(k)]);
-    PMs{1, k} = repmat(Br/(mu0*mur_PM)*[cos(angle_pm); sin(angle_pm)], 1, size(PMs{2,k},2));
+    PMs{1, k} = -repmat(Br/(mu0*mur_PM)*[cos(angle_pm); sin(angle_pm)], 1, size(PMs{2,k},2));
 end
 
 %material data for rotor
@@ -180,7 +181,7 @@ for kr = 1:Nrep
     m_r( Surfaces_r.get('Magnet1') ) = 6;
     PMs{2, kr} = Surfaces_r.get('Magnet1') + (kr-1)*Ne_r_e;
     angle_pm = (gamma_pole/2 + (kr-1)*gamma_pole) + mod(kr+1,2)*pi;
-    PMs{1, kr} = repmat(Br/(mu0*mur_PM)*[cos(angle_pm); sin(angle_pm)], 1, size(PMs{2,1},2));
+    PMs{1, kr} = -repmat(Br/(mu0*mur_PM)*[cos(angle_pm); sin(angle_pm)], 1, size(PMs{2,1},2));
 
 end
 

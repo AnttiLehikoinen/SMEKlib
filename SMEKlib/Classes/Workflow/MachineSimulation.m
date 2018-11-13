@@ -119,7 +119,7 @@ classdef MachineSimulation < handle
                 A = this.results.Xh(1:this.Np, 1);
                 step = 1;
                 rotorangle = (step-1)*(1-slip)*(2*pi*pars.f/this.dims.p) * ...
-                    (1/pars.f) / pars.N_stepsPerPeriod;
+                    (1/pars.f) / pars.N_stepsPerPeriod + pars.rotorAngle;
             elseif numel(varargin)>0 && strcmp(varargin{1}, 'static')
                 A = this.results.Xs(1:this.Np, step);
                 if isempty(pars.rotorAngle)
@@ -131,7 +131,7 @@ classdef MachineSimulation < handle
             else
                 A = this.results.Xt(1:this.Np, step);
                 rotorangle = (step-1)*(1-slip)*(2*pi*pars.f/this.dims.p) * ...
-                    (1/pars.f) / pars.N_stepsPerPeriod;
+                    (1/pars.f) / pars.N_stepsPerPeriod + pars.rotorAngle;
             end
             
             drawFluxDensity(this.msh, A, rotorangle, 'LineStyle', 'none'); 

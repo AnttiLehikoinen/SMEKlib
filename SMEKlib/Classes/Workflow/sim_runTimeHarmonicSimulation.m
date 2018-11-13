@@ -15,6 +15,9 @@ else
     slips = sim.dims.slip;
 end
 
+%rotor angle given
+angle0 = pars.rotorAngle;
+
 %setting harmonic reluctivity function
 if ~numel(varargin)
     nu_struct = initialize_harmonicReluctivityStruct_interp1(sim.msh, true);
@@ -33,12 +36,12 @@ for kslip = 1:numel(slips)
     [Stot, Mtot] = get_circuitMatrices_2(sim, slip); %rotor currents as variables
     
     if isfield(pars.misc, 'isDC') && pars.misc.isDC
-        Sag_r = sim.msh.get_AGmatrix(0, size(Stot,1));
-        Sag_i = sim.msh.get_AGmatrix(-0.5*pi/sim.dims.p, size(Stot,1));
+        Sag_r = sim.msh.get_AGmatrix(angle0, size(Stot,1));
+        Sag_i = sim.msh.get_AGmatrix(angle0 -0.5*pi/sim.dims.p, size(Stot,1));
         Q = [Stot+Sag_r -w*Mtot;
             w*Mtot Stot+Sag_i];
     else
-        Stot = Stot + sim.msh.get_AGmatrix(0, size(Stot,1));
+        Stot = Stot + sim.msh.get_AGmatrix(angle0, size(Stot,1));
         Q = [Stot -w*Mtot;
             w*Mtot Stot];
     end

@@ -181,7 +181,7 @@ elseif matNumber == 6
     BH = [B H];
     return;
 elseif matNumber == 7;
-    B = [0
+    B = [
         0.1000
         0.2000
         0.3000
@@ -200,7 +200,7 @@ elseif matNumber == 7;
         1.6000
         1.7000
         1.8000];
-    H = 1e4*[         0
+    H = 1e4*[
         0.0025
         0.0033
         0.0038

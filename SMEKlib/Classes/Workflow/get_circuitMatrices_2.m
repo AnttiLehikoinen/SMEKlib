@@ -50,6 +50,17 @@ if isfield(sim.dims, 'supply_type') && sim.dims.supply_type == defs.current_supp
     S_II_s = [];
     M_II_s = [];
     Ni_s = 0; Nu_s = 0;
+elseif isfield(sim.dims, 'supply_type') && sim.dims.supply_type == defs.current_supply_dynamic
+    Nu_temp = size(S_UI_s,1);
+    S_AI_s = [S_AI_s sparse(Np, Ni_s)];
+    S_UI_s = [S_UI_s sparse(Nu_temp, Ni_s)];
+    M_IA_s = [M_IA_s; sparse(Ni_s, Np)];
+    S_IU_s = [S_IU_s; sparse(Ni_s, Nu_temp)];
+    S_II_s = [S_II_s -speye(Ni_s, Ni_s);
+        speye(Ni_s,Ni_s) sparse(Ni_s,Ni_s)];
+    M_II_s = [M_II_s sparse(Ni_s, Ni_s);
+        sparse(Ni_s, 2*Ni_s)];
+    Ni_s = 2*Ni_s;
 end
     
    

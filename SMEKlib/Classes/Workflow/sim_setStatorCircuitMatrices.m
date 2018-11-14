@@ -39,7 +39,7 @@ if sim.dims.type_statorWinding == defs.stranded
     
     %loop matrix
     Ls = statorConnectionMatrix(sim.matrices.W, size(sim.matrices.W,1), 1);
-    Ls = Ls(1:(size(Ls,1)/sim.msh.symmetrySectors),:); 
+    Ls = Ls(1:(size(Ls,1)/sim.msh.symmetrySectors),:);
     sim.matrices.Ls = Ls(:, sum(abs(Ls),1)>0) * sim.dims.N_series;
     sim.matrices.Zew_s = sparse(sim.matrices.Ls'*DRs*sim.matrices.Ls);
 elseif sim.dims.type_statorWinding == defs.decomposed

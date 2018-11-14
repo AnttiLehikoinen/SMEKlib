@@ -53,11 +53,12 @@ elseif size(msh.t,1) == 6
     B = cell(6, 1); Babs = zeros(6, size(msh.t,2));
     [B{:}] = deal(zeros(2, size(msh.t,2)));
     N = Nodal2D(Operators.curl);
+    Ne = size(msh.t,2);
     %F = msh.getMappingMatrix;
     %detF = matrixDeterminant(F);
     for kp = 1:6
         for kf = 1:6
-            B{kp} = B{kp} + bsxfun(@times, N.eval(kf, xref(:,kp), msh, []), ...
+            B{kp} = B{kp} + bsxfun(@times, N.eval(kf, xref(:,kp), msh, 1:Ne), ...
                 transpose(X(msh.t(kf,:))) );
         end
         Babs(kp,:) = sum(B{kp}.^2, 1).^0.5;

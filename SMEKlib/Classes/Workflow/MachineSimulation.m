@@ -38,6 +38,11 @@ classdef MachineSimulation < handle
                 n_dir = this.msh.namedNodes.get('Dirichlet');
                 np_master = this.msh.namedNodes.get('Periodic_master');
                 np_slave = this.msh.namedNodes.get('Periodic_slave');
+                
+                n_dir = [n_dir intersect(np_master, np_slave)];
+                np_master = setdiff(np_master, n_dir, 'stable');
+                np_slave = setdiff(np_slave, n_dir, 'stable');
+                
                 P_data = {[np_slave; np_master; this.msh.periodicityCoeff*ones(1, numel(np_master))], ...
                 [n_dir; zeros(2, numel(n_dir))]};
                 this.matrices.P = assemble_TotalMasterSlaveMatrix(this.Np, P_data, []);
@@ -110,11 +115,11 @@ classdef MachineSimulation < handle
                 slip = this.dims.slip;
             end
             
-            if step == -1
+            if step == -1 || numel(varargin)>0 && strcmp(varargin{1}, 'harmonic')
                 A = this.results.Xh(1:this.Np, 1);
                 step = 1;
                 rotorangle = (step-1)*(1-slip)*(2*pi*pars.f/this.dims.p) * ...
-                    (1/pars.f) / pars.N_stepsPerPeriod;
+                    (1/pars.f) / pars.N_stepsPerPeriod + pars.rotorAngle;
             elseif numel(varargin)>0 && strcmp(varargin{1}, 'static')
                 A = this.results.Xs(1:this.Np, step);
                 if isempty(pars.rotorAngle)
@@ -126,7 +131,7 @@ classdef MachineSimulation < handle
             else
                 A = this.results.Xt(1:this.Np, step);
                 rotorangle = (step-1)*(1-slip)*(2*pi*pars.f/this.dims.p) * ...
-                    (1/pars.f) / pars.N_stepsPerPeriod;
+                    (1/pars.f) / pars.N_stepsPerPeriod + pars.rotorAngle;
             end
             
             drawFluxDensity(this.msh, A, rotorangle, 'LineStyle', 'none'); 

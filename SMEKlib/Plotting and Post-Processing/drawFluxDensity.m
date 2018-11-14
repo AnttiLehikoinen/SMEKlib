@@ -39,4 +39,8 @@ end
 %h = fill(X,Y, Babs, plotArgs{:});
 h = patch(X,Y, Babs, plotArgs{:});
 
+%figure(10); clf; hold on;
+%triplot(t', msh.p(1,:), msh.p(2,:));
+%triplot(msh.t(1:3,:)', msh.p(1,:), msh.p(2,:), 'r--');
+
 end

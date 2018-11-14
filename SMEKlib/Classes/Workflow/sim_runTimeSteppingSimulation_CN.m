@@ -11,6 +11,7 @@ if ~isempty(pars.slip)
 else
     slip = sim.dims.slip;
 end
+angle0 = pars.rotorAngle;
 
 %voltage-function
 Nin = 1;
@@ -52,7 +53,7 @@ PT = blkdiag(sim.matrices.P, speye(Nui));
 indI = (1:sim.results.Ni_s) + sim.Np+Nu;
 
 %Jacobian constructor object
-Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
+Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), true);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % simulating
@@ -82,13 +83,13 @@ end
 if size(Ustep,1) == sim.results.Ni_s
     Ustep = [Ustep; zeros(sim.results.Ni_r,size(Ustep,2))];
 end
-res_prev = -res_prev - (sim.msh.get_AGmatrix(0, Ntot) + Sc)*Xsamples(:,1) + [sim.matrices.F; zeros(Nu, 1); Ustep];
+res_prev = -res_prev - (sim.msh.get_AGmatrix(angle0, Ntot) + Sc)*Xsamples(:,1) + [sim.matrices.F; zeros(Nu, 1); Ustep];
 
 for kt = 2:Nsamples
     disp(['Time step ' num2str(kt) '...']);
     
     %S_ag = get_MovingBandMatrix(wm*tsamples(kt), sim.msh, Ntot);
-    S_ag = sim.msh.get_AGmatrix(wm*tsamples(kt), Ntot);
+    S_ag = sim.msh.get_AGmatrix(angle0 + wm*tsamples(kt), Ntot);
     
     Qconst = S_ag + Sc + (2/alpha2)*Mtot;
     

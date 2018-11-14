@@ -9,6 +9,6 @@ function edgeList = edgeDefs2edges(msh, edgeDefs)
 % 
 % Copyright (c) 2016 Antti Lehikoinen / Aalto University
 
-[~, edgeList] = ismember(sort(edgeDefs,1)', msh.edges', 'rows');
+[~, edgeList] = ismember(sort(edgeDefs,1)', msh.edges(1:2,:)', 'rows');
 
 end

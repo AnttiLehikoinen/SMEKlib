@@ -20,7 +20,9 @@ classdef defs < handle
 		function e = timestepping(); e = 36; end;
 		function e = star(); e = 37; end;
 		function e = delta(); e = 38; end;
-        function e = current_supply(); e = 39; end;
         function e = decomposed();  e = 40; end;
+        
+        function e = current_supply(); e = 50; end;
+        function e = current_supply_dynamic(); e = 5; end;
 	end
 end

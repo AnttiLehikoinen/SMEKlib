@@ -121,7 +121,11 @@ classdef MachineMesh < MeshBase
             try ri = dims.D_ri / 2; catch; ri = 0;  end
             n_out = find( abs(sum(msh.p.^2,1) - ro^2) < (TOL) );
             n_in = find( abs(sum(msh.p.^2,1) - ri^2) < (0.1*TOL) );
-            msh.namedNodes.add('Dirichlet', [toRow(n_out) toRow(n_in)]);
+            
+            n_dir = [sortSegmentEdges(msh.p, toRow(n_out)) ...
+                sortSegmentEdges(msh.p, toRow(n_in))];
+            
+            msh.namedNodes.add('Dirichlet', n_dir);
         end
         
         function msh = setMachinePeriodicNodes(msh, varargin)
@@ -160,7 +164,7 @@ classdef MachineMesh < MeshBase
                 return;
             end
             n_master_cand = find( (msh.p(2,:) < TOL) & (msh.p(1,:)>0) );
-            n_master_cand = setdiff(n_master_cand, msh.namedNodes.get('Dirichlet'));
+            %n_master_cand = setdiff(n_master_cand, msh.namedNodes.get('Dirichlet'));
             
             %sorting based on radius and adding
             r2 = sum(msh.p(:,n_master_cand).^2,1); [~,I] = sort(r2);
@@ -173,8 +177,8 @@ classdef MachineMesh < MeshBase
                 temp = cos(sectorAngle)*msh.p(2,:) - sin(sectorAngle)*msh.p(1,:);
                 n_slave_cand = find(abs(temp)<TOL);
             end
-            n_slave_cand = setdiff(n_slave_cand, ...
-                [msh.namedNodes.get('Dirichlet') msh.namedNodes.get('Periodic_master')]);
+            %n_slave_cand = setdiff(n_slave_cand, ...
+            %    [msh.namedNodes.get('Dirichlet') msh.namedNodes.get('Periodic_master')]);
             r2 = sum(msh.p(:,n_slave_cand).^2,1);  [~,I] = sort(r2);
             
             msh.namedNodes.add('Periodic_slave', n_slave_cand(I));
@@ -211,6 +215,9 @@ classdef MachineMesh < MeshBase
             Np = size(this.p, 2);
             [this.p, this.t] = to2ndOrder(this.p, this.t, this.edges, this.t2e);            
             this.edges = [this.edges; (Np+1):(Np+size(this.edges,2))];
+            
+            this = msh_updateNamedNodes(this);
+            
             this.elementType = Elements.triangle2;
         end
         

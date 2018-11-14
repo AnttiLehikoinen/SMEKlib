@@ -2,6 +2,9 @@
 
 ts = pars.ts;
 
+w = 2*pi*pars.f;
+wm = w / dimsc.p;
+
 rotorAngles = wm*ts;
 Is = sim.Is;
 
@@ -21,7 +24,7 @@ plot(ts, Idq(1,:), 'b');
 plot(ts, Idq(2,:), 'r');
 
 figure(13); clf; hold on;
-Uhere = 520;
+Uhere = 530;
 phi0 = phi_bias-pi/2 - pi/180*15;
 Uplot = Uhere/sim.msh.symmetrySectors * sim.dims.a * sqrt(2)* ...
     [cos(w*ts-phi0); cos(w*ts - 2*pi/3-phi0); cos(w*ts - 4*pi/3-phi0)];

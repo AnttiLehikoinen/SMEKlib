@@ -98,7 +98,7 @@ pars = SimulationParameters('U', 525, 'f', 200, 'slip', 0, 'N_periods', 2, 'N_st
     'phi0', phi_bias-pi/2 - pi/180*15);
 
 %uncomment for elegant no-load simulation
-%sim.matrices.Zew_s = eye(3)*1e9;
+sim.matrices.Zew_s = eye(3)*1e9;
 
 %harmonic simulation
 sim.run_harmonic(pars);
@@ -120,20 +120,20 @@ toc
 
 %plotting currents
 figure(3); clf; hold on;
-I_rated = sim.Is;
-plot(pars.ts, I_rated');
-plot(pars.ts, sum(I_rated,1), 'k');
+I_noload = sim.Is;
+plot(pars.ts, I_noload');
+plot(pars.ts, sum(I_noload,1), 'k');
 
 %flux plot
 figure(4); clf;
-sim.fluxplot(2, pars);
+%sim.fluxplot(100, pars);
 
 %torque plot
 figure(5); clf; hold on; box on;
-%T_rated = sim_compute_torque(sim, pars, 'stepping');
-plot(pars.ts, T_rated);
+T_noload = sim_compute_torque(sim, pars, 'stepping');
+plot(pars.ts, T_noload);
 wm = 2*pi*pars.f/dimsc.p;
-Pave = mean(T_rated)*wm;
+Pave = mean(T_noload)*wm;
 Sin = pars.U * sum(rms(sim.Is,2));
 
 %current density in slots
@@ -142,9 +142,9 @@ Jrms = dimsc.N_series*rms(sim.Is,2) / Alayer *1e-6
 
 %back-emf
 ts = pars.ts; dt = ts(2)-ts(1);
-Phi_rated = sim.matrices.Ls' * dimsc.leff*sim.matrices.Cs' * sim.results.Xt(1:sim.Np,:) * mshc.symmetrySectors/sim.dims.a;
-E_rated = diff(Phi_rated, [], 2); 
-E_rated = [E_rated(:,1) E_rated]/dt;
+Phi_noload = sim.matrices.Ls' * dimsc.leff*sim.matrices.Cs' * sim.results.Xt(1:sim.Np,:) * mshc.symmetrySectors/sim.dims.a;
+E_noload = diff(Phi_noload, [], 2); 
+E_noload = [E_noload(:,1) E_noload]/dt;
 w = 2*pi*pars.f; phi0 = pars.phi0; %phi0 = pi/180 * 60;
 Uplot = pars.U * sim.dims.a * sqrt(2)* ...
     [cos(w*ts-phi0); cos(w*ts - 2*pi/3-phi0); cos(w*ts - 4*pi/3-phi0)];
@@ -152,9 +152,9 @@ Uplot = pars.U * sim.dims.a * sqrt(2)* ...
 %Uplot = [1 -1 0;0 1 -1;-1 0 1]*Uloop;
 
 figure(6); clf; hold on; box on;
-plot(ts, E_rated(1, :), 'b');
-plot(ts, E_rated(2, :), 'r');
-plot(ts, E_rated(3, :), 'k');
+plot(ts, E_noload(1, :), 'b');
+plot(ts, E_noload(2, :), 'r');
+plot(ts, E_noload(3, :), 'k');
 plot(ts, Uplot(1, :), 'b--');
 plot(ts, Uplot(2, :), 'r--');
 plot(ts, Uplot(3, :), 'k--');

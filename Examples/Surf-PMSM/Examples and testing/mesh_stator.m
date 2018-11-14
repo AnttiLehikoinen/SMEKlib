@@ -26,7 +26,7 @@ h_tt = 1.7e-3; %tooth tip height
 dim.S_height1 = h_tt; %slot wedge height
 
 dim.S_height3 = dim.S_height - h_tt; %conductor area height
-dim.S_width1 = 1.8e-3; %slot opening width
+dim.S_width1 = 1.2e-3; %slot opening width
 
 %dim.S_width2 = 2.7e-3; %slot width (opening side)
 %dim.S_width3 = 4.2e-3; %slot width (bottom side)

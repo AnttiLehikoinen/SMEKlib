@@ -55,6 +55,10 @@ mshc.namedElements.set('rotorConductors', RC);
 %   - The named nodes are ordered either radially (periodic boundaries) or
 %       circumferentially (airgap nodes, Dirichlet nodes excluding possible
 %       center node).
+%   - The lists of periodic nodes now contain all nodes on the periodic
+%       boundary. In other words, something like
+%           n_cl_s = setdiff(n_cl_s, n_dir_s);
+%       must NOT be called.
 %   - Air gap mesh generation (msh.generateMovingBand()) is only called
 %   AFTER msh.2ndOrder().
 mshc.to2ndOrder();

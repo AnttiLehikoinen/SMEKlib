@@ -46,6 +46,19 @@ statorConductors = cellfun(@(x)(x+Ne_r), SC, 'UniformOutput', false);
 mshc.namedElements.set('statorConductors', statorConductors);
 mshc.namedElements.set('rotorConductors', RC);
 
+%use 2nd-order elements?
+%The method transforms the mesh elements into non-curved second-order
+%elements. For the named nodes (airgap bnd, periodic, Dirichlet) to be
+%updated correctly, the following criteria must be met:
+%   - The method is only called after the nodes have been set with e.g.
+%       msh.namedNodes.set('n_ag_s', stator_ag_nodes);
+%   - The named nodes are ordered either radially (periodic boundaries) or
+%       circumferentially (airgap nodes, Dirichlet nodes excluding possible
+%       center node).
+%   - Air gap mesh generation (msh.generateMovingBand()) is only called
+%   AFTER msh.2ndOrder().
+mshc.to2ndOrder();
+
 %generating airgap triangulation
 mshc.generateMovingBand();
 
@@ -70,13 +83,13 @@ msh_fill(mshc, rotorConductors{9}, 'r');
 %plotting airgap triangulation
 AGT = mshc.bandData;
 [~, pag, tag] = mshc.bandData.t_ag(0);
-triplot(tag', mshc.p(1,:), mshc.p(2,:), 'm');
+triplot(tag(1:3,:)', mshc.p(1,:), mshc.p(2,:), 'm');
 drawnow;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % running simulation
 sim = MachineSimulation(mshc, dimsc);
-pars = SimulationParameters('U', 400/sqrt(3), 'slip', 1.5e-2, 'N_periods', 1.5, 'N_stepsPerPeriod', 400);
+pars = SimulationParameters('U', 400/sqrt(3), 'slip', 1.5e-2, 'N_periods', 1, 'N_stepsPerPeriod', 400);
 
 %harmonic simulation
 sim.run_harmonic(pars);
@@ -85,6 +98,7 @@ sim.run_harmonic(pars);
 figure(2); clf; hold on; box on;
 sim.fluxplot(-1, pars);
 drawnow
+%return
 
 %running time-stepping single-slice simulation
 sim.init(pars); %initial conditions

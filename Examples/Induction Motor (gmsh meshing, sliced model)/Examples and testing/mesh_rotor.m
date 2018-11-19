@@ -1,7 +1,7 @@
 %Meshing rotor.
 
-tol_ag = 0.5e-3;
-tol_core1 = 1e-3;
+tol_ag = 1e-3;
+tol_core1 = 2e-3;
 tol_core = 2.3e-3;
 
 gw = gwrap(gmsh_path); %gwrap object
@@ -85,8 +85,8 @@ m_r( Surfaces_r.get('Shaft') ) = dim.sM;
 [p_r, t_r, n_ccl_r, n_ag_r, n_dir_r] = ...
     replicate_sector_fixed(p_r, t_r, dim.Qr/symmetrySectors, alpha_slot, n_cl_r, n_ccl_r, n_ag_r, n_dir_r);
 
-n_cl_r = setdiff(n_cl_r, n_dir_r);
-n_ccl_r = setdiff(n_ccl_r, n_dir_r);
+%n_cl_r = setdiff(n_cl_r, n_dir_r);
+%n_ccl_r = setdiff(n_ccl_r, n_dir_r);
 
 %replicating and finalizing material data
 m_r = repmat(m_r, 1, dim.Qr/symmetrySectors);

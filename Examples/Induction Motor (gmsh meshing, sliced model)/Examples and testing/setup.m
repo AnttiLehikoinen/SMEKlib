@@ -6,8 +6,8 @@
 addpath(genpath('..\..\SMEKlib'));
 
 %meshing; see the script files for details
-mesh_stator; 
-mesh_rotor;
+%mesh_stator; 
+%mesh_rotor;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Beginning to parse models

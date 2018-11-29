@@ -59,7 +59,7 @@ classdef Nodal2D < handle
         end
         
         function N = eval(this, k, X, msh, varargin)
-            %evaluates the global shape function
+            %eval evaluates the global shape function
             % call syntax 
             % eval(k, X, msh, F, detF) or
             % eval(k, X, msh, elements)

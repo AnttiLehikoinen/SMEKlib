@@ -9,17 +9,25 @@ p_virt(:, this.n_moving) = rm*this.p_virt(:, this.n_moving);
 nodeShift = -floor( (rotorAngle - this.shiftTol/2) / this.shiftTol ) - 1;
 newPositions = mod(this.original_positions - 1 + nodeShift, numel(this.n_bnd) ) + 1;
 
-%fixing center nodes for 2nd-order meshes
-if this.msh_ag.elementType == Elements.triangle2 || this.msh_ag.elementType == Elements.triangle2I
-    msh_ag = this.msh_ag;
-    %updating edge center node positions
-    p_virt(:, msh_ag.edges(3,:)) = ...
-        0.5*p_virt(:, msh_ag.edges(1,:)) + ...
-        0.5*p_virt(:, msh_ag.edges(2,:));
-end
-
 t_moving = this.t_moving;
 t_moving(this.inds_r) = this.n_bnd(newPositions);
+
+%fixing center nodes for 2nd-order meshes
+if this.msh_ag.elementType == Elements.triangle2 || this.msh_ag.elementType == Elements.triangle2I
+    %%{
+    msh_ag = this.msh_ag;
+    %updating edge center node positions
+    %p_virt(:, msh_ag.edges(3,:)) = ...
+    %    0.5*p_virt(:, msh_ag.edges(1,:)) + ...
+    %    0.5*p_virt(:, msh_ag.edges(2,:));
+    
+    %should improve efficiency here!
+    p_virt(:, t_moving(4,:)) = 0.5*(p_virt(:, t_moving(1,:)) + p_virt(:, t_moving(2,:)));
+    p_virt(:, t_moving(5,:)) = 0.5*(p_virt(:, t_moving(2,:)) + p_virt(:, t_moving(3,:)));
+    p_virt(:, t_moving(6,:)) = 0.5*(p_virt(:, t_moving(3,:)) + p_virt(:, t_moving(1,:)));
+    %}
+end
+
 return
 %}
 

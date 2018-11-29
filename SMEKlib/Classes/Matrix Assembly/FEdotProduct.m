@@ -11,7 +11,9 @@ elseif size(v,1)<=3
     %E = sum(u.*(varargin{1}*v), 1); %assuming broadcasting here
     E = sum(u.*bsxfun(@times, v, varargin{1}), 1);
 else
-    error('Not implemented or something.');
+    %tensor material supplied
+    E = sum(u.*matrixTimesVector(v, varargin{1}, false, false), 1);   
+    %error('Not implemented or something.');
 end
 
 end

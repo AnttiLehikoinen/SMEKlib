@@ -1,12 +1,15 @@
 function [] = gw_writeFile(gm, varargin)
 
 %opening file
-if numel(varargin)
+if numel(varargin) && ~strcmp(varargin{1}, 'commands')
     filename = varargin{1};
 else
     filename = [gm.gpath 'gm_geo.geo'];
 end
 fid = fopen(filename, 'w');
+
+%setting characteristic length
+gm.p(3, gm.p(3,:)==0) = gm.lc;
 
 %printing points
 for k = 1:gm.N_points
@@ -103,6 +106,19 @@ for kn = 1:numel(names)
         fprintf(fid, ', %d', lines(kp));
     end
     fprintf(fid, '};\n');
+end
+
+%checking if manual commands given?
+ri = 2;
+if numel(varargin) && strcmp(varargin{1}, 'commands')
+    ri = 2;
+end
+if numel(varargin)==2 && strcmp(varargin{2}, 'commands')
+    ri = 3;
+end
+for k = ri:numel(varargin)
+    fprintf(fid, varargin{k});
+    fprintf(fid, '\n');
 end
 
 fclose(fid);

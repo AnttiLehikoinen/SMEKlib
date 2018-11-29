@@ -4,13 +4,13 @@ classdef MachineMesh < MeshBase
     %
     % Assumes a typical electrical machine, with a circular stator and
     % rotor, and symmetry sector boundaries passing through the origin.
-    % 
+    %
     % Properties in addition to those of MeshBase:
     %   symmetrySectors = number of symmetry sectors
     %   periodicityCoeff = periodicity coefficient
     %   bandData = band data for moving band generation
     %
-    % (c) 2017 Antti Lehikoinen / Aalto University
+    % (c) 2017-2018 Antti Lehikoinen / Aalto University, Smeklab Ltd
     
     properties
         symmetrySectors
@@ -34,7 +34,7 @@ classdef MachineMesh < MeshBase
         function msh = setSymmetrySectors(msh, N_sec, dims)
             %setSymmetrySectors sets the number of symmetry sectors and
             %the periodicity coefficient.
-            % 
+            %
             % Call syntax setSymmetrySectors(N_of_sectors, dims),
             % where dims.p is the number of pole pairs.
             %
@@ -100,19 +100,19 @@ classdef MachineMesh < MeshBase
         function msh = setMachineDirichletNodes(msh, dims, varargin)
             %setMachineDirichletNodes Dirichlet nodes on outer and inner
             %boundaries.
-            % 
+            %
             % setMachineDirichletNodes(dims) and
             % setMachineDirichletNodes(dims, tol)
-            % try to find the nodes on the outer (and possibly inner) 
-            % boundaries of the machines, based on the dimensions dims.D_so 
-            % (stator outer diameter) and optionally dims.D_ri (rotor inner diameter). 
+            % try to find the nodes on the outer (and possibly inner)
+            % boundaries of the machines, based on the dimensions dims.D_so
+            % (stator outer diameter) and optionally dims.D_ri (rotor inner diameter).
             % A defaults tolerance of 1e-4 is used,
             % unless a different one is given as input.
-            % 
+            %
             % Nodes are stored as namedNodes('Dirichlet').
             %
             % (c) 2017 Antti Lehikoinen / Aalto University
-
+            
             TOL = 1e-4;
             if numel(varargin)
                 TOL = varargin{1};
@@ -121,12 +121,16 @@ classdef MachineMesh < MeshBase
             try ri = dims.D_ri / 2; catch; ri = 0;  end
             n_out = find( abs(sum(msh.p.^2,1) - ro^2) < (TOL) );
             n_in = find( abs(sum(msh.p.^2,1) - ri^2) < (0.1*TOL) );
-            msh.namedNodes.add('Dirichlet', [toRow(n_out) toRow(n_in)]);
+            
+            n_dir = [sortSegmentEdges(msh.p, toRow(n_out)) ...
+                sortSegmentEdges(msh.p, toRow(n_in))];
+            
+            msh.namedNodes.add('Dirichlet', n_dir);
         end
         
         function msh = setMachinePeriodicNodes(msh, varargin)
             %setMachinePeriodicNodes nodes on periodic boundaries.
-            % 
+            %
             % setMachinePeriodicNodes() and
             % setMachinePeriodicNodes(tol) try to find the nodes
             % belonging to the periodic boundaries, determined based on the
@@ -134,11 +138,11 @@ classdef MachineMesh < MeshBase
             % used unless a different one is supplied as input.
             %
             % Master boundary is assumed to lie on the positive x-axis, and
-            % its nodes are stored in namedNodes('Periodic_master'). 
+            % its nodes are stored in namedNodes('Periodic_master').
             %
             % Slave boundary nodes are stored in
             % namedNodes('Periodic_slave')
-            % 
+            %
             % Dirichlet boundary nodes belong to neither, and must be set
             % before calling this function.
             %
@@ -149,7 +153,7 @@ classdef MachineMesh < MeshBase
             % of nodes differs),
             % CALL msh.info.set('NonSymmetricBND', true) before running any
             % other function requiring boundary information.
-            % 
+            %
             % (c) 2017 Antti Lehikoinen / Aalto University
             
             TOL = 1e-4;
@@ -160,7 +164,7 @@ classdef MachineMesh < MeshBase
                 return;
             end
             n_master_cand = find( (msh.p(2,:) < TOL) & (msh.p(1,:)>0) );
-            n_master_cand = setdiff(n_master_cand, msh.namedNodes.get('Dirichlet'));
+            %n_master_cand = setdiff(n_master_cand, msh.namedNodes.get('Dirichlet'));
             
             %sorting based on radius and adding
             r2 = sum(msh.p(:,n_master_cand).^2,1); [~,I] = sort(r2);
@@ -173,8 +177,8 @@ classdef MachineMesh < MeshBase
                 temp = cos(sectorAngle)*msh.p(2,:) - sin(sectorAngle)*msh.p(1,:);
                 n_slave_cand = find(abs(temp)<TOL);
             end
-            n_slave_cand = setdiff(n_slave_cand, ...
-                [msh.namedNodes.get('Dirichlet') msh.namedNodes.get('Periodic_master')]);
+            %n_slave_cand = setdiff(n_slave_cand, ...
+            %    [msh.namedNodes.get('Dirichlet') msh.namedNodes.get('Periodic_master')]);
             r2 = sum(msh.p(:,n_slave_cand).^2,1);  [~,I] = sort(r2);
             
             msh.namedNodes.add('Periodic_slave', n_slave_cand(I));
@@ -182,7 +186,7 @@ classdef MachineMesh < MeshBase
         
         function m2 = copy(msh, varargin)
             %copy A deep copy.
-            % 
+            %
             % See MeshBase.copy for documentation.
             %
             % (c) 2017 Antti Lehikoinen / Aalto University
@@ -208,9 +212,29 @@ classdef MachineMesh < MeshBase
         end
         
         function this = to2ndOrder(this)
+            %to2ndOrder Transform mesh to second order.
+            %
+            %The method transforms the mesh elements into non-curved second-order
+            %elements. For the named nodes (airgap bnd, periodic, Dirichlet) to be
+            %updated correctly, the following criteria must be met:
+            %   - The method is only called after the nodes have been set with e.g.
+            %       msh.namedNodes.set('n_ag_s', stator_ag_nodes);
+            %   - The named nodes are ordered either radially (periodic boundaries) or
+            %       circumferentially (airgap nodes, Dirichlet nodes excluding possible
+            %       center node).
+            %   - The lists of periodic nodes now contain all nodes on the periodic
+            %       boundary. In other words, something like
+            %           n_cl_s = setdiff(n_cl_s, n_dir_s);
+            %       must NOT be called.
+            %   - Air gap mesh generation (msh.generateMovingBand()) is only called
+            %   AFTER msh.2ndOrder().
+            
             Np = size(this.p, 2);
-            [this.p, this.t] = to2ndOrder(this.p, this.t, this.edges, this.t2e);            
+            [this.p, this.t] = to2ndOrder(this.p, this.t, this.edges, this.t2e);
             this.edges = [this.edges; (Np+1):(Np+size(this.edges,2))];
+            
+            this = msh_updateNamedNodes(this);
+            
             this.elementType = Elements.triangle2;
         end
         
@@ -239,13 +263,13 @@ classdef MachineMesh < MeshBase
                 %number of nodes to skip on rotor surface
                 nodeShift = -floor( (rotorAngle - 1*this.bandData.shiftTol/2) / this.bandData.shiftTol ) - 1;
                 nodeShift = 2*nodeShift;
-
+                
                 %shifting indices in the sorted list
                 newPositions = mod(this.bandData.originalPositions_rotor - 1 + nodeShift, this.bandData.N_ag_r ) + 1;
-
+                
                 t_ag = this.bandData.t_ag;
                 t_ag(this.bandData.inds_r) = this.bandData.sortedNodes_rotor(newPositions);
-
+                
                 p = this.bandData.p_ag_virt;
                 p(:, this.bandData.sortedNodes_rotor) = [cos(rotorAngle) -sin(rotorAngle);sin(rotorAngle) cos(rotorAngle)] * ...
                     p(:, this.bandData.sortedNodes_rotor);
@@ -259,7 +283,7 @@ classdef MachineMesh < MeshBase
                 
                 %figure(10); clf;
                 %msh_triplot(this.bandData.msh_ag, [], 'b');
-
+                
                 Sag_c = MatrixConstructor(Nodal2D(Operators.grad), Nodal2D(Operators.grad), 1/(pi*4e-7), [], this.bandData.msh_ag);
                 inds = 1:Sag_c.Nvals;
                 Sag_c.E(inds) = Sag_c.E(inds) .* this.bandData.el_table(3, Sag_c.I(inds));
@@ -274,7 +298,6 @@ classdef MachineMesh < MeshBase
                 end
             end
         end
-    end   
+    end
 end
-        
-        
+

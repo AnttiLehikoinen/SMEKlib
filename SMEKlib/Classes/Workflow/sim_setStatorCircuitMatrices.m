@@ -32,13 +32,14 @@ if sim.dims.type_statorWinding == defs.stranded
     else
         DRs = sparsediag(sim.dims.leff ./(sim.dims.sigma_stator*cAs)) / sim.dims.fillingFactor; %resistance matrix
     end
+    sim.matrices.cAs = cAs;
     sim.matrices.DRs = DRs;
     sim.matrices.Cs = bsxfun(@times, JF_s, 1./cAs);    
     sim.matrices.Ms = sparse(sim.Np, sim.Np);    
     
     %loop matrix
     Ls = statorConnectionMatrix(sim.matrices.W, size(sim.matrices.W,1), 1);
-    Ls = Ls(1:(size(Ls,1)/sim.msh.symmetrySectors),:); 
+    Ls = Ls(1:(size(Ls,1)/sim.msh.symmetrySectors),:);
     sim.matrices.Ls = Ls(:, sum(abs(Ls),1)>0) * sim.dims.N_series;
     sim.matrices.Zew_s = sparse(sim.matrices.Ls'*DRs*sim.matrices.Ls);
 elseif sim.dims.type_statorWinding == defs.decomposed

@@ -50,13 +50,24 @@ if isfield(sim.dims, 'supply_type') && sim.dims.supply_type == defs.current_supp
     S_II_s = [];
     M_II_s = [];
     Ni_s = 0; Nu_s = 0;
+elseif isfield(sim.dims, 'supply_type') && sim.dims.supply_type == defs.current_supply_dynamic
+    Nu_temp = size(S_UI_s,1);
+    S_AI_s = [S_AI_s sparse(Np, Ni_s)];
+    S_UI_s = [S_UI_s sparse(Nu_temp, Ni_s)];
+    M_IA_s = [M_IA_s; sparse(Ni_s, Np)];
+    S_IU_s = [S_IU_s; sparse(Ni_s, Nu_temp)];
+    S_II_s = [S_II_s -speye(Ni_s, Ni_s);
+        speye(Ni_s,Ni_s) sparse(Ni_s,Ni_s)];
+    M_II_s = [M_II_s sparse(Ni_s, Ni_s);
+        sparse(Ni_s, 2*Ni_s)];
+    Ni_s = 2*Ni_s;
 end
     
    
 sim.results.Ni_s = Ni_s; sim.results.Nu_s = Nu_s;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if sim.dims.type_rotorWinding == defs.cage
+if sim.dims.type_rotorWinding == defs.cage || sim.dims.type_rotorWinding == defs.user_defined
     Nu_r = size(sim.matrices.Lr, 1); 
     Ni_r = size(sim.matrices.Lr, 2);
     
@@ -84,7 +95,8 @@ else
     S_UI_r = []; M_IA_r = []; S_IU_r = [];
     S_II_r = []; M_II_r = [];
     Nu_r = 0; Ni_r = 0;
-end
+end     
+
 sim.results.Nu_r = Nu_r; sim.results.Ni_r = Ni_r;
 
 if numel(varargin)

@@ -27,14 +27,14 @@ classdef MatrixConstructor < MatrixConstructorBase
             Ne = numel(elements);
 
             %size of v(x) too small --> assuming constant value
-            if numel(v) == 1
-                v = v(1) * ones(1, numel(elements));
+            if size(v, 2) == 1
+                v = bsxfun(@times, v(:,1), ones(1, numel(elements)));
             elseif size(v,2) ~= numel(elements)
                 v = v(elements);
             end
             
             %checking symmetricity
-            if strcmp(class(fun_test), class(fun_shape)) && (fun_test.op == fun_shape.op)
+            if strcmp(class(fun_test), class(fun_shape)) && (fun_test.op == fun_shape.op) && size(v,1)<=2
                 symmetric = true;
             else
                 symmetric = false;

@@ -32,11 +32,13 @@ this.msh_ag.p = p_virt;
 Sag_c = MatrixConstructor(Nodal2D(Operators.grad), Nodal2D(Operators.grad), 1/(pi*4e-7), [], this.msh_ag);
 
 %moving to global indexing and taking care of symmetry sectors
+%%{
 inds = 1:(Sag_c.Nvals);
 Sag_c.E(inds) = Sag_c.E(inds) .* this.el_table(3, Sag_c.I(inds));
 Sag_c.I(inds) = this.el_table(2, Sag_c.I(inds));
 Sag_c.E(inds) = Sag_c.E(inds) .* this.el_table(3, Sag_c.J(inds));
 Sag_c.J(inds) = this.el_table(2, Sag_c.J(inds));
+%}
 
 %finalizing
 S = blkdiag(this.S_const, sparse(N-Np, N-Np)) + Sag_c.finalize(N, N);

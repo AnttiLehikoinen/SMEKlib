@@ -47,7 +47,7 @@ this.addLineloop(lldef);
 if numel(other_args) && (islogical(other_args{1}) || islogical(other_args{end}))
     % surface is a hole
     this.surfaces.add(surfacename, -this.N_lineloops);
-else
+elseif ~isempty(surfacename)
     this.surfaces.add(surfacename, this.N_lineloops);
     %adding internal surfaces
     sname_ll = ['ll_' num2str(this.N_lineloops)];

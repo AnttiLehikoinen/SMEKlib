@@ -101,7 +101,10 @@ mu0 = pi*4e-7;
 Next = 100;
 
 B_ext = [BH(:,1)' BH(end,1)+(1:Next)*dB];
-H_ext = min(interp1(BH(:,1), BH(:,2), B_ext, 'linear', 'extrap'), B_ext/mu0);
+%H_ext = min(interp1(BH(:,1), BH(:,2), B_ext, 'linear', 'extrap'), B_ext/mu0);
+
+Mmax = BH(end,1)/mu0 - BH(end,2);
+H_ext = B_ext/mu0 - Mmax;
 
 BH2 = [B_ext' H_ext'];
 

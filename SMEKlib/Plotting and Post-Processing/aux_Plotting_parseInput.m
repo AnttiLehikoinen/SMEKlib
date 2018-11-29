@@ -17,7 +17,7 @@ if isfield(msh, 'rotel') && numel(varargin) && isnumeric(varargin{1}) && isscala
     end
     
     p_plot = msh.p;
-    rotorNodes = unique( [msh.t(1,msh.rotel) msh.t(2,msh.rotel) msh.t(3,msh.rotel) ] );
+    rotorNodes = unique( msh.t(:,msh.rotel) );
     p_plot(:,rotorNodes) = [cos(rotorAngle) -sin(rotorAngle);sin(rotorAngle) cos(rotorAngle)] * p_plot(:,rotorNodes);
 else
     p_plot = msh.p;

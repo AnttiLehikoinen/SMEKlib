@@ -3,14 +3,14 @@ classdef gwrap < handle
         gpath
         N_points, N_lines, N_lineloops, N_surfaces,
         p, l, ll
-        surfaces, holesInSurfaces, physicalLines
+        surfaces, holesInSurfaces, physicalLines, lc
     end
     
     methods
         function this = gwrap(gmsh_path)
             
-            if gmsh_path(end)~='\'
-                 this.gpath = [gmsh_path '\'];
+            if gmsh_path(end)~='/'
+                 this.gpath = [gmsh_path '/'];
             else
                 this.gpath = gmsh_path;
             end
@@ -29,13 +29,19 @@ classdef gwrap < handle
             this.surfaces = SLContainer();
             this.holesInSurfaces = SLContainer();
             this.physicalLines = SLContainer();
+            
+            %characteristic length
+            this.lc = 0;
         end
         
-        function this = addPoints(this, p)
-            this = gw_addPoints(this, p);
+        function this = addPoints(this, p, varargin)
+            this = gw_addPoints(this, p, varargin{:});
         end
-        function this = addLines(this, l)
-            this = gw_addLines(this, l);
+        function this = addLines(this, l, varargin)
+            this = gw_addLines(this, l, varargin{:});
+        end
+        function this = addLinePoints(this, xstart, xend, tol, varargin)
+            this = gw_addLinePoints(this, xstart, xend, tol, varargin{:});
         end
         function this = addLineloop(this, ll)
             this = gw_addLineLoop(this, ll);

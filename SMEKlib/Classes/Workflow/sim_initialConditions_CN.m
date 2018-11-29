@@ -69,7 +69,7 @@ end
 Finit = w*Mtot*sim.results.Xh(Ntot + (1:Ntot), kslip) + [sim.matrices.F; zeros(Nui,1)];
 
 X0 = sim.results.Xh(1:Ntot, kslip);
-Sag = sim.msh.get_AGmatrix(0, Ntot);
+Sag = sim.msh.get_AGmatrix(pars.rotorAngle, Ntot);
 for kiter = 1:15
     [J, res] = Jc.eval(X0, nu_fun);
     

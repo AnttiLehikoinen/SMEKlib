@@ -5,29 +5,25 @@ function sim = sim_setRotorCircuitMatrices(sim)
 
 %setting FE-side circuit matrices
 Mc = MatrixConstructor();
-if sim.dims.type_rotorWinding == defs.cage
-    %mass matrix for rotor
+if sim.dims.type_rotorWinding == defs.cage || sim.dims.type_rotorWinding == defs.user_defined
     rotorConductors = sim.msh.namedElements.get('rotorConductors');
-    Mc.assemble_matrix(Nodal2D(Operators.I), Nodal2D(Operators.I), ...
-        sim.dims.sigma_rotor, horzcat(rotorConductors{:}), sim.msh);
-    %Mc = MatrixConstructor(Nodal2D(Operators.I), Nodal2D(Operators.I), ...
-    %    sim.dims.sigma_rotor, horzcat(rotorConductors{:}), sim.msh);
-
-    shaft = sim.msh.namedElements.get('shaft');
-    if any(shaft)
-        Mc.assemble_matrix(Nodal2D(Operators.I), Nodal2D(Operators.I), ...
-           6e6, shaft, msh);
-    end
-    
-    %rotor winding matrix
     Nc_r = numel(rotorConductors);
-    %JF_struct = [];
+    
+    %conductivities
+    sigma = sim.dims.sigma_rotor;
+    if numel(sigma) == 1
+        sigma = repmat(sigma, 1, Nc_r);
+    end        
+    
+    %assembling
     JF_s = MatrixConstructor;
     for k = 1:Nc_r
-        %JF_struct = assemble_vector('', 'nodal', sim.dims.sigma_rotor, k, rotorConductors{k}, sim.msh, JF_struct);
-        JF_s.assemble_vector(Nodal2D(Operators.I), k, sim.dims.sigma_rotor, rotorConductors{k}, sim.msh);
+        Mc.assemble_matrix(Nodal2D(Operators.I), Nodal2D(Operators.I), ...
+            sigma(k), rotorConductors{k}, sim.msh);
+        JF_s.assemble_vector(Nodal2D(Operators.I), k, sigma(k), rotorConductors{k}, sim.msh);
     end
-    %sim.matrices.Cr = sparseFinalize(JF_struct, sim.Np, Nc_r);
+    
+    %Au / uA prototype matrix
     sim.matrices.Cr = JF_s.finalize(sim.Np, Nc_r);
 
     %conductor areas for rotor
@@ -55,6 +51,8 @@ if sim.dims.type_rotorWinding == defs.cage
     [Lr, Zr] = rotorConnectionMatrix(sim.dims.Qr, sim.msh.symmetrySectors, sim.dims.p, 0, r_er);
     sim.matrices.Lr = Lr;
     sim.matrices.Zew_r = Zr;
-else
+elseif sim.dims.type_rotorWinding == defs.user_defined
+    sim.matrices.Lr = sim.dims.Lr;
+    sim.matrices.Zew_r = sim.dims.Zew_r;
     %error('Invalid rotor winding type');
 end

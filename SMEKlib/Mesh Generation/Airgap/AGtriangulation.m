@@ -56,6 +56,7 @@ classdef AGtriangulation < handle
             tag_local = [this.t_const t_mov];
             if nargout == 3
                 tag_global = reshape(this.agNodes_global(tag_local(:)), size(tag_local,1), []);
+                %tag_global = reshape(this.el_table(2,tag_local(:)), size(tag_local,1), []);
             else
                 tag_global = [];
             end

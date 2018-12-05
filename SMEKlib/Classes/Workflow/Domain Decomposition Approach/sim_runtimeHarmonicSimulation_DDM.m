@@ -26,12 +26,14 @@ end
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 
 %(rotor) circuit matrices
-[Stot, Mtot] = get_circuitMatrices(sim, slip);
+[Stot, Mtot] = get_circuitMatrices_2(sim, slip);
 
 %reduced-basis coupling blocks
 Qs_sector = sim.dims.Qs / sim.msh.symmetrySectors;
 P_m2D = sim.msh.misc.P_m2D;
-L_s = sim.matrices.Ls;
+L_s = sim.matrices.Ls; 
+L_s = [L_s zeros(size(L_s,1), sim.results.Ni_s-size(L_s,2))]; %for dynamic current supply case
+
 tempcell_DD = cell(1, Qs_sector); [tempcell_DD{:}] = deal( sim.misc.R_AA );
 tempcell_DI = cell(1, Qs_sector); [tempcell_DI{:}] = deal( sim.misc.R_AI );
 tempcell_ID = cell(1, Qs_sector); [tempcell_ID{:}] = deal( sim.misc.R_UA );
@@ -46,12 +48,20 @@ Nu = sim.results.Nu_r;
 Ni_r = sim.results.Ni_r;
 Ni_s = sim.results.Ni_s;
 
+
 Qred = [Q_DD sparse(sim.Np, Nu) Q_DI sparse(sim.Np, Ni_r);
     sparse(Nu, sim.Np + Nu + Ni_r + Ni_s);
     Q_ID sparse(Ni_s,Nu) Q_II];
 
 %temp solution
-if numel(pars.U) > 1
+if sim.dims.supply_type == defs.current_supply_dynamic
+    N_phases = sim.dims.N_phases;
+    %N_inParallel = size(L_s,2) / N_phases
+    N_inParallel = 1; %suuuper-quick fix
+    Ntemp = size(pars.U,1) - N_phases;
+    UH = [kron(eye(Ntemp), ones(N_inParallel,1))*pars.U(1:Ntemp);
+        pars.U((Ntemp+1):end)];
+elseif numel(pars.U) > 1
     N_phases = numel(pars.U);
     N_inParallel = size(L_s,2) / N_phases;
     UH = kron(eye(N_phases), ones(N_inParallel,1))*pars.U;
@@ -95,6 +105,11 @@ for kiter = 1:15
     sim.misc.res11 = res11;
     sim.misc.res22 = res22;
     sim.misc.J11 = J11;
+    
+    %size(Q)
+    %size(Xtot)
+    %size(Ftot)
+    %size( [res11;res22] )
     
     %finalizing
     Jtot = PTT'*( [J11 J12; J21 J22] + Q )*PTT;

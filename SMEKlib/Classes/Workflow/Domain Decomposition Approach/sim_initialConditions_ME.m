@@ -16,7 +16,7 @@ slip = slips(kslip);
 
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 
-[Stot, Mtot] = get_circuitMatrices(sim, slip);
+[Stot, Mtot] = get_circuitMatrices_2(sim, slip);
 
 %numbers of variables
 Ntot = size(sim.results.Xh, 1) / 2;
@@ -58,12 +58,16 @@ M_slave = [M sparse(Np_slave, Nu_slave);
 %slave-domain solution from harmonic analysis
 indA = 1:sim.Np;
 indI = (sim.Np + sim.results.Nu_r) + (1:sim.results.Ni_s);
+
+L_s = sim.matrices.Ls;
+L_s = [L_s zeros(size(L_s,1), sim.results.Ni_s-size(L_s,2))]; %for dynamic current supply case
+
 Xh = sim.results.Xh;
 Xh = reshape(Xh, [], 2);
 
 D0 = P_m2D*Xh(indA,:);
 D0 = reshape(D0(:,1) + 1i*D0(:,2), [], Qs_sector);
-I0 = sim.matrices.Ls*Xh(indI,:);
+I0 = L_s*Xh(indI,:);
 I0 = reshape(I0(:,1) + 1i*I0(:,2), [], Qs_sector);
 
 Xslave0 = sim.misc.Ximp_H * [D0; I0];
@@ -82,7 +86,6 @@ hslave(nfree, :) = S_slave(nfree, nfree) \ xs(nfree,:);
 
 %contribution of slave-domain time-derivative to master-domain load vector
 FD = zeros(Ntot, 1);
-L_s = sim.matrices.Ls;
 FD(indA) = FD(indA) - P_m2D'*reshape(P_D2s'*S_slave(nd, :)*hslave, [], 1);
 
 %"impulse" solutions

@@ -28,11 +28,13 @@ end
 
 %voltage-function
 L_s = sim.matrices.Ls;
+L_s = [L_s zeros(size(L_s,1), sim.results.Ni_s-size(L_s,2))]; %for dynamic current supply case
 if isa(pars.U, 'function_handle')
     Nin =  nargin(pars.U);
-    %N_phases = numel(pars.U(0));
-    N_phases = 3; %quick fix
-    N_inParallel = size(L_s,2) / N_phases;
+    N_phases = numel(pars.U(0));
+    %N_phases = sim.dims.N_phases; %quick fix
+    %N_inParallel = size(L_s,2) / N_phases;
+    N_inParallel = 1;
     Mphase =  kron(eye(N_phases), ones(N_inParallel,1));
     Ufun = @(t, varargin)(Mphase*pars.U(t, varargin{:}) );
 else
@@ -63,7 +65,7 @@ indI = (sim.Np + Nu) + (1:Ni_s);
 indA = 1:sim.Np;
 
 %circuit and other matrices
-[Scc, Mtot] = get_circuitMatrices(sim);
+[Scc, Mtot] = get_circuitMatrices_2(sim);
 Mtot = Mtot / dt;
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 Ntot = size(Scc,1);

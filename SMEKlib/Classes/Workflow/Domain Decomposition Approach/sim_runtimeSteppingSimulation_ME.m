@@ -166,7 +166,7 @@ Xslave(:, 1) = reshape(xslav, [], 1);
 
 for kt = 2:Nsamples
 
-    disp(['Time step ' num2str(kt) '...']);
+    pars.dispf(['Time step ' num2str(kt) '...']);
     
     S_ag = sim.msh.get_AGmatrix(wm*tsamples(kt), Ntot);
     Qconst = S_ag + Sc + (2/alpha2)*Mtot;
@@ -204,7 +204,7 @@ for kt = 2:Nsamples
         res_tot = PT'*(res + Qconst*Xsamples(:,kt) - FL - (alpha1/alpha2)*res_prev);
         
         resNorm = norm(res_tot) / norm(FL);
-        disp(['    Newton step ' num2str(kiter) ', relative residual ' num2str(resNorm) '.']);
+        pars.dispf(['    Newton step ' num2str(kiter) ', relative residual ' num2str(resNorm) '.']);
         %disp(['    Newton step ' num2str(kiter) ', relative residual ' num2str(resNorm) '.']); fflush(stdout); uncomment in Octave
         if resNorm < 1e-6
             break;

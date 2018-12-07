@@ -117,12 +117,31 @@ classdef ExtrudedPrismMesh < PrismMeshBase3D
             %named elements
             keys = msh2.namedElements.keys();
             for kk = 1:numel(keys)
-                key = keys{kk};
-                val = msh2.namedElements.get(key);
-                els = kron(0:(Nl-2), Ne2*ones(1, numel(val))) + ...
-                    repmat(val, 1, Nl-1);
-                msh3.namedElements.add(key, els);
+                try
+                    key = keys{kk};
+                    val = msh2.namedElements.get(key);
+                    els = kron(0:(Nl-2), Ne2*ones(1, numel(val))) + ...
+                        repmat(val, 1, Nl-1);
+                    msh3.namedElements.add(key, els);
+                catch
+                    disp('Something failed with named elements.');
+                end
             end
+        end
+        
+        function y = t(msh3)
+            y = msh3.elements;
+        end
+        
+        function x0 = elementCenters(msh3, elem)
+            if ~any(elem) || elem(1) < 0
+                elem = 1:size(msh3.elements,2);
+            end
+            x0 = zeros(3, numel(elem));
+            for k = 1:size(msh3.elements, 1)
+                x0 = x0 + msh3.nodes(:, msh3.elements(k, elem));
+            end
+            x0 = x0 / size(msh3.elements, 1);
         end
         
         
@@ -136,8 +155,8 @@ classdef ExtrudedPrismMesh < PrismMeshBase3D
             msh_plotEdges3D(msh3, edges, varargin{:});
         end
         
-        function [F, varargout] = getMappingMatrix(this, elem)
-            if ~any(elem) || elem < 0
+        function [F, varargout] = getMappingMatrix(this, elem, varargin)
+            if ~any(elem) || elem(1) < 0
                 elem = 1:size(this.elements,2);
             end
             F = zeros(9, numel(elem));

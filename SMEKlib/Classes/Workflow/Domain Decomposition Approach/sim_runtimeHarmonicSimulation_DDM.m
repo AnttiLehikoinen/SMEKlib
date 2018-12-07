@@ -116,7 +116,7 @@ for kiter = 1:15
     res_tot = PTT'*( Q*Xtot - Ftot + [res11;res22] );
     
     %checking convergence
-    disp( norm(res_tot) / norm(Ftot) )
+    pars.dispf( norm(res_tot) / norm(Ftot) )
     if (norm(res_tot) / norm(Ftot)) < 1e-9
         break;
     end

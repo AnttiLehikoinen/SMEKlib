@@ -39,6 +39,13 @@ classdef Elements < handle
             end
             bl = false;
         end
+        function bl = isPrism(type)
+            if type == Elements.prism;
+                bl = true;
+                return;
+            end
+            bl = false;
+        end
         
         function X = refPoints_nodes(type)
             switch type

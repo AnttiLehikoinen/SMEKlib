@@ -145,7 +145,7 @@ for kiter = 1:15
     res_tot = PT'*( (Sag+Stot)*X0 - Finit + res );
     
     %checking convergence
-    disp( norm(res_tot) / norm(Finit) )
+    pars.dispf( norm(res_tot) / norm(Finit) )
     if (norm(res_tot) / norm(Finit)) < 1e-6
         break;
     end

@@ -20,6 +20,17 @@ classdef SimpleTetMesh < handle
             msh.elementType = Elements.tet;
         end
         
+        function x0 = elementCenters(msh3, elem)
+            if ~any(elem) || elem(1) < 0
+                elem = 1:size(msh3.t,2);
+            end
+            x0 = zeros(3, numel(elem));
+            for k = 1:size(msh3.t, 1)
+                x0 = x0 + msh3.p(:, msh3.t(k, elem));
+            end
+            x0 = x0 / size(msh3.t, 1);
+        end
+        
         function [F, F0] = getMappingMatrix(this, elem, varargin)
             %getMappingMatrix Mapping matrix from reference to global
             %element.

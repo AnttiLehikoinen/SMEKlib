@@ -55,6 +55,8 @@ for k = 1:N
         Qconst = S_ag + Sc;
     end
     
+    pars.dispf(['Computing step/case ' num2str(k) ' out of ' num2str(N) '...']);
+    
     for kiter = 1:50
         [J, res] = Jc.eval(Xs, sim.nu_fun);
 

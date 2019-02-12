@@ -16,7 +16,7 @@ slip = slips(kslip);
 
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 
-[Stot, Mtot] = get_circuitMatrices_2(sim, slip);
+[Stot, Mtot, Cstar, Ustar] = get_circuitMatrices_2(sim, slip);
 
 %numbers of variables
 Ntot = size(sim.results.Xh, 1) / 2;
@@ -60,7 +60,15 @@ indA = 1:sim.Np;
 indI = (sim.Np + sim.results.Nu_r) + (1:sim.results.Ni_s);
 
 L_s = sim.matrices.Ls;
-L_s = [L_s zeros(size(L_s,1), sim.results.Ni_s-size(L_s,2))]; %for dynamic current supply case
+if isfield(sim.dims, 'supply_type') && sim.dims.supply_type == defs.current_supply_dynamic
+    L_s = [L_s zeros(size(L_s,1), sim.results.Ni_s-size(L_s,2))]; %for dynamic current supply case
+end
+if sim.dims.connection_stator == defs.star
+    if sim.dims.Nc_slot > sim.dims.N_series
+        %error('Star connection should not work (yet) for stranded windings');
+    end
+     L_s = L_s * Cstar;
+end
 
 Xh = sim.results.Xh;
 Xh = reshape(Xh, [], 2);

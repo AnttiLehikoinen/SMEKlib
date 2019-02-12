@@ -26,16 +26,36 @@ else
     slip = sim.dims.slip;
 end
 
+[Scc, Mtot, Cstar, Ustar] = get_circuitMatrices_2(sim);
+
 %voltage-function
 L_s = sim.matrices.Ls;
-L_s = [L_s zeros(size(L_s,1), sim.results.Ni_s-size(L_s,2))]; %for dynamic current supply case
+if isfield(sim.dims, 'supply_type') && sim.dims.supply_type == defs.current_supply_dynamic
+    L_s = [L_s zeros(size(L_s,1), sim.results.Ni_s-size(L_s,2))]; %for dynamic current supply case
+end
+if sim.dims.connection_stator == defs.star
+    if sim.dims.Nc_slot > sim.dims.N_series
+        %error('Star connection should not work (yet) for stranded windings');
+    end
+     L_s = L_s * Cstar;
+end
+
 if isa(pars.U, 'function_handle')
     Nin =  nargin(pars.U);
-    N_phases = numel(pars.U(0));
-    %N_phases = sim.dims.N_phases; %quick fix
-    %N_inParallel = size(L_s,2) / N_phases;
-    N_inParallel = 1;
-    Mphase =  kron(eye(N_phases), ones(N_inParallel,1));
+    if Nin == 1
+        N_phases = numel(pars.U(0));
+    else
+        N_phases = numel(pars.U([0;0], 0, 0)); %only works for star connection now
+    end
+    if sim.dims.connection_stator == defs.delta
+        %N_phases = sim.dims.N_phases; %quick fix
+        %N_inParallel = size(L_s,2) / N_phases;
+        N_inParallel = 1;
+        Mphase =  kron(eye(N_phases), ones(N_inParallel,1));
+        %Mphase = eye( N_phases )
+    else
+        Mphase = Ustar;
+    end
     Ufun = @(t, varargin)(Mphase*pars.U(t, varargin{:}) );
 else
     U = pars.U / sim.msh.symmetrySectors * sim.dims.a * sqrt(2);
@@ -65,7 +85,6 @@ indI = (sim.Np + Nu) + (1:Ni_s);
 indA = 1:sim.Np;
 
 %circuit and other matrices
-[Scc, Mtot] = get_circuitMatrices_2(sim);
 Mtot = Mtot / dt;
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 Ntot = size(Scc,1);
@@ -254,12 +273,12 @@ for kt = 2:Nsamples
     
     %plotting currents
     %{    
-    Mphase_plot = kron(eye(N_phases), ones(N_inParallel,1))';
+    %Mphase_plot = kron(eye(N_phases), ones(N_inParallel,1))';
     Is = Xsamples(indI(:), 1:kt);
-    Iphase = Mphase_plot*Is;
+    Iphase = Ustar'*Is;
     h = figure(13); clf; hold on;
-    plot( Iphase(1:3,:)' ); 
-    plot( Is(1:N_inParallel,:)', 'b--');
+    plot( Iphase' ); 
+    plot( (Cstar*Is(1:17,:))', 'b--');
     drawnow;
     
 

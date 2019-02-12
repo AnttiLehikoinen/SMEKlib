@@ -1,9 +1,23 @@
-function [Sc, Mc] = get_circuitMatrices_2(sim, varargin)
+function [Sc, Mc, Cstar2, Ustar] = get_circuitMatrices_2(sim, varargin)
 %get_circuitMatrices returns all circuit matrices for simulation.
 %
 % Now without elimination of rotor cage currents.
 % 
 % (c) 2017 Antti Lehikoinen / Aalto University
+
+Cstar = [1 0; 0 1;-1 -1];
+Ustar = eye(3); Cstar2 = [1 0; 0 1;-1 -1];
+if isfield(sim.dims, 'N_inParallel')
+    n = sim.dims.N_inParallel;
+    Mtemp = zeros(n, n-1);
+    for k = 1:(n-1)
+        Mtemp([k k+1], k) = [1;-1];
+    end
+    
+    Cstar2 = [kron(Cstar, eye(n)) ...
+        [zeros(2*n, n-1); Mtemp]];
+    Ustar = [kron(eye(2), ones(n,1)); zeros(n-1, 2)];
+end
 
 Np = sim.Np;
 if sim.dims.type_statorWinding == defs.stranded || sim.dims.type_statorWinding == defs.decomposed
@@ -30,8 +44,7 @@ if sim.dims.type_statorWinding == defs.decomposed
 end
 
 %checking if star connection
-if sim.dims.connection_stator == defs.star
-   Cstar = [1 0; 0 1;-1 -1];
+if sim.dims.connection_stator == defs.star && sim.dims.type_statorWinding ~= defs.decomposed
    S_AI_s = S_AI_s*Cstar;
    S_UI_s = S_UI_s*Cstar;
    M_IA_s = Cstar'*M_IA_s;
@@ -39,7 +52,16 @@ if sim.dims.connection_stator == defs.star
    S_II_s = Cstar'*S_II_s*Cstar;
    M_II_s = Cstar'*M_II_s*Cstar;
    Ni_s = 2;
+elseif sim.dims.connection_stator == defs.star && sim.dims.type_statorWinding == defs.decomposed
+   S_AI_s = S_AI_s*Cstar2;
+   S_UI_s = S_UI_s*Cstar2;
+   M_IA_s = Cstar2'*M_IA_s;
+   S_IU_s = Cstar2'*S_IU_s;
+   S_II_s = Cstar2'*S_II_s*Cstar2;
+   M_II_s = Cstar2'*M_II_s*Cstar2;
+   Ni_s = size(Cstar2, 2);
 end
+    
 
 if isfield(sim.dims, 'supply_type') && sim.dims.supply_type == defs.current_supply
     S_AI_s = sparse(Np, 0);
@@ -51,16 +73,27 @@ if isfield(sim.dims, 'supply_type') && sim.dims.supply_type == defs.current_supp
     M_II_s = [];
     Ni_s = 0; Nu_s = 0;
 elseif isfield(sim.dims, 'supply_type') && sim.dims.supply_type == defs.current_supply_dynamic
+    Nphases = 3;
+    
     Nu_temp = size(S_UI_s,1);
-    S_AI_s = [S_AI_s sparse(Np, Ni_s)];
-    S_UI_s = [S_UI_s sparse(Nu_temp, Ni_s)];
-    M_IA_s = [M_IA_s; sparse(Ni_s, Np)];
-    S_IU_s = [S_IU_s; sparse(Ni_s, Nu_temp)];
+    S_AI_s = [S_AI_s sparse(Np, Nphases)];
+    S_UI_s = [S_UI_s sparse(Nu_temp, Nphases)];
+    M_IA_s = [M_IA_s; sparse(Nphases, Np)];
+    S_IU_s = [S_IU_s; sparse(Nphases, Nu_temp)];
+    
+    S_II_s = [S_II_s -kron( eye(Nphases), ones(Ni_s/Nphases, 1) );
+        kron( eye(Nphases), ones(Ni_s/Nphases, 1) )' sparse(Nphases,Nphases)];
+    %full(S_II_s)
+    M_II_s = [M_II_s sparse(Ni_s, Nphases);
+        sparse(Nphases, Ni_s+Nphases)];
+    
+    %{
     S_II_s = [S_II_s -speye(Ni_s, Ni_s);
         speye(Ni_s,Ni_s) sparse(Ni_s,Ni_s)];
     M_II_s = [M_II_s sparse(Ni_s, Ni_s);
         sparse(Ni_s, 2*Ni_s)];
-    Ni_s = 2*Ni_s;
+    %}
+    Ni_s = Ni_s + Nphases;
 end
     
    

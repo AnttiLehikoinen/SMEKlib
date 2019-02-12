@@ -26,13 +26,25 @@ end
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 
 %(rotor) circuit matrices
-[Stot, Mtot] = get_circuitMatrices_2(sim, slip);
+[Stot, Mtot, Cstar, Ustar] = get_circuitMatrices_2(sim, slip);
 
 %reduced-basis coupling blocks
 Qs_sector = sim.dims.Qs / sim.msh.symmetrySectors;
 P_m2D = sim.msh.misc.P_m2D;
-L_s = sim.matrices.Ls; 
-L_s = [L_s zeros(size(L_s,1), sim.results.Ni_s-size(L_s,2))]; %for dynamic current supply case
+L_s = sim.matrices.Ls;
+
+if isfield(sim.dims, 'supply_type') && sim.dims.supply_type == defs.current_supply_dynamic
+    L_s = [L_s zeros(size(L_s,1), sim.results.Ni_s-size(L_s,2))]; %for dynamic current supply case
+end
+if sim.dims.connection_stator == defs.star
+    if sim.dims.Nc_slot > sim.dims.N_series
+        %error('Star connection should not work (yet) for stranded windings');
+    end
+    %N_inParallel = sim.dims.N_inParallel;
+    %L_s = L_s * [1 0;0 1;-1 -1];
+    %Cstar = kron( [1 0;0 1;-1 -1], ones(1, N_inParallel));
+    L_s = L_s * Cstar;
+end
 
 tempcell_DD = cell(1, Qs_sector); [tempcell_DD{:}] = deal( sim.misc.R_AA );
 tempcell_DI = cell(1, Qs_sector); [tempcell_DI{:}] = deal( sim.misc.R_AI );
@@ -54,7 +66,7 @@ Qred = [Q_DD sparse(sim.Np, Nu) Q_DI sparse(sim.Np, Ni_r);
     Q_ID sparse(Ni_s,Nu) Q_II];
 
 %temp solution
-if sim.dims.supply_type == defs.current_supply_dynamic
+if isfield(sim.dims, 'supply_type') && sim.dims.supply_type == defs.current_supply_dynamic
     N_phases = sim.dims.N_phases;
     %N_inParallel = size(L_s,2) / N_phases
     N_inParallel = 1; %suuuper-quick fix
@@ -68,17 +80,19 @@ elseif numel(pars.U) > 1
 else
     t0 = 0;
     if sim.dims.connection_stator == defs.delta
-        FI = U.*[exp(1i*w*t0); exp(1i*w*t0-1i*2*pi/3); exp(1i*w*t0-1i*4*pi/3)];
+        FI = U.*[exp(1i*w*t0- 1i*pars.phi0); exp(1i*w*t0-1i*2*pi/3 - 1i*pars.phi0); exp(1i*w*t0-1i*4*pi/3 - 1i*pars.phi0)];
+        UH = kron(eye(3), ones(size(L_s,2)/3,1)) * FI;
     else
-        FI = U.* [exp(1i*w*t0); exp(1i*w*t0-1i*pi/3)];
+        FI = U.* [exp(1i*w*t0 - 1i*pars.phi0); exp(1i*w*t0-1i*pi/3 - 1i*pars.phi0)];
+        UH = Ustar * FI;
     end            
-    UH = kron(eye(3), ones(size(L_s,2)/3,1)) * FI;
+    
 end
 
 %final assembly
 if isfield(pars.misc, 'isDC') && pars.misc.isDC
     Stot_r = Stot + sim.msh.get_AGmatrix(0, size(Stot,1));
-    Stot_i = Stot + sim.msh.get_AGmatrix(+0.5*pi/sim.dims.p, size(Stot,1));
+    Stot_i = Stot + sim.msh.get_AGmatrix(-0.5*pi/sim.dims.p, size(Stot,1));
 else
     Stot_r = Stot + sim.msh.get_AGmatrix(0, size(Stot,1));
     Stot_i = Stot_r;

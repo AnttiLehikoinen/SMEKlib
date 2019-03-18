@@ -16,7 +16,7 @@ slip = slips(kslip);
 
 Jc = JacobianConstructor(sim.msh, Nodal2D(Operators.curl), Nodal2D(Operators.curl), false);
 
-[Stot, Mtot] = get_circuitMatrices(sim, slip);
+[Stot, Mtot, Cstar, Ustar] = get_circuitMatrices_2(sim, slip);
 
 %numbers of variables
 Ntot = size(sim.results.Xh, 1) / 2;
@@ -58,12 +58,24 @@ M_slave = [M sparse(Np_slave, Nu_slave);
 %slave-domain solution from harmonic analysis
 indA = 1:sim.Np;
 indI = (sim.Np + sim.results.Nu_r) + (1:sim.results.Ni_s);
+
+L_s = sim.matrices.Ls;
+if isfield(sim.dims, 'supply_type') && sim.dims.supply_type == defs.current_supply_dynamic
+    L_s = [L_s zeros(size(L_s,1), sim.results.Ni_s-size(L_s,2))]; %for dynamic current supply case
+end
+if sim.dims.connection_stator == defs.star
+    if sim.dims.Nc_slot > sim.dims.N_series
+        %error('Star connection should not work (yet) for stranded windings');
+    end
+     L_s = L_s * Cstar;
+end
+
 Xh = sim.results.Xh;
 Xh = reshape(Xh, [], 2);
 
 D0 = P_m2D*Xh(indA,:);
 D0 = reshape(D0(:,1) + 1i*D0(:,2), [], Qs_sector);
-I0 = sim.matrices.Ls*Xh(indI,:);
+I0 = L_s*Xh(indI,:);
 I0 = reshape(I0(:,1) + 1i*I0(:,2), [], Qs_sector);
 
 Xslave0 = sim.misc.Ximp_H * [D0; I0];
@@ -82,7 +94,6 @@ hslave(nfree, :) = S_slave(nfree, nfree) \ xs(nfree,:);
 
 %contribution of slave-domain time-derivative to master-domain load vector
 FD = zeros(Ntot, 1);
-L_s = sim.matrices.Ls;
 FD(indA) = FD(indA) - P_m2D'*reshape(P_D2s'*S_slave(nd, :)*hslave, [], 1);
 
 %"impulse" solutions
@@ -142,7 +153,7 @@ for kiter = 1:15
     res_tot = PT'*( (Sag+Stot)*X0 - Finit + res );
     
     %checking convergence
-    disp( norm(res_tot) / norm(Finit) )
+    pars.dispf( norm(res_tot) / norm(Finit) )
     if (norm(res_tot) / norm(Finit)) < 1e-6
         break;
     end

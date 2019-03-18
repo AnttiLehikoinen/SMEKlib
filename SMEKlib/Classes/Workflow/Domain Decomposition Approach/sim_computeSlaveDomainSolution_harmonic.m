@@ -30,6 +30,7 @@ DR = sparsediag( sim.dims.leff ./ cA_slave );
 % end-winding terms
 DR_ew = kron(speye(Qs_sector, Qs_sector),...
     sparsediag( (sim.dims.l_halfCoil - sim.dims.leff) ./ cA_slave ));
+
 sim.matrices.Zew_s = sim.matrices.Ls'*DR_ew*sim.matrices.Ls;
 
 %computing slot area and mean radial coordinate
@@ -37,7 +38,11 @@ Mall = MatrixConstructor().assemble_vector(Nodal2D(Operators.I), 1, 1, [], msh).
 Aslot = Mall'*ones(Np, 1);
 rmean = Mall'*transpose( sum(msh.p.^2, 1).^0.5 ) / Aslot;
 
-L = EWsegmentIncidenceMatrix(sim.dims.W, sim.dims.N_series); %end-winding matrix
+if isfield(sim.dims, 'L_EWincidence')
+    L = sim.dims.L_EWincidence;
+else
+    L = EWsegmentIncidenceMatrix(sim.dims.W, sim.dims.N_series); %end-winding matrix
+end
 Lew = EWsegmentInductance(rmean, Aslot, sim.dims); %ew segment inductance
 
 %getting EW matrix for stranded winding

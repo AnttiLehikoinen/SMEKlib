@@ -27,8 +27,8 @@ if sim.dims.type_rotorWinding == defs.cage || sim.dims.type_rotorWinding == defs
     sim.matrices.Cr = JF_s.finalize(sim.Np, Nc_r);
 
     %conductor areas for rotor
-    cAr = sum(sim.matrices.Cr*eye(Nc_r)/(sim.dims.sigma_rotor),1);
-    sim.matrices.DRr = sparsediag(sim.dims.leff ./(sim.dims.sigma_rotor*cAr)); %resistance matrix
+    cAr = sum(sim.matrices.Cr*eye(Nc_r),1)./sigma;
+    sim.matrices.DRr = sparsediag(sim.dims.leff ./(sigma.*cAr)); %resistance matrix
 else
     %error('Invalid rotor winding type');
 end

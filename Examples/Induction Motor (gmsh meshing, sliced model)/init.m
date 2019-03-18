@@ -8,4 +8,6 @@ restoredefaultpath;
 addpath(genpath('../../SMEKlib'));
 gmsh_path = 'E:/Software/Work/gmsh40';
 
+gmsh_path = 'C:\Users\Antti\Documents\gmsh';
+
 addpath(genpath('Examples and testing'));

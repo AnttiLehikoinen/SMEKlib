@@ -4,8 +4,8 @@
 % Copyright (c) 2016 Antti Lehikoinen / Aalto University
 
 %meshing; see the script files for details
-%mesh_stator; 
-%mesh_rotor;
+mesh_stator; 
+mesh_rotor;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Beginning to parse models

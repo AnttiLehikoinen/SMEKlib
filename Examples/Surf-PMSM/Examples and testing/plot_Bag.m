@@ -5,8 +5,8 @@ msh_ag = SimpleMesh(pag, tag);
 
 %finding nodes to plot
 angles = linspace(0, pi/4, 1000);
-%angles = linspace(-1/12, 1/12)*2*pi + pi/2;
 r = 0.55*dim.Sin + 0.45*dim.Rout;
+%r = 0.45*dim.Sin + 0.55*dim.Rout;
 x = r*cos(angles);
 y = r*sin(angles);
 [~, els] = pointSources2Elements_faster(x,y,msh_ag); angles = angles(els>0);els = els(els>0);
@@ -20,7 +20,7 @@ Babs_all = zeros(numel(angles), Nsamples);
 Brad_all = Babs_all;
 Bcirc_all = Babs_all;
 
-for k = 1:1:Nsamples
+for k = 1:Nsamples
     
     %computing B in the airgap
     A_ag = mshc.bandData.tag_solution(sim.results.Xt(:,k));
@@ -56,5 +56,9 @@ end
 figure(6); clf; hold on; box on;
 %drawFluxDensity(mshc, simc.results.Xh, 'LineStyle', 'none'); colormap('jet'); colorbar;% caxis([0 2])
 drawFluxDensity(msh_ag, A_ag, 'LineStyle', 'none'); colorbar;
+msh_triplot(mshc, find(mshc.matel==2), 'k');
 
 plot(x, y, 'k.-')
+
+figure(7); clf;
+surf(Babs_all)

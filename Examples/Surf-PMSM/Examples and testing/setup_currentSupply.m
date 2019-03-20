@@ -93,11 +93,18 @@ phi_rotor = pi/8; %angle of rotor axis
 phi_stator = pi/(2*dimsc.p) + pi/dimsc.Qs*dimsc.q*(1/2 + 1/2*(1 - 0.5*dimsc.c)); %angle of stator winding axis
 phi_bias = -phi_rotor + phi_stator;
 
-Imain = 5*[cos(phi_bias); cos(phi_bias-2*pi/3); cos(phi_bias-4*pi/3)];
+angle_layer_1 = pi/(2*dimsc.p) + pi/dimsc.Qs*dimsc.q - 2*pi/dimsc.Qs*dimsc.c; %chorded layer
+angle_layer_2 = pi/(2*dimsc.p) + pi/dimsc.Qs*dimsc.q; %non-chorded layer
+phi_stator = 0.5*angle_layer_1 + 0.5*angle_layer_2;
+phi_bias = (phi_rotor - phi_stator)*dimsc.p;
+
+angles = linspace(0, 2*pi, 100);
+Imain = sqrt(2)*6*[cos(phi_bias+angles); cos(phi_bias-2*pi/3+angles); cos(phi_bias-4*pi/3+angles)];
+Imain = Imain + randn(size(Imain));
 
 msch.matel(mshc.rotel) = 0;
 sim = MachineSimulation(mshc, dimsc);
-pars = SimulationParameters('Is', Imain, 'slip', 1, 'rotorAngle', zeros(1, size(Imain,2)));
+pars = SimulationParameters('Is', Imain, 'slip', 1, 'rotorAngle', angles/dimsc.p);
 
 %harmonic simulation
 sim.run_static(pars);

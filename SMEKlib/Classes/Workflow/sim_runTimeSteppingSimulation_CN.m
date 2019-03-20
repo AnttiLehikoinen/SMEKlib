@@ -105,7 +105,7 @@ for kt = 2:Nsamples
     FL = (2/alpha2)*Mtot*Xsamples(:,kt-1) + [sim.matrices.F; zeros(Nu, 1); Ustep];
     
     Xsamples(:,kt) = Xsamples(:,kt-1); %initial condition for NR
-    for kiter = 1:50
+    for kiter = 1:pars.maxIter
         %[J, res] = assemble_Jacobian(sim.nu_fun, Xsamples(:,kt), [], sim.msh);
         [J, res] = Jc.eval(Xsamples(:,kt), sim.nu_fun); 
         

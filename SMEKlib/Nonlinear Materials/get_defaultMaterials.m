@@ -10,21 +10,21 @@ function [BH, lossCoeffs] = get_defaultMaterials(matNumber)
 %
 % Supplying a matNumber < 0 returns the number of available materials
 %
-% Copyright (c) 2016 Antti Lehikoinen / Aalto University
-
-%NOTE: due to possible confidentiality issues, only three materials are
-%included here:
-% 0 = air
-% 1 = construction steel (Ovako 520 L)
-% 2 = Electrical steel sheet – Bochum STABOLEC 260-50 A
-% 3 = slot wedge material
-% 4 = M27 steel
-% 5 = linear iron (mu_r = 1000)
-% 6 = linear PM (mu_r = 1.05)
-% 7 = Cogent
+% Materials: due to possible confidentiality issues, only three materials are
+% included here:
+%   0 = air
+%   1 = construction steel (Ovako 520 L)
+%   2 = Electrical steel sheet – Bochum STABOLEC 260-50 A
+%   3 = slot wedge material
+%   4 = M27 steel
+%   5 = linear iron (mu_r = 1000)
+%   6 = linear PM (mu_r = 1.05)
+%   7 = Cogent
 %
 % Feel free to add your own :)
 
+%
+% Copyright (c) 2016 Antti Lehikoinen / Aalto University
 lossCoeffs = zeros(1, 3);
 
 if matNumber < 0

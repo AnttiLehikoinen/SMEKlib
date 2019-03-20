@@ -90,12 +90,16 @@ msh_triplot(mshc, ind, 'r', 'linewidth', 2);
 
 %determining supply angles
 phi_rotor = pi/8; %angle of rotor axis
-phi_stator = pi/(2*dimsc.p) + pi/dimsc.Qs*dimsc.q*(1/2 + 1/2*(1 - 0.5*dimsc.c)); %angle of stator winding axis
-phi_bias = -phi_rotor + phi_stator;
+%phi_stator = pi/(2*dimsc.p) + pi/dimsc.Qs*dimsc.q*(1/2 + 1/2*(1 - 0.5*dimsc.c)); %angle of stator winding axis
+%phi_bias = -phi_rotor + phi_stator;
+
+angle_layer_1 = pi/(2*dimsc.p) + pi/dimsc.Qs*dimsc.q - 2*pi/dimsc.Qs*dimsc.c; %chorded layer
+angle_layer_2 = pi/(2*dimsc.p) + pi/dimsc.Qs*dimsc.q; %non-chorded layer
+phi_stator = 0.5*angle_layer_1 + 0.5*angle_layer_2;
 
 sim = MachineSimulation(mshc, dimsc);
 pars = SimulationParameters('U', 525, 'f', 200, 'slip', 0, 'N_periods', 2, 'N_stepsPerPeriod', 600, 'isDC', true, ...
-    'phi0', phi_bias-pi/2 - pi/180*15);
+    'phi0', phi_bias-pi/2 - pi/180*11);
 
 %uncomment for elegant no-load simulation
 %sim.matrices.Zew_s = eye(3)*1e9;
@@ -130,7 +134,7 @@ sim.fluxplot(2, pars);
 
 %torque plot
 figure(5); clf; hold on; box on;
-%T_rated = sim_compute_torque(sim, pars, 'stepping');
+T_rated = sim_compute_torque(sim, pars, 'stepping');
 plot(pars.ts, T_rated);
 wm = 2*pi*pars.f/dimsc.p;
 Pave = mean(T_rated)*wm;
@@ -160,3 +164,4 @@ plot(ts, Uplot(2, :), 'r--');
 plot(ts, Uplot(3, :), 'k--');
 
 %Idq_plot;
+save('data_rated.mat', 'I_rated', 'T_rated', 'E_rated', 'Phi_rated', 'Babs_all', 'Bcirc_all', 'Brad_all');

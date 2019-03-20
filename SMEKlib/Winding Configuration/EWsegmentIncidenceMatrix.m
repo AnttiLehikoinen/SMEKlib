@@ -1,4 +1,4 @@
-function L = EWsegmentIncidenceMatrix(W, Nturns)
+function L = EWsegmentIncidenceMatrix(W, Nturns, varargin)
 %EWsegmentIncidenceMatrix Indicence matrix from phase to end-winding
 %segment.
 %
@@ -21,6 +21,22 @@ m = max(W(:)); %number of phases
 
 L = zeros(Q, m);
 Wtemp = W;
+
+if size(W,1) == 1
+    q = Q / (2*varargin{1}*3);
+    for k = 1:Q
+        if W(k) < 0
+            continue;
+        else
+            ph = W(k);
+        end
+        inds = 1:(1+3*q-1);
+        L( mod(k-1+inds-1, Q)+1, ph ) = L( mod(k-1+inds-1, Q)+1, ph ) + 1;
+    end
+    return;
+end
+
+
 %going through slots
 for kslot = 1:Q
     

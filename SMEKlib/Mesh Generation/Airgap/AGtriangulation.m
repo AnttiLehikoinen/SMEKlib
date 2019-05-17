@@ -62,7 +62,7 @@ classdef AGtriangulation < handle
             end
         end
         
-        function A_tag = tag_solution(this, A)
+        function A_tag = tag_solution(this, A, ~)
             %Vector potential solution at airgap triangulation nodes,
             %taking into account periodicity.
 

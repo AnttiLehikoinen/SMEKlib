@@ -24,7 +24,7 @@ slip = slips(kslip);
 [Stot, Mtot] = get_circuitMatrices_2(sim, slip);
 
 
-%{
+%%{
 %finding indices to free non-damped variables (non-conductive regions,
 %mostly)
 [Itemp, Jtemp] = find(Mtot);
@@ -35,7 +35,8 @@ P = blkdiag(sim.matrices.P, eye(Nui));
 
 PT = P(:,unique(Jcond));
 %}
-%%{
+
+%{
 Np = sim.Np;
 P = blkdiag(sim.matrices.P, eye(Nui));
 [~, Jcond] = find(P(1:Np,:));
@@ -66,7 +67,7 @@ end
 
 
 %effect of derivatives
-Finit = w*Mtot*sim.results.Xh(Ntot + (1:Ntot), kslip) + [sim.matrices.F; zeros(Nui,1)];
+Finit = 0*w*Mtot*sim.results.Xh(Ntot + (1:Ntot), kslip) + [sim.matrices.F; zeros(Nui,1)];
 
 X0 = sim.results.Xh(1:Ntot, kslip);
 Sag = sim.msh.get_AGmatrix(pars.rotorAngle, Ntot);

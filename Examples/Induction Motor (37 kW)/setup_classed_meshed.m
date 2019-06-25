@@ -130,3 +130,7 @@ plot(pars.ts, 2*sim.Is');
 
 figure(13); clf;
 sim.fluxplot(25, pars);
+
+Tem = sim_compute_torque(sim, pars, 'stepping')
+figure(7); clf; hold on; box on; grid on;
+plot(pars.ts, Tem);

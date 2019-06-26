@@ -18,7 +18,7 @@ dim.connection_stator = defs.star; %stator connection
 dim.Lew = 0.1e-3; %end-winding inductance
 
 dim.type_statorWinding = defs.stranded; %stator winding type
-dim.fillingFactor = 0.4; %stator filling factor
+dim.fillingFactor = 0.45; %stator filling factor
 dim.type_rotorWinding = defs.cage; %rotor winding type
 
 dim.sigma_stator = 45e6; %stator winding conductivity

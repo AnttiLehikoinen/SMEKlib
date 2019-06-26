@@ -198,17 +198,17 @@ if plotting_on
         title('Excess loss density (W/kg)')
         
     else
-        figure(8); clf; hold on; box on; axis equal tight;
+        figure(11); clf; hold on; box on; axis equal tight;
         msh_fill(msh, [], 2*Physt, 'linestyle', 'none'); colormap('jet');
         colorbar; caxis([0 [0 1]*caxis']);
         title('Hysteresis loss density (W/kg)')
 
-        figure(9); clf; hold on; box on; axis equal tight;
+        figure(12); clf; hold on; box on; axis equal tight;
         msh_fill(msh, [], 2*Peddy, 'linestyle', 'none'); colormap('jet');
         colorbar; caxis([0 [0 1]*caxis']);
         title('Eddy-current loss density (W/kg)')
 
-        figure(10); clf; hold on; box on; axis equal tight;
+        figure(13); clf; hold on; box on; axis equal tight;
         msh_fill(msh, [], 2*Pexcess, 'linestyle', 'none'); colormap('jet');
         colorbar; caxis([0 [0 1]*caxis']);
         title('Excess loss density (W/kg)')

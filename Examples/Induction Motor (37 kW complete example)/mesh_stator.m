@@ -29,7 +29,7 @@ end
 if isfield(dim, 'tol_ag')
     tol_ag = dim.tol_ag_s;
 else
-    tol_ag = dim.delta*1.2;
+    tol_ag = dim.delta*0.9;
 end
 if isfield(dim, 'tol_opening')
     tol_opening = dim.tol_opening_s;
@@ -194,11 +194,17 @@ m_s_temp( Surfaces_s.get('Core') ) = dim.SM;
 m_s_temp = repmat(m_s_temp, 1, Qs/dim.symmetrySectors);
 
 %setting conductors
-SC = cell(2, Qs/dim.symmetrySectors);
-for k = 1:(Qs/dim.symmetrySectors)
-    
-    SC{(k-1)*2+1} = Surfaces_s.get('Layer1') + (k-1)*Ne_s_orig;
-    SC{(k-1)*2+2} = Surfaces_s.get('Layer2') + (k-1)*Ne_s_orig;
+if isfield(dim, 'N_layers') && dim.N_layers == 2
+    SC = cell(2, Qs/dim.symmetrySectors);
+    for k = 1:(Qs/dim.symmetrySectors)
+        SC{(k-1)*2+1} = Surfaces_s.get('Layer1') + (k-1)*Ne_s_orig;
+        SC{(k-1)*2+2} = Surfaces_s.get('Layer2') + (k-1)*Ne_s_orig;
+    end
+else
+    SC = cell(1, Qs/dim.symmetrySectors);
+    for k = 1:(Qs/dim.symmetrySectors)
+        SC{k} = (k-1)*Ne_s_orig + [Surfaces_s.get('Layer1') Surfaces_s.get('Layer2')];
+    end
 end
 
 

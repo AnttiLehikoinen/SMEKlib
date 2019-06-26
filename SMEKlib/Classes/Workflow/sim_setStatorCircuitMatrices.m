@@ -6,7 +6,7 @@ function sim = sim_setStatorCircuitMatrices(sim)
 if isfield(sim.dims, 'W')
     %winding configuration matrix given
     sim.matrices.W = sim.dims.W;
-elseif isfield(sim.dims, 'N_layers')
+elseif isfield(sim.dims, 'N_layers') && sim.dims.N_layers > 1
     W = windingConfiguration_1(sim.dims.q, sim.dims.p, sim.dims.a, sim.dims.c);
     temp = unique( abs(W(:, 1:(sim.dims.Qs/sim.msh.symmetrySectors))) );
     if mod(numel(temp), sim.dims.a) || ~isfield(sim.dims, 'model_all_branches') || ~sim.dims.model_all_branches

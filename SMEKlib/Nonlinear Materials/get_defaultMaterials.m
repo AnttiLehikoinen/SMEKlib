@@ -1,4 +1,4 @@
-function [BH, lossCoeffs] = get_defaultMaterials(matNumber)
+function [BH, lossCoeffs, density] = get_defaultMaterials(matNumber)
 %get_defaultMaterials returns the BH curve for some materials
 %
 % BH = get_defaultMaterials(matNumber)
@@ -24,8 +24,12 @@ function [BH, lossCoeffs] = get_defaultMaterials(matNumber)
 % Feel free to add your own :)
 
 %
-% Copyright (c) 2016 Antti Lehikoinen / Aalto University
+% Copyright (c) 2016-2019 Antti Lehikoinen / Aalto University,
+%   Antti Lehikoinen / Smeklab Ltd
+
 lossCoeffs = zeros(1, 3);
+
+density = 7900;
 
 if matNumber < 0
     % number of default materials asked
@@ -169,6 +173,8 @@ elseif matNumber == 4
         176835.706764
         216374.283609];
     BH = [B H];
+    
+    lossCoeffs = [2.14 0.740 0];
     return;
 elseif matNumber == 5
     B = linspace(0, 2, 2)';
@@ -180,7 +186,7 @@ elseif matNumber == 6
     H = B / (1.05*pi*4e-7);
     BH = [B H];
     return;
-elseif matNumber == 7;
+elseif matNumber == 7
     B = [
         0.1000
         0.2000

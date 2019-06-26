@@ -85,7 +85,7 @@ for kiter = 1:pars.maxIter
     %Newton step
     dX = - Jtot \ res_tot;
     
-    X0 = X0 + PT*dX;
+    X0 = X0 + 0.9*PT*dX;
 end
 
 sim.results.X0 = X0;

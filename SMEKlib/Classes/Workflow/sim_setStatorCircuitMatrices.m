@@ -6,10 +6,10 @@ function sim = sim_setStatorCircuitMatrices(sim)
 if isfield(sim.dims, 'W')
     %winding configuration matrix given
     sim.matrices.W = sim.dims.W;
-elseif isfield(sim.dims, 'N_layers')
+elseif isfield(sim.dims, 'N_layers') && sim.dims.N_layers > 1
     W = windingConfiguration_1(sim.dims.q, sim.dims.p, sim.dims.a, sim.dims.c);
     temp = unique( abs(W(:, 1:(sim.dims.Qs/sim.msh.symmetrySectors))) );
-    if mod(numel(temp), sim.dims.a)
+    if mod(numel(temp), sim.dims.a) || ~isfield(sim.dims, 'model_all_branches') || ~sim.dims.model_all_branches
         warning('Symmetrizing winding for the symmetry sector');
         W = (floor( (abs(W)-1)/sim.dims.a )+1).*sign(W);
     end
@@ -62,7 +62,7 @@ end
 if isfield(sim.dims, 'Lew')
     Lew = sim.dims.Lew;
     if numel(Lew) == 1
-        sim.matrices.Zew_s = sim.matrices.Zew_s + 1i*Lew*eye(size(sim.matrices.Zew_s,1));
+        sim.matrices.Zew_s = sim.matrices.Zew_s + 1i*Lew*[1 -0.5 -0.5;-0.5 1 -0.5;-0.5 -0.5 1];
     else
         sim.matrices.Zew_s = sim.matrices.Zew_s + 1i*Lew;
     end

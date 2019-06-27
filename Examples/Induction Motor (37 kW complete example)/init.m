@@ -1,8 +1,12 @@
+%init Run a complete analysis workflow on a 37 kW induction motor, from
+%meshing to post-processing.
+
 addpath(genpath('..\..\SMEKlib'));
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %setting dimensions
 dim = struct();
-dim.gmsh_path = 'E:/Software/Work/gmsh43';
+dim.gmsh_path = 'E:/Software/Work/gmsh43'; %CHANGE THIS ACCORDINGLY
 
 %winding and other main dimensions
 dim.p = 2; %number of pole pairs
@@ -27,7 +31,7 @@ dim.sigma_rotor = 35.5E+06 *(230.0 + 20)/(230.0 + 80); %rotor winding conductivi
 %stator dimensions
 dim.Sout = 310.0e-3/2; %outer radius of stator
 dim.Sin = 200.0E-03 /2; %inner radius of stator
-dim.Qs = 48;
+dim.Qs = 48; %number of stator slots
 dim.delta = 0.8e-3; %airgap
 dim.SM = 4; %stator core material
 
@@ -41,16 +45,23 @@ dim.w_slotOpening_s = 3.5e-3; %slot opening width
 
 dim.htt_s = dim.hslot_s - dim.ws_b/2 - 17.5e-3; %slot opening, total height
 
-
 %rotor dimensions
-dim.Rout = 198.40E-03 / 2;
-dim.Rin = 70.00E-03  / 2;
-dim.Qr = 40;
-dim.RM = 4;
+dim.Rout = dim.Sin - dim.delta; %outer radius of rotor
+dim.Rin = 70.00E-03  / 2; %inner (shaft) radius of rotor
+dim.Qr = 40; %number of rotor bars
+dim.RM = 4; %rotor core material
 
-dim.h_bridge_r = 0.7e-3; %bridge thickness
+dim.h_bridge_r = 0.7e-3; %bridge thickness (outer bar surface to airgap)
 dim.w_bar_out = 6e-3; %outer bar width
 dim.w_bar_mid = 2.5e-3; %mid-bar width
 
-dim.h_bar_out = 16.1e-3; %outer bar-thingy height
-dim.h_bar_in = 17.8e-3; %inner bar-thingy height
+dim.h_bar_out = 16.1e-3; %outer bar-thingy height (distance from outer bar surface to inner bar top-arc center)
+dim.h_bar_in = 17.8e-3; %inner bar-thingy height (distance from inner bar outer-arc center to inner-arc center)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% running analysis scripts
+mesh_stator; %generate mesh data for stator
+mesh_rotor; %generate mesh data for rotor
+parse_mesh; %create mesh object
+
+run_simulation; %run simulation and compute losses

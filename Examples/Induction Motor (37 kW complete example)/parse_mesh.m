@@ -1,4 +1,4 @@
-%Parsing mesh
+%parse_mesh Combine stator and rotor mesh data into a mesh object.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % parsing dimsc

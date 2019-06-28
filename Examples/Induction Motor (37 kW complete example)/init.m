@@ -4,7 +4,8 @@
 % By default, the free open-source software gmsh is used for meshing the geometry; 
 % you can download yours from
 %   http://gmsh.info/#Download
-% gmsh is covered by its own separate license.
+% gmsh is covered by its own separate license. At least until version 4.3, no installation
+% is required; it is sufficient to just download and extract the files.
 %
 % (c) 2019 Antti Lehikoinen / Smeklab Ltd
 %   www.smeklab.com

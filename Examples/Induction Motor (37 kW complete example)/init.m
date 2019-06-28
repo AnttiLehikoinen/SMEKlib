@@ -7,6 +7,8 @@
 % gmsh is covered by its own separate license. At least until version 4.3, no installation
 % is required; it is sufficient to just download and extract the files.
 %
+% Alternatively, you can generate your own mesh with the tool of your choice and import it.
+%
 % (c) 2019 Antti Lehikoinen / Smeklab Ltd
 %   www.smeklab.com
 %   antti@smeklab.com

@@ -70,7 +70,7 @@ Finit = w*Mtot*sim.results.Xh(Ntot + (1:Ntot), kslip) + [sim.matrices.F; zeros(N
 
 X0 = sim.results.Xh(1:Ntot, kslip);
 Sag = sim.msh.get_AGmatrix(pars.rotorAngle, Ntot);
-for kiter = 1:15
+for kiter = 1:pars.maxIter
     [J, res] = Jc.eval(X0, nu_fun);
     
     Jtot = PT'*( J + Sag + Stot )*PT;
@@ -85,7 +85,7 @@ for kiter = 1:15
     %Newton step
     dX = - Jtot \ res_tot;
     
-    X0 = X0 + PT*dX;
+    X0 = X0 + 0.9*PT*dX;
 end
 
 sim.results.X0 = X0;

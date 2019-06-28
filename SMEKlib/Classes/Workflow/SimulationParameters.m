@@ -22,7 +22,7 @@ classdef SimulationParameters < dynamicprops
             this.alpha2 = 1.1; %weight factor for k+1 step. 
                 %2=implicit Euler; 1 = Crank-Nicolson
             this.silent = false;
-            this.maxIter = 15;
+            this.maxIter = 30;
             
             this.misc = struct('Info', 'Miscellaneous parameters etc.');
             

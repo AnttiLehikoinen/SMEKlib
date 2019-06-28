@@ -12,14 +12,15 @@ function [Torque, Force] = sim_compute_torque(sim, pars, simtype)
 %initializing
 if strcmp(simtype, 'static')
     A = sim.results.Xs(1:sim.Np, :);
-elseif strcmp(simtype, 'stepping');
+elseif strcmp(simtype, 'stepping')
     A = sim.results.Xt(1:sim.Np,:);
-elseif strcmp(simtype, 'harmonic');
+elseif strcmp(simtype, 'harmonic')
     A = sim.results.Xh(1:sim.Np,:);
 end
 Nsamples = size(A,2);
 
 rotorDisplacements = pars.rotorDisplacement;
+rotorAngles = 2*pi*pars.f/sim.dims.p*(1-pars.slip)*pars.ts;
 
 Torque = zeros(1, Nsamples);
 Force = zeros(2, Nsamples);
@@ -70,7 +71,7 @@ for ks = 1:Nsamples
         end
     end
 
-    Ahere = sim.msh.bandData.tag_solution(A(:,ks));
+    Ahere = sim.msh.bandData.tag_solution(A(:,ks), rotorAngles(ks));
 
     
     %integrating torque

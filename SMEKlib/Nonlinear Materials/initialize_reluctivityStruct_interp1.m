@@ -95,6 +95,7 @@ if isnan(nu_init(1))
 end
 
 nu = min(interp1(BH(:,1), nu_init, BH2(:,1), 'linear', 'extrap'), 1/mu0);
+%nu(2:end) = max(nu(2:end), nu(1:(end-1)))
 
 end
 

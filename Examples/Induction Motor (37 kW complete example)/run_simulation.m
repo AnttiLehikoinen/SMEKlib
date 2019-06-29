@@ -44,7 +44,7 @@ ylabel('Torque (Nm)');
 % loss computation
 
 %bar losses
-[Pmean, P_bar, J] = sim_compute_CageLosses(sim, pars, true, 350:400);
+[Pmean, P_bar, J] = sim_compute_CageLosses(sim, pars, true, 1:200);
 Pcage = sum(Pmean)
 
 %end-ring losses

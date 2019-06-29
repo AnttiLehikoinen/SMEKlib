@@ -117,6 +117,7 @@ gw.addPcws('line', Xin, Xmid, -Nper1, 'linename', 'n_cw', ...
 
 if PLOTTING_ON
     figure(2); clf; hold on; box on; axis equal;
+    %msh_fill(msh, statorConductors{1}, 'y');
     gw.plotSurface('Layer1', 'bo-');
     gw.plotSurface('Layer2', 'rx-');    
     gw.plotSurface('Wedge', 'mx-');    

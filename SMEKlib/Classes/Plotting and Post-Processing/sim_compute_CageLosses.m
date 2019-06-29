@@ -1,4 +1,4 @@
- function [Pmean, P_bar, J] = sim_compute_CageLosses(sim, pars, varargin)
+function [Pmean, P_bar, J] = sim_compute_CageLosses(sim, pars, varargin)
 %fun_PMlosses Compute PM losses from results.
 %
 % Call syntax
@@ -20,10 +20,12 @@
 %
 % Note: breaks down if there are other conductors in the rotor, for now.
 %
-% (c) 2018 Antti Lehikoinen / Smeklab
+% (c) 2018-2019 Antti Lehikoinen / Smeklab
+
+MAKE_ANIMATION = false; %save J-animation into a gif file?
 
 %plot losses?
-if numel(varargin) 
+if numel(varargin)
     plotting_on = varargin{1};
 else
     plotting_on = false;
@@ -54,8 +56,6 @@ J = zeros(Np, Nsamples);
 
 %for animation
 rotorAngles = 2*pi*pars.f*ts / sim.dims.p;
-%filename = 'PM_currents.gif';
-%iron = find(msh.matel==2);
 for ks = 2:Nsamples
     %disp(num2str(ks));
     
@@ -77,32 +77,29 @@ for ks = 2:Nsamples
         P_bar(kpm, ks) = Jpm' * M_bars{kpm} * (Jpm/sigma_rotor(kpm));
         J(:, ks) = J(:, ks) + Jpm;
     end
-    
-    %{
-    axis([-0.07 0.1 -0.07 0.08]); daspect([1 1 1]);
-    %axis equal;
-    %drawnow;
-    frame = getframe(h);
-    im = frame2im(frame);
-    [imind,cm] = rgb2ind(im,256);
-    
-    if ks == 2
-        imwrite(imind,cm,filename,'gif', 'Loopcount',inf, 'DelayTime', 1e-3);
-    elseif ks < Nsamples;
-        imwrite(imind,cm,filename,'gif', 'WriteMode','append', 'DelayTime', 1e-3);
-    else
-        imwrite(imind,cm,filename,'gif','WriteMode','append', 'DelayTime', 1.5);
-    end
-    %}
 end
 P_bar = P_bar * sim.msh.symmetrySectors;
 
 Pmean = mean(P_bar, 2);
 
 if plotting_on
-    h = figure(10); clf; hold on; box on; axis equal;
+    if numel(varargin) == 2
+        ks_vec = varargin{2};
+    else
+        ks_vec = 2:Nsamples;
+    end
+    
+    filename = 'cage_currents.gif'; ri = 1;
+    h = figure(10); clf; hold on; box on;
     colorbar;
-    cax = [min(J(:)) max(J(:))];
+    cax = 1e-6*[min(min(J(:, ks_vec))) max(max(J(:, ks_vec)))];
+    
+    %getting axis limits
+    if sim.msh.symmetrySectors == 4
+        axlims = [-sim.dims.Rout sim.dims.Sout -sim.dims.Rout sim.dims.Sout];
+    else
+        axlims = sim.dims.Sout*[-1 1 -1 1];
+    end
     
     Xplot = zeros(size(msh.t,1), size(msh.t,2));
     Yplot = Xplot;
@@ -116,26 +113,32 @@ if plotting_on
         ord = 1:3;
     end
     
-    if numel(varargin) == 2
-        ks_vec = varargin{2};
-    else
-        ks_vec = 2:Nsamples;
-    end  
     for ks = ks_vec
         clf;
         msh_triplot(msh, [], rotorAngles(ks), 'k');
-        drawCurrentDensity(msh, J(:,ks), [bars{:}], rotorAngles(ks), 'linestyle', 'none');
-        %Jplot = J(:, ks)';
-        %patch(Xplot(ord, [PMels{:}]), Yplot(ord, [PMels{:}]), ...
-        %     Jplot( msh.t(ord, [PMels{:}]) ), 'linestyle', 'none' );
-         %Jplot( msh.t(ord, [PMels{:}]) )
-        colorbar; caxis(cax);  
-        %pause(0.01); 
+        drawCurrentDensity(msh, 1e-6*J(:,ks), [bars{:}], rotorAngles(ks), 'linestyle', 'none');
+        colorbar; caxis(cax);
+        title('Current density (Apeak / mm^2)');
+        axis(axlims);
         drawnow;
         
-        %figure(11); clf;
-        %dA = (sim.results.Xt(:,ks) - sim.results.Xt(:,ks-1) ) / dt;
-        %msh_trimesh(msh, 7.14e5*dA, [PMels{:}]);
+        if MAKE_ANIMATION
+            %axis([-0.07 0.1 -0.07 0.08]); daspect([1 1 1]);
+            %axis equal;
+            %drawnow;
+            frame = getframe(h);
+            im = frame2im(frame);
+            [imind,cm] = rgb2ind(im,256);
+            
+            if ri == 1
+                imwrite(imind,cm,filename,'gif', 'Loopcount',inf, 'DelayTime', 1e-3);
+            elseif ri < numel(ks_vec)
+                imwrite(imind,cm,filename,'gif', 'WriteMode','append', 'DelayTime', 1e-3);
+            else
+                imwrite(imind,cm,filename,'gif','WriteMode','append', 'DelayTime', 1.5);
+            end
+            ri = ri + 1;
+        end
     end
 end
 

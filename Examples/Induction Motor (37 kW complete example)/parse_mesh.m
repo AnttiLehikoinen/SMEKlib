@@ -58,7 +58,11 @@ triplot(tag', mshc.p(1,:), mshc.p(2,:), 'm');
 %msh_triplot(AGT.msh_ag, [], 'm'); 
 
 %default winding type plot
-Wtemp = windingConfiguration_1(dim.q, dim.p, 1, dim.c);
+if dim.N_layers > 1
+    Wtemp = windingConfiguration_1(dim.q, dim.p, 1, dim.c);
+else
+    Wtemp = windingConfiguration_1(dim.q, dim.p);
+end
 %phaseColors = {[139 69 19]/256, [0 0 0], [1 1 1]*0.6};
 phaseColors = {[0 0 1], [1 0 0], [0 1 0]};
 for kphase = 1:3

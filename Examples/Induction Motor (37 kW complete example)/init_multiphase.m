@@ -1,5 +1,7 @@
-%init Run a complete analysis workflow on a 37 kW induction motor, from
-% meshing to post-processing.
+%init Run a complete analysis workflow on a fictional 12-phase 37 kW induction motor, 
+% from meshing to post-processing. As there is not "official" support for 
+% multi-phase machines, some manual setting is needed for the supply
+% voltage vectors and stator winding matrices.
 %
 % By default, the free open-source software gmsh is used for meshing the geometry; 
 % you can download yours from
@@ -13,13 +15,12 @@
 %   www.smeklab.com
 %   antti@smeklab.com
 
-addpath(genpath('..\..\SMEKlib'));
+addpath(genpath('../../SMEKlib'));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %setting dimensions
 dim = struct();
-dim.gmsh_path = 'E:/Software/Work/gmsh43'; %CHANGE THIS ACCORDINGLY
-dim.gmsh_path = 'C:/Users/Antti/Documents/gmsh';
+dim.gmsh_path = 'C:/Users/Antti/Documents/gmsh'; %CHANGE THIS ACCORDINGLY
 
 %winding and other main dimensions
 dim.p = 2; %number of pole pairs
@@ -27,12 +28,24 @@ dim.leff = 0.249; %core length
 dim.symmetrySectors = 4; %number of sectors in simulation
 dim.N_series = 12; %number of turns per coil
 dim.l_halfCoil = 0.520; %length of half a coil (for EW resistance)
-dim.a = 2; %number of parallel paths
+dim.a = 1; %number of parallel paths
 dim.N_layers = 1; %number of winding layers
 dim.A_ring = 520.00E-06; %cross-sectional area of end-ring
 dim.D_ring = 154.00E-03; %diameter of end-ring
-dim.connection_stator = defs.star; %stator connection
-dim.Lew = 0.1e-3; %end-winding inductance
+dim.connection_stator = defs.delta; %stator connection
+
+%setting multi-phase stuff
+dim.Qs = 48; %number of stator slots
+slot_angles = linspace(0.5, dim.Qs-0.5, dim.Qs)'*2*pi/dim.Qs * dim.p;
+slot_angles = slot_angles( 1:(dim.Qs/dim.symmetrySectors) ); %slot angles in el. rads
+
+Uampl = 400/sqrt(3)*sqrt(2) / 8;
+Uh = Uampl * exp(1i*-slot_angles); %phase voltage phasors
+Ut = @(t)( Uampl * cos( bsxfun(@minus, 2*pi*50*t, slot_angles) ) ); %voltage function
+
+%winding matrix
+Ls = kron( [1;-1;1;-1], eye(12) );
+dim.Ls = Ls;
 
 dim.type_statorWinding = defs.stranded; %stator winding type
 dim.fillingFactor = 0.45; %stator filling factor
@@ -44,7 +57,6 @@ dim.sigma_rotor = 35.5E+06 *(230.0 + 20)/(230.0 + 80); %rotor winding conductivi
 %stator dimensions
 dim.Sout = 310.0e-3/2; %outer radius of stator
 dim.Sin = 200.0E-03 /2; %inner radius of stator
-dim.Qs = 48; %number of stator slots
 dim.delta = 0.8e-3; %airgap
 dim.SM = 4; %stator core material
 
@@ -77,4 +89,4 @@ mesh_stator; %generate mesh data for stator
 mesh_rotor; %generate mesh data for rotor
 parse_mesh; %create mesh object
 
-run_simulation; %run simulation and compute losses
+run_simulation_multiphase; %run simulation and compute losses

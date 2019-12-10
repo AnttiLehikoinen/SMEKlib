@@ -43,7 +43,7 @@ if isfield(sim.dims, 'L_EWincidence')
 else
     L = EWsegmentIncidenceMatrix(sim.dims.W, sim.dims.N_series, sim.dims.p); %end-winding matrix
 end
-Lew = EWsegmentInductance(rmean, Aslot, sim.dims); %ew segment inductance
+Lew = EWsegmentInductance(rmean, Aslot, sim.dims) %ew segment inductance
 
 %getting EW matrix for stranded winding
 N_phases = max(sim.dims.W(:));
@@ -51,7 +51,8 @@ N_inParallel = size(sim.matrices.Ls,2) / N_phases;
 L = kron(L, ones(1, N_inParallel));
 
 %final EW matrix
-sim.matrices.Zew_s = sim.matrices.Zew_s + 1i*Lew*L'*L;
+sim.matrices.Zew_s = sim.matrices.Zew_s;% + 1i*Lew*L'*L;
+warning('EW inductance ignored');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

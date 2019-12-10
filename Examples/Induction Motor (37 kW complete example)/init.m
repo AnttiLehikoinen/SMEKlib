@@ -19,7 +19,7 @@ addpath(genpath('..\..\SMEKlib'));
 %setting dimensions
 dim = struct();
 dim.gmsh_path = 'E:/Software/Work/gmsh43'; %CHANGE THIS ACCORDINGLY
-dim.gmsh_path = 'C:/Users/Antti/Documents/gmsh';
+%dim.gmsh_path = 'C:/Users/Antti/Documents/gmsh';
 
 %winding and other main dimensions
 dim.p = 2; %number of pole pairs

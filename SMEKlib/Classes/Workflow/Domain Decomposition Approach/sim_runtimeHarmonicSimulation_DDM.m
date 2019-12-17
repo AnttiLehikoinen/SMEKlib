@@ -46,10 +46,10 @@ if sim.dims.connection_stator == defs.star
     L_s = L_s * Cstar;
 end
 
-tempcell_DD = cell(1, Qs_sector); [tempcell_DD{:}] = deal( sim.misc.R_AA );
-tempcell_DI = cell(1, Qs_sector); [tempcell_DI{:}] = deal( sim.misc.R_AI );
-tempcell_ID = cell(1, Qs_sector); [tempcell_ID{:}] = deal( sim.misc.R_UA );
-tempcell_II = cell(1, Qs_sector); [tempcell_II{:}] = deal( sim.misc.R_UI );
+tempcell_DD = cell(1, Qs_sector); [tempcell_DD{:}] = deal( sparse(sim.misc.R_AA) );
+tempcell_DI = cell(1, Qs_sector); [tempcell_DI{:}] = deal(  sparse(sim.misc.R_AI) );
+tempcell_ID = cell(1, Qs_sector); [tempcell_ID{:}] = deal(  sparse(sim.misc.R_UA) );
+tempcell_II = cell(1, Qs_sector); [tempcell_II{:}] = deal(  sparse(sim.misc.R_UI) );
 Q_DD = P_m2D'*blkdiag(tempcell_DD{:})*P_m2D; clear tempcell_DD;
 Q_DI = P_m2D'*blkdiag(tempcell_DI{:})*L_s; clear tempcell_DI;
 Q_ID = L_s'*blkdiag(tempcell_ID{:})*P_m2D; clear tempcell_ID;

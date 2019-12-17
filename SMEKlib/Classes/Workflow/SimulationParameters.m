@@ -3,8 +3,10 @@ classdef SimulationParameters < dynamicprops
     properties
         U, f, N_stepsPerPeriod, N_periods, slip, misc, rotorAngle,
         Is, rotorDisplacement,
-        alpha2, phi0,
+        alpha2, 
+        voltage_angle, waveform, fs, Ubus
         silent, maxIter
+        dispfun
     end
     
     methods
@@ -14,11 +16,12 @@ classdef SimulationParameters < dynamicprops
             this.f = 50;
             this.N_stepsPerPeriod = 200;
             this.N_periods = 2;
-            this.slip = [];
+            this.slip = 0;
             this.rotorAngle = 0;
             this.Is = [];
             this.rotorDisplacement;
-            this.phi0 = 0; %voltage phase angle
+            this.voltage_angle = 0; %voltage phase angle
+            this.waveform = 'sinusoidal';
             this.alpha2 = 1.1; %weight factor for k+1 step. 
                 %2=implicit Euler; 1 = Crank-Nicolson
             this.silent = false;
@@ -55,7 +58,11 @@ classdef SimulationParameters < dynamicprops
         
         function [] = dispf(this, varargin)
             if ~this.silent
-                disp(varargin{:});
+                if isempty(this.dispfun)
+                    disp(varargin{:});
+                else
+                    this.dispfun(varargin{:});
+                end
             end
         end
     end

@@ -130,10 +130,10 @@ Hvar = [P_D2s'*Q_slave(nd, :)*XX(:,:);
 
 
 %dependencies on the newest time-step
-tempcell_SDD = cell(1, Qs_sector); [tempcell_SDD{:}] = deal( Hvar(1:ND, 1:ND) );
-tempcell_SDI = cell(1, Qs_sector); [tempcell_SDI{:}] = deal( Hvar(1:ND, (ND+1):end) );
-tempcell_ID = cell(1, Qs_sector); [tempcell_ID{:}] = deal( Hvar((ND+1):end, 1:ND) );
-tempcell_II = cell(1, Qs_sector); [tempcell_II{:}] = deal( Hvar((ND+1):end, (ND+1):end) );
+tempcell_SDD = cell(1, Qs_sector); [tempcell_SDD{:}] = deal( sparse(Hvar(1:ND, 1:ND)) );
+tempcell_SDI = cell(1, Qs_sector); [tempcell_SDI{:}] = deal( sparse(Hvar(1:ND, (ND+1):end)) );
+tempcell_ID = cell(1, Qs_sector); [tempcell_ID{:}] = deal( sparse(Hvar((ND+1):end, 1:ND)) );
+tempcell_II = cell(1, Qs_sector); [tempcell_II{:}] = deal( sparse(Hvar((ND+1):end, (ND+1):end)) );
 Q_SDD = P_m2D'*blkdiag(tempcell_SDD{:})*P_m2D; clear tempcell_SDD;
 Q_SDI = P_m2D'*blkdiag(tempcell_SDI{:})*L_s; clear tempcell_SDI;
 Q_ID = L_s'*blkdiag(tempcell_ID{:})*P_m2D; clear tempcell_ID;

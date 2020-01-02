@@ -40,7 +40,7 @@ rmean = Mall'*transpose( sum(msh.p.^2, 1).^0.5 ) / Aslot;
 
 if isfield(sim.dims, 'L_EWincidence')
     L = sim.dims.L_EWincidence;
-else
+elseif isfield(sim.dims, 'W')
     L = EWsegmentIncidenceMatrix(sim.dims.W, sim.dims.N_series, sim.dims.p); %end-winding matrix
 end
 Lew = EWsegmentInductance(rmean, Aslot, sim.dims) %ew segment inductance

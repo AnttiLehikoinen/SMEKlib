@@ -25,7 +25,7 @@ sim.run_timestepping(pars); %time-stepping
 
 %plotting flux from time-stepping
 figure(6); clf; hold on; axis equal tight;
-sim.fluxplot(100, pars);
+sim.fluxplot(50, pars);
 
 %plotting phase currents
 figure(7); clf; hold on; box on; grid on;

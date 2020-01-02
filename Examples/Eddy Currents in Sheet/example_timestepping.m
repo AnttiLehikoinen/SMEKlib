@@ -29,14 +29,21 @@ nu_fun = @(B)( calculate_reluctivity(B, nu_struct) );
 dH_fun = @(B)( matfun_1D(B, nu_fun) );
 
 %constant part of Jacobian
-Q = [S_AA+1/dt*M_AA(e_free,e_free) V_Constr(e_free);
+Q = [1/dt*M_AA(e_free,e_free) V_Constr(e_free);
     V_Constr(e_free)' 0];
 
 Jc = JacobianConstructor(msh, Wcurl, Wcurl, true); %constructor for Jacobian
 X = zeros(size(msh.edges,2)+1, 1);
+
+figure(10); clf; hold on; box on;
+BH = nu_struct.Bnu{1}; B = sqrt(BH(:,1));
+nu = BH(B<1.5,2);
+B = B( B<1.5 );
+plot(B.*nu, B, 'k');
+xlabel('H (A/m)');
+ylabel('B (T)');
 for ks = 2:Nsamples
-    disp(['Computing timestep ' num2str(ks)])
-    
+    disp(['Computing timestep ' num2str(ks)]);   
     
     FL = [M_AA(e_free,e_free)*Aprev(e_free)/dt; Phi*sin(w*ts(ks))];
     
@@ -70,6 +77,12 @@ for ks = 2:Nsamples
     quiver(Xplot(1,:), Xplot(2,:), Jvecs(1,:,ks), Jvecs(2,:,ks)); 
     axis([0 0.0025 0 1e-3]);
     title(['B = ' num2str( Phi*sin(w*ts(ks))/(1e-3*15e-3) ) ' T']);
+    drawnow;
+    
+    figure(10);
+    plot(-X(end), FL(end)/(1e-3*15e-3), 'bo');
+    %plot(FL(end)/(1e-3*15e-3), 1./Anew(end), 'bo');
+    
     drawnow;
     pause(0.05);
     

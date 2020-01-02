@@ -60,6 +60,15 @@ Nu = sim.results.Nu_r;
 Ni_r = sim.results.Ni_r;
 Ni_s = sim.results.Ni_s;
 
+size(Q_DD)
+size(Q_DI)
+size(Q_ID)
+size(Q_II)
+
+disp('...')
+size([Q_DD sparse(sim.Np, Nu) Q_DI sparse(sim.Np, Ni_r)])
+size([sparse(Nu, sim.Np + Nu + Ni_r + Ni_s)])
+size([Q_ID sparse(Ni_s,Nu) Q_II])
 
 Qred = [Q_DD sparse(sim.Np, Nu) Q_DI sparse(sim.Np, Ni_r);
     sparse(Nu, sim.Np + Nu + Ni_r + Ni_s);

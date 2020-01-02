@@ -4,7 +4,7 @@ classdef SimulationParameters < dynamicprops
         U, f, N_stepsPerPeriod, N_periods, slip, misc, rotorAngle,
         Is, rotorDisplacement,
         alpha2, 
-        voltage_angle, waveform, fs, Ubus
+        phi0, waveform, fs, Ubus
         silent, maxIter
         dispfun
     end
@@ -20,7 +20,7 @@ classdef SimulationParameters < dynamicprops
             this.rotorAngle = 0;
             this.Is = [];
             this.rotorDisplacement;
-            this.voltage_angle = 0; %voltage phase angle
+            this.phi0 = 0; %voltage phase angle
             this.waveform = 'sinusoidal';
             this.alpha2 = 1.1; %weight factor for k+1 step. 
                 %2=implicit Euler; 1 = Crank-Nicolson
